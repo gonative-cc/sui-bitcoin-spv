@@ -4,8 +4,8 @@ setup-hooks:
 
 .git/hooks/pre-commit: setup
 
-build: out .git/hooks/pre-commit
-	echo "TODO"
+build: .git/hooks/pre-commit
+	sui move build
 
 # used as pre-commit
 lint-git:
@@ -29,6 +29,14 @@ lint-fix-all:
 ##                                   Tests                                   ##
 ###############################################################################
 
+test:
+	sui move test
+
+test-coverage:
+	sui move test --coverage
+	sui move coverage
+
+.PHONY: test test-coverage
 
 ###############################################################################
 ##                                Infrastructure                             ##
