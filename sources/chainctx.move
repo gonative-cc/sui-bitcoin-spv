@@ -22,3 +22,10 @@ public fun id(c: &Chain): &UID {
     return &c.id
 }
 
+// TODO: complete this function
+public fun min_retarget_timespan(_: &Chain) : u64 {
+    return 0
+}
+public fun max_retarget_timespan(_: &Chain) : u64 {
+    return 0
+}
