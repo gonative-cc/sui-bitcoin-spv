@@ -1,7 +1,7 @@
 module btclc::block_header;
 
 use btclc::chainctx::Chain;
-use sui::dynamic_object_field as blocks_map;
+use sui::dynamic_object_field as dof;
 
 public struct Header has key, store {
     id: UID,
@@ -20,8 +20,15 @@ public struct LightBlock has key, store {
 }
 
 
+public fun relative_ancestor(lb: &LightBlock, distance: u32, c: &Chain): &LightBlock {
+    let ancestor_height: u32 = lb.height - distance;
+    
+    let ancestor: &LightBlock = dof::borrow(c.id(), ancestor_height);
+    return ancestor
+}
 
-fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_block_time: u32) : u32 {
+
+public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_block_time: u32) : u32 {
 
     // TODO: handle lastHeader is nil or genesis block
 
@@ -38,7 +45,7 @@ fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_block_tim
 	return last_block.header.bits
     };
 
-    // we compute a new difficulty   
+    // we compute a new difficulty
     
     return 0
 }

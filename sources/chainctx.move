@@ -1,6 +1,5 @@
 module btclc::chainctx;
 
-
 public struct Params has key, store{
     id: UID,
     blocks_pre_retarget: u32
@@ -19,5 +18,7 @@ public fun params(c: &Chain): &Params {
     return &c.params
 }
 
-
+public fun id(c: &Chain): &UID {
+    return &c.id
+}
 
