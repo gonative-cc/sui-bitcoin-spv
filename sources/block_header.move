@@ -30,7 +30,7 @@ public fun relative_ancestor(lb: &LightBlock, distance: u32, c: &Chain): &LightB
 }
 
 
-public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_block_time: u32) : u32 {
+public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, _new_block_time: u32) : u32 {
 
     // TODO: handle lastHeader is nil or genesis block
 
@@ -42,7 +42,7 @@ public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_bl
 	// TODO: support ReduceMinDifficulty params
 	// if c.params().reduce_min_difficulty {
 	//     ...
-	// new_block_time is using in this logic
+	//     new_block_time is using in this logic
 	// }
 
 	// Return previous block difficulty
@@ -68,11 +68,9 @@ public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_bl
     let second = 1000000000;
     let target_timespan = c.params().target_timespan() / second;
     new_target = new_target / (target_timespan as u256);
-
-    if (new_target >  c.params().power_limit()) {
+    
+    if (new_target > c.params().power_limit()) {
 	new_target = c.params().power_limit();
     };
-
-    
     return target_to_bits(new_target)
 }
