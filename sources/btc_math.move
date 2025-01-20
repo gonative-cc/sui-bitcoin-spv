@@ -13,13 +13,13 @@ fun bytes_of(number: u256) : u8 {
 
 // get last 32 bits of number
 fun get_last_32_bits(number: u256): u32 {
-    return (((number << 224) >> 32) as u32)
+    return (number & 0xffffffff) as u32
 }
 public fun target_to_bits(target: u256): u32 {
     // TODO: Handle case nagative target?
     // I checked bitcoin-code. They did't create any negative target.
     let mut number_bytes = bytes_of(target);
-    let mut compact = 0u32;
+    let mut compact;
     if (number_bytes <= 3) {
 	let exponent: u8 = 8 * ( 3 - number_bytes);
 	compact = get_last_32_bits(target) << exponent
