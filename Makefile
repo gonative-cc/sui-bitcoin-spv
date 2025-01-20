@@ -43,4 +43,3 @@ test-coverage:
 ##                                Infrastructure                             ##
 ###############################################################################
 
-# To setup bitcoin, use Native Relayer.
