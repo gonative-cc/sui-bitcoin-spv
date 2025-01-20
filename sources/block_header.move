@@ -1,6 +1,7 @@
 module btclc::block_header;
 
 use btclc::chainctx::Chain;
+use btclc::btc_math::{bits_to_target, target_to_bits};
 use sui::dynamic_object_field as dof;
 
 public struct Header has key, store {
@@ -41,6 +42,7 @@ public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_bl
 	// TODO: support ReduceMinDifficulty params
 	// if c.params().reduce_min_difficulty {
 	//     ...
+	// new_block_time is using in this logic
 	// }
 
 	// Return previous block difficulty
@@ -58,6 +60,19 @@ public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_bl
     } else if ((acctual_timespan as u64)> c.max_retarget_timespan()){
 	adjusted_timespan = c.max_retarget_timespan();
     };
+
+    let old_target = bits_to_target(first_block.header.bits);
+    // TODO: ensure this one can't overflow
+    let mut new_target = old_target * (adjusted_timespan as u256);
+    // TODO: make this more sense.
+    let second = 1000000000;
+    let target_timespan = c.params().target_timespan() / second;
+    new_target = new_target / (target_timespan as u256);
+
+    if (new_target >  c.params().power_limit()) {
+	new_target = c.params().power_limit();
+    };
+
     
-    return 0
+    return target_to_bits(new_target)
 }
