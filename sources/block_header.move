@@ -58,6 +58,6 @@ public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, new_bl
     } else if ((acctual_timespan as u64)> c.max_retarget_timespan()){
 	adjusted_timespan = c.max_retarget_timespan();
     };
-
+    
     return 0
 }
