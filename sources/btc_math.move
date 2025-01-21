@@ -1,4 +1,4 @@
-module btclc::btc_math;
+module bitcoin_spv::btc_math;
 
 // number of bytes to represent number. 
 fun bytes_of(number: u256) : u8 {

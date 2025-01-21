@@ -1,7 +1,7 @@
-module btclc::block_header;
+module bitcoin_spv::block_header;
 
-use btclc::chainctx::Chain;
-use btclc::btc_math::{bits_to_target, target_to_bits};
+use bitcoin_spv::chainctx::Chain;
+use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
 use sui::dynamic_object_field as dof;
 
 public struct Header has key, store {

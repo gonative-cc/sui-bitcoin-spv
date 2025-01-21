@@ -1,4 +1,4 @@
-module btclc::chainctx;
+module bitcoin_spv::chainctx;
 
 public struct Params has key, store{
     id: UID,

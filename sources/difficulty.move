@@ -1,8 +1,8 @@
-module btclc::difficulty;
+module bitcoin_spv::difficulty;
 
-use btclc::btc_math::{bits_to_target, target_to_bits};
-use btclc::block_header::LightBlock;
-use btclc::chainctx::Chain;
+use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
+use bitcoin_spv::block_header::LightBlock;
+use bitcoin_spv::chainctx::Chain;
 
 
 public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, _new_block_time: u32) : u32 {

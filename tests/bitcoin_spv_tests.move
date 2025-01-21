@@ -16,13 +16,3 @@ fun test_bitcoin_spv_fail() {
     abort ENotImplemented
 }
 */
-
-module bitcoin_spv::bitcoin_spv_tests;
-
-#[test]
-public fun test_mul() {
-    let a = 10 as u256;
-    let b = 0xfffffffffffffffffffffffffffffffffffffffffff;
-    let c = a * b;
-}
-

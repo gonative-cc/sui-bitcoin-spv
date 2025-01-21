@@ -1,4 +1,4 @@
-module btclc::timestamp;
+module bitcoin_spv::timestamp;
 
 use std::vector::length;
 
