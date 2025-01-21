@@ -1,18 +1,18 @@
 /*
 #[test_only]
-module btclc::btclc_tests;
+module bitcoin_spv::bitcoin_spv_tests;
 // uncomment this line to import the module
-// use btclc::btclc;
+// use bitcoin_spv::bitcoin_spv;
 
 const ENotImplemented: u64 = 0;
 
 #[test]
-fun test_btclc() {
+fun test_bitcoin_spv() {
     // pass
 }
 
-#[test, expected_failure(abort_code = ::btclc::btclc_tests::ENotImplemented)]
-fun test_btclc_fail() {
+#[test, expected_failure(abort_code = ::bitcoin_spv::bitcoin_spv_tests::ENotImplemented)]
+fun test_bitcoin_spv_fail() {
     abort ENotImplemented
 }
 */

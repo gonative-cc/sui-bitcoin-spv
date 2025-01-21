@@ -5,7 +5,7 @@ setup-hooks:
 .git/hooks/pre-commit: setup
 
 build: .git/hooks/pre-commit
-	sui move build
+	@sui move build
 
 # used as pre-commit
 lint-git:
@@ -30,7 +30,7 @@ lint-fix-all:
 ###############################################################################
 
 test:
-	sui move test
+	@sui move test
 
 test-coverage:
 	echo TODO
@@ -43,3 +43,4 @@ test-coverage:
 ##                                Infrastructure                             ##
 ###############################################################################
 
+# To setup bitcoin, use Native Relayer.

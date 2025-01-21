@@ -1,6 +1,6 @@
 /*
-/// Module: btclc
-module btclc::btclc;
+/// Module: bitcoin_spv
+module bitcoin_spv::bitcoin_spv;
 */
 
 // For Move coding conventions, see
