@@ -21,6 +21,8 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ### Features
 
+- Create a basic entries for package<!-- Placeholder for PR number -->
+
 ### Breaking Changes
 
 ### Bug Fixes
