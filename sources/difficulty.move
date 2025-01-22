@@ -7,15 +7,13 @@ fun bytes_of(number: u256) : u8 {
 	b = b - 1;
     };
 
-    ((b as u32 + 1 ) / 8) as u8
+    ((b as u32 + 7 ) / 8) as u8
 }
 
 /// get last 32 bits of number
 fun get_last_32_bits(number: u256): u32 {
     return (number & 0xffffffff) as u32
 }
-
-
 
 /// target => bit conversion function.
 /// target is the number you need to get below to mine a block - it defines the difficulty.
