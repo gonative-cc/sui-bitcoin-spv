@@ -23,7 +23,9 @@ const HASH_LEN: u64 = 32;
 
 const EInvalidHashLen: u64 = 0;
 
+// === Function ===
 
+/// Create a new header
 public fun new_block_header(
     version: u32,
     prev_block: vector<u8>,
@@ -49,6 +51,15 @@ public fun new_block_header(
     return header
 }
 
+public fun new_light_block(height: u32, header: BlockHeader, ctx: &mut TxContext) : LightBlock{
+    let lb = LightBlock {
+	id: object::new(ctx),
+	height,
+	header,
+    };
+
+    return lb
+}
 // === Query data from light block ===
 public fun height(lb: &LightBlock): u32 {
     return lb.height
@@ -76,5 +87,9 @@ public fun version(lb: &LightBlock): u32 {
 
 public fun nonce(lb: &LightBlock): u32 {
     return lb.header.nonce
+}
+
+public fun block_hash(header: &BlockHeader) : vector<u8> {
+    return vector[]
 }
 
