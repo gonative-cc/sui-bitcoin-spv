@@ -6,7 +6,7 @@ fun bytes_of(number: u256) : u8 {
     while (number & (1 << b) == 0 && b > 0) {
 	b = b - 1;
     };
-
+    // Follow logic in bitcoin core
     ((b as u32 + 7 ) / 8) as u8
 }
 
@@ -59,7 +59,7 @@ public fun target_to_bits(target: u256): u32 {
 public fun bits_to_target(bits: u32): u256 {
     let exponent = bits >> 3*8;
 
-    // extract coefficient path
+    // extract coefficient path or get last 24 bit of `bits` 
     let mut target = (bits & 0x007fffff) as u256;
     
     if (exponent <= 3) {
@@ -70,4 +70,22 @@ public fun bits_to_target(bits: u32): u256 {
 	target = target << bits_shift;
     };
     return target
+}
+
+// internal test
+// TODO: Check best practice to improve test
+#[test]
+fun bytes_of_test() {
+    assert!(bytes_of(0) == 0);
+    assert!(bytes_of(7) == 1);
+    assert!(bytes_of(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 32);
+}
+
+#[test]
+/// get last 32 bits of number
+fun get_last_32_bits_test() {
+    assert!(get_last_32_bits(0) == 0);
+    assert!(get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 0xffffffff);
+    assert!(get_last_32_bits(0x0123456789) == 0x23456789);
+    
 }

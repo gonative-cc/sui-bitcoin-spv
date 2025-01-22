@@ -3,7 +3,6 @@ module bitcoin_spv::btc_math_tests;
 
 use bitcoin_spv::difficulty::{bits_to_target, target_to_bits};
 
-
 #[test]
 fun target_to_bits_test() {
     // Data get from btc main net at block 880,086
