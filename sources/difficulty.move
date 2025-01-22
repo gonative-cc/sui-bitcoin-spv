@@ -26,7 +26,7 @@ fun get_last_32_bits(number: u256): u32 {
 public fun target_to_bits(target: u256): u32 {
     // TODO: Handle case nagative target?
     // I checked bitcoin-code. They did't create any negative target.
-  
+    
     let mut exponent = bytes_of(target);
     let mut coefficient;
     if (exponent <= 3) {
