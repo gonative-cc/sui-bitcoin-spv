@@ -3,8 +3,7 @@ module bitcoin_spv::difficulty;
 // number of bytes to represent number. 
 fun bytes_of(number: u256) : u8 {
     let mut b : u8 = 255;
-    
-    while (number & (1 << b) == 0) {
+    while (number & (1 << b) == 0 && b > 0) {
 		b = b - 1;
     };
 
@@ -18,16 +17,18 @@ fun get_last_32_bits(number: u256): u32 {
 
 
 
+/// target => bit conversion function.
+/// target is the number you need to get below to mine a block - it defines the difficulty.
+/// The bits field contains a compact representation of the target.
 /// format of bits = <1 byte for exponent><3 bytes for coefficient>
-/// format target = 000000<3 bytes of coefficient>00000000000000000
-///                         |------------- exponent bytes-----------|
-///                   |--------------32 bytes or 256 bits-----------|
-
-// === target <> bit convert function ===
+/// target = coefficient * 2^ (coefficient - 3) (note: 3 = bytes length of the coefficient).
+/// Caution:
+///    The first significant byte for the coefficient must be below 80. If it's not, you have to take the preceding 00 as the first byte. 
+// More & examples: https://learnmeabitcoin.com/technical/block/bits.
 public fun target_to_bits(target: u256): u32 {
     // TODO: Handle case nagative target?
     // I checked bitcoin-code. They did't create any negative target.
-    let mut number_bytes = bytes_of(target);
+    let mut coefficient = bytes_of(target);
     let mut compact;
     if (number_bytes <= 3) {
 	let exponent: u8 = 8 * ( 3 - number_bytes);
@@ -50,16 +51,17 @@ public fun target_to_bits(target: u256): u32 {
     compact
 }
 
+/// converts bits to target. See documentation to the function above for more details.
 public fun bits_to_target(bits: u32): u256 {
-    let number_bytes = bits >> 24;
-    let mut word = (bits & 0x007fffff) as u256;
+    let exponent = bits >> 3*8;
+    let mut target = (bits & 0x007fffff) as u256;
 
     if (number_bytes <= 3) {
-	let exponent = (8 * (3 - number_bytes)) as u8;
-	word = word >> exponent;
+		let bits_shift = (8 * (3 - exponent)) as u8;
+		word = coefficient >> bits_shift;
     } else {
-	let exponent = (8 * (number_bytes - 3)) as u8;
-	word = word << exponent;
+		let exponent = (8 * (number_bytes - 3)) as u8;
+		coefficient = coefficient << bits_shift;
     };
     return word
 }
