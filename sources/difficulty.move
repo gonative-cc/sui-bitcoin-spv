@@ -29,25 +29,30 @@ public fun target_to_bits(target: u256): u32 {
     // TODO: Handle case nagative target?
     // I checked bitcoin-code. They did't create any negative target.
   
-    let mut coefficient = bytes_of(target);
-    let mut compact;
-    if (coefficient <= 3) {
-	let exponent: u8 = 8 * ( 3 - coefficient);
-	compact = get_last_32_bits(target) << exponent
+    let mut exponent = bytes_of(target);
+    let mut coefficient;
+    if (exponent <= 3) {
+	let bits_shift: u8 = 8 * ( 3 - exponent);
+	coefficient = get_last_32_bits(target) << bits_shift;
     } else {
-	let exponent : u8 = 8 * (coefficient - 3);
-	let bn = (target >> exponent);
-	compact = get_last_32_bits(bn)
+	let bits_shift : u8 = 8 * (exponent - 3);
+	let bn = target >> bits_shift;
+	coefficient = get_last_32_bits(bn)
     };
 
-    if (compact & 0x00800000 > 0) {
-	compact = compact >> 8;
-	coefficient = coefficient + 1;
+
+    // handle case target is nagative number.
+    // 0x00800000 is set then it indicates a negative value
+    // and target can be nagative
+    if (coefficient & 0x00800000 > 0) {
+	// we push 00 before coefficet
+	coefficient = coefficient >> 8;
+	exponent = exponent + 1;
     };
     
     // TODO: check some conditions for compact ...
     // TODO: add TODO for this todo!
-    compact = compact | ((coefficient as u32) << 24);
+    let compact = coefficient | ((exponent as u32) << 24);
 
     compact
 }
@@ -55,6 +60,8 @@ public fun target_to_bits(target: u256): u32 {
 /// converts bits to target. See documentation to the function above for more details.
 public fun bits_to_target(bits: u32): u256 {
     let exponent = bits >> 3*8;
+
+    // extract coefficient path
     let mut target = (bits & 0x007fffff) as u256;
     
     if (exponent <= 3) {
