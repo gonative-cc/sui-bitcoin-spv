@@ -1,5 +1,7 @@
 module bitcoin_spv::block_header;
 
+use bitcoin_spv::math_utils::{to_LE_bytes, btc_hash};
+
 // === Structs ===
 public struct BlockHeader has key, store{
     id: UID,
@@ -60,6 +62,7 @@ public fun new_light_block(height: u32, header: BlockHeader, ctx: &mut TxContext
 
     return lb
 }
+
 // === Query data from light block ===
 public fun height(lb: &LightBlock): u32 {
     return lb.height
@@ -89,7 +92,18 @@ public fun nonce(lb: &LightBlock): u32 {
     return lb.header.nonce
 }
 
+public fun to_bytes(header: &BlockHeader): vector<u8> {
+    let mut b = vector[];
+    b.append(to_LE_bytes(header.version));
+    b.append(header.prev_block);
+    b.append(header.merkle_root);
+    b.append(to_LE_bytes(header.timestamp));
+    b.append(to_LE_bytes(header.bits));
+    b.append(to_LE_bytes(header.nonce));
+    return b
+}
 public fun block_hash(header: &BlockHeader) : vector<u8> {
-    return vector[]
+    let b = header.to_bytes();
+    return btc_hash(b)
 }
 

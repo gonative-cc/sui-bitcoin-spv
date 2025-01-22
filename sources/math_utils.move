@@ -3,7 +3,7 @@ module bitcoin_spv::math_utils;
 use std::hash;
 
 /// return bytes represent of number in litle endian format.
-public fun u32_to_LE_bytes(number: u32): vector<u8> {
+public fun to_LE_bytes(number: u32): vector<u8> {
     let mut v = vector<u8>[];
     let mut i = 0;
     // `number` is immutable. we need reassign this to other mutable value.
