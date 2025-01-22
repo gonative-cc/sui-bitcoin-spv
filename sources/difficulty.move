@@ -5,7 +5,7 @@ fun bytes_of(number: u256) : u8 {
     let mut b : u8 = 255;
     
     while (number & (1 << b) == 0) {
-	b = b - 1;
+		b = b - 1;
     };
 
     ((b as u32 + 1 ) / 8) as u8
@@ -18,8 +18,8 @@ fun get_last_32_bits(number: u256): u32 {
 
 
 
-/// format of bits = 0x<1 byte for exponent><3 bytes for coefficient>
-/// format target = 0x000000<3 bytes of coefficient>00000000000000000
+/// format of bits = <1 byte for exponent><3 bytes for coefficient>
+/// format target = 000000<3 bytes of coefficient>00000000000000000
 ///                         |------------- exponent bytes-----------|
 ///                   |--------------32 bytes or 256 bits-----------|
 
