@@ -1,6 +1,7 @@
 module bitcoin_spv::block_header;
 
-public struct BlockHeader has key, store {
+// === Structs ===
+public struct BlockHeader has key, store{
     id: UID,
     version: u32,
     prev_block: vector<u8>,
@@ -15,7 +16,38 @@ public struct LightBlock has key, store {
     height: u32,
     header: BlockHeader,
 }
+// === Constansts ===
+const HASH_LEN: u64 = 32;
 
+// === Errors ===
+
+const EInvalidHashLen: u64 = 0;
+
+
+public fun new_block_header(
+    version: u32,
+    prev_block: vector<u8>,
+    merkle_root: vector<u8>,
+    timestamp: u32,
+    bits: u32,
+    nonce: u32,
+    ctx: &mut TxContext
+) : BlockHeader{
+    assert!(prev_block.length() != HASH_LEN, EInvalidHashLen);
+    assert!(merkle_root.length() != HASH_LEN, EInvalidHashLen);
+    
+    let header = BlockHeader {
+	id: object::new(ctx),
+	version,
+	prev_block,
+	merkle_root,
+	timestamp,
+	bits,
+	nonce
+    };
+    
+    return header
+}
 
 // === Query data from light block ===
 public fun height(lb: &LightBlock): u32 {

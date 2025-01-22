@@ -3,21 +3,20 @@
 module bitcoin_spv::bitcoin_spv;
 
 use bitcoin_spv::chain::Chain;
-use bitcoin_spv::block_header::BlockHeader;
-
+use bitcoin_spv::block_header::BlockHeader
 // === Errors ===
 // We will add this later
 
 
-// === init function for module ====
+// === Init function for module ====
 fun init(_ctx: &mut TxContext) {
     // TODO: Init this module with parameter
 }
 
-// === entry methods ===
+// === Entry methods ===
 
 /// insert new header to bitcoin spv
-public entry fun insert_header(_c: &Chain, _header: &BlockHeader) {
+public entry fun insert_header(_c: &Chain, block_header: &BlockHeader) {
     // insert a new header to current light client
 }
 

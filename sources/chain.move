@@ -15,7 +15,7 @@ public struct Params has key, store{
 }
 
 /// === Blockchain storage struct use dynamicc object field ===
-
+// TODO: should we rename this to BTCLightClient
 public struct Chain has key, store{
     id: UID,
     params: Params
