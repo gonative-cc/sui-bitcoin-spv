@@ -1,6 +1,6 @@
 module bitcoin_spv::btc_types;
 
-use bitcoin_spv::math_utils::{btc_hash, to_u32, slices};
+use bitcoin_spv::btc_math::{btc_hash, to_u32};
 
 // === Constants ===
 const BLOCK_HEADER_SIZE :u64 = 80;
@@ -64,6 +64,19 @@ public fun nonce(header: &BlockHeader): u32 {
 public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHeader): bool {
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
     return true
+}
+
+
+fun slices(v: vector<u8>, start: u64, end: u64) : vector<u8>{
+    // TODO: handle error when start,end position > length's v.
+    let mut ans = vector[];
+    let mut i = start;
+    while (i < end) {
+        ans.push_back(v[i]);
+        i = i + 1;
+    };
+
+    return ans
 }
 
 fun slice(header: &BlockHeader, start: u64, end: u64) : vector<u8> {

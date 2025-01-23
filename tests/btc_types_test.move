@@ -1,7 +1,7 @@
 #[test_only]
 module bitcoin_spv::btc_types_test;
 use bitcoin_spv::btc_types::{new_block_header};
-use bitcoin_spv::math_utils::to_u32;
+use bitcoin_spv::btc_math::to_u32;
 
 #[test]
 fun block_header_tests() {

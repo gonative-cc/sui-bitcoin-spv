@@ -1,5 +1,5 @@
 #[test_only]
-module bitcoin_spv::btc_math_tests;
+module bitcoin_spv::difficulty_test;
 
 use bitcoin_spv::difficulty::{bits_to_target, target_to_bits};
 
