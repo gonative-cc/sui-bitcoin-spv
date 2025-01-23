@@ -48,10 +48,11 @@ public fun target_to_bits(target: u256): u32 {
 	exponent = exponent + 1;
     };
     
-    // TODO: check some conditions for compact ...
-    // TODO: add TODO for this todo!
     let compact = coefficient | ((exponent as u32) << 24);
 
+    // TODO: Check case target is a negative number.
+    // However, the target mustn't be a negative number
+    
     compact
 }
 
