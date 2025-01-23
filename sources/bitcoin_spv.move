@@ -16,8 +16,9 @@ fun init(_ctx: &mut TxContext) {
 // === Entry methods ===
 
 /// insert new header to bitcoin spv
-public entry fun insert_header(_c: &Chain, _block_header: &BlockHeader) {
+public entry fun insert_header(_c: &Chain) {
     // insert a new header to current light client
+    
 }
 
 // === views function ===
