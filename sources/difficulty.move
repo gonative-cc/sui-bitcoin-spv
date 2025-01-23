@@ -15,7 +15,7 @@ fun get_last_32_bits(number: u256): u32 {
     return (number & 0xffffffff) as u32
 }
 
-/// target => bit conversion function.
+/// target => bits conversion function.
 /// target is the number you need to get below to mine a block - it defines the difficulty.
 /// The bits field contains a compact representation of the target.
 /// format of bits = <1 byte for exponent><3 bytes for coefficient>
