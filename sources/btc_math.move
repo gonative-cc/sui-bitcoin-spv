@@ -9,16 +9,14 @@ const EInvalidLength: u64 = 0;
 /// convert 4 bytes in little endian format to u32 number
 public fun to_u32(v: vector<u8>): u32 {
     assert!(v.length() == 4, EInvalidLength);
-    let mut ans = 0u64;
+    let mut ans = 0u32;
     let mut i = 0;
-    let mut c = 1u64;
     while (i < 4) {
-        ans = ans + (v[i] as u64) * c;
-        c = c * 256u64;
-        i = i + 1;
+        ans = ans + (v[i] as u32 << i*8);
+        i = i + 1
     };
 
-    ans as u32
+    ans
 }
 
 /// double hash of value

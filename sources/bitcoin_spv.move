@@ -6,7 +6,7 @@ use sui::dynamic_object_field as dof;
 
 use bitcoin_spv::btc_types::{BlockHeader, new_block_header, LightBlock, Params};
 
-public struct BTCLightClient has key, store{
+public struct LightClient has key, store{
     id: UID,
     params: Params,
 }
@@ -33,7 +33,8 @@ public entry fun insert_header(c: &BTCLightClient, raw_header: vector<u8>) {
 
 }
 
-// === views function ===
+// === Views function ===
+
 public fun latest_finalized_height(_c: &BTCLightClient): u32 {
     return 0
 }
