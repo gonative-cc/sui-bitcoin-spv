@@ -1,6 +1,7 @@
-module bitcoin_spv::btc_types;
+module bitcoin_spv::block_header;
 
 use bitcoin_spv::btc_math::{btc_hash, to_u32};
+use bitcoin_spv::utils;
 
 // === Constants ===
 const BLOCK_HEADER_SIZE :u64 = 80;
@@ -10,18 +11,9 @@ const EBlockHashNotMatch: u64 = 0;
 const EInvalidBlockHeaderSize: u64 = 1;
 
 public struct BlockHeader has store, drop, copy{
-    internal: vector<u8>
+   internal: vector<u8> 
 }
 
-public struct LightBlock has key, store {
-    id: UID,
-    height: u32,
-    header: BlockHeader
-}
-
-public struct Params has key, store{
-    id: UID
-}
 
 // === Block header methods ===
 
@@ -67,28 +59,6 @@ public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHe
 }
 
 
-/// slice() extracts up to but not including end.
-fun slice(v: vector<u8>, start: u64, end: u64) : vector<u8>{
-    // TODO: handle error when start,end position > length's v.
-    let mut ans = vector[];
-    let mut i = start;
-    while (i < end) {
-        ans.push_back(v[i]);
-        i = i + 1;
-    };
-
-    return ans
-}
-
-fun slice(header: &BlockHeader, start: u64, end: u64) : vector<u8> {
-    slices(header.internal, start, end)
-}
-// === Light Block methods ===
-
-public fun height(lb: &LightBlock): u32 {
-    return lb.height
-}
-
-public fun header(lb: &LightBlock): &BlockHeader {
-    return &lb.header
+fun slice(header: &BlockHeader, start: u64, end: u64): vector<u8> {
+    utils::slice(header.internal, start, end)
 }

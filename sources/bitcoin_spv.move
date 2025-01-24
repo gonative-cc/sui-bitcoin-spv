@@ -1,15 +1,18 @@
 module bitcoin_spv::bitcoin_spv;
 
 use sui::dynamic_object_field as dof;
-use bitcoin_spv::btc_types::{BlockHeader, new_block_header, LightBlock, Params};
+use bitcoin_spv::block_header::{new_block_header};
+use bitcoin_spv::light_block::LightBlock;
+
+
+public struct Params has key, store{
+    id: UID
+}
 
 public struct LightClient has key, store{
     id: UID,
     params: Params,
 }
-
-// === Errors ===
-// We will add this later
 
 // === Init function for module ====
 fun init(_ctx: &mut TxContext) {
@@ -37,6 +40,7 @@ public fun latest_finalized_height(_c: &LightClient): u32 {
 }
 
 public fun latest_finalized_block(c: &LightClient): &LightBlock{
+    // TODO: decide return type
     let height = c.latest_finalized_height();
     let light_block = dof::borrow<_,LightBlock>(&c.id, height);
     return light_block
