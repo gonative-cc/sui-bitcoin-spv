@@ -91,7 +91,3 @@ public fun height(lb: &LightBlock): u32 {
 public fun header(lb: &LightBlock): &BlockHeader {
     return &lb.header
 }
-
-public fun id(lb: &LightBlock): &UID {
-    return &lb.id
-}
