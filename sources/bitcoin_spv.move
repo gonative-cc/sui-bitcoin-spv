@@ -61,6 +61,9 @@ public fun client_id(c: &LightClient): &UID {
     return &c.id
 }
 
+public fun client_id_mut(c: &mut LightClient): &mut UID {
+    return &mut c.id
+}
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
     let ancestor_height: u64 = lb.height() - distance;
     

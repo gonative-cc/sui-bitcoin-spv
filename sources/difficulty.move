@@ -126,8 +126,9 @@ public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, 
     if (new_target > c.params().power_limit()) {
 	new_target = c.params().power_limit();
     };
-    
-    return target_to_bits(new_target)
+
+    let new_bits = target_to_bits(new_target);
+    return new_bits
 }
 
 
