@@ -96,7 +96,6 @@ public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, 
     };
 
     // we compute a new difficulty
-    // let first_block = last_block.relative_ancestor(blocks_pre_retarget - 1, c);
     let first_block = c.relative_ancestor(last_block, blocks_pre_retarget - 1);
     let acctual_timespan = last_block.header().timestamp() - first_block.header().timestamp();
     let mut adjusted_timespan: u64 = acctual_timespan as u64;
@@ -110,9 +109,15 @@ public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, 
     // compute new target
     // You can check this blogs for more information
     // https://learnmeabitcoin.com/technical/mining/target
+    // 
+    // TODO: handle overflow 
+    // NB: high targets e.g. ffff0020 can cause overflows here
+    // so we divide it by 256**2, then multiply by 256**2 later
+    // we know the target is evenly divisible by 256**2, so this isn't an issue
+    
     let old_target = bits_to_target(first_block.header().bits());
-    // TODO: ensure this one can't overflow
     let mut new_target = old_target * (adjusted_timespan as u256);
+    
     // TODO: make this more sense.
     let second = 1000000000;
     let target_timespan = c.params().target_timespan() / second;
