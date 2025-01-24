@@ -76,6 +76,7 @@ public fun bits_to_target(bits: u32): u256 {
     return target
 }
 
+
 public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, _new_block_time: u32) : u32 {
 
     // TODO: handle lastHeader is nil or genesis block
@@ -97,13 +98,14 @@ public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, 
 
     // we compute a new difficulty
     let first_block = c.relative_ancestor(last_block, blocks_pre_retarget - 1);
-    let acctual_timespan = last_block.header().timestamp() - first_block.header().timestamp();
-    let mut adjusted_timespan: u64 = acctual_timespan as u64;
+    let mut actual_timespan = (last_block.header().timestamp() - first_block.header().timestamp()) as u64;
     
-    if ((acctual_timespan as u64) < c.params().min_retarget_timespan()) {
-	adjusted_timespan = c.params().min_retarget_timespan();
-    } else if ((acctual_timespan as u64)> c.params().max_retarget_timespan()){
-	adjusted_timespan = c.params().max_retarget_timespan();
+    if (actual_timespan  < c.params().target_timespan() / 4) {
+	actual_timespan = c.params().target_timespan() / 4;
+    };
+    
+    if (actual_timespan > c.params().target_timespan() * 4){
+	actual_timespan = c.params().target_timespan() * 4;
     };
 
     // compute new target
@@ -116,16 +118,15 @@ public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, 
     // we know the target is evenly divisible by 256**2, so this isn't an issue
     
     let old_target = bits_to_target(first_block.header().bits());
-    let mut new_target = old_target * (adjusted_timespan as u256);
+    let mut new_target = old_target * (actual_timespan as u256);
     
-    // TODO: make this more sense.
-    let second = 1000000000;
-    let target_timespan = c.params().target_timespan() / second;
+    let target_timespan = c.params().target_timespan();
     new_target = new_target / (target_timespan as u256);
     
     if (new_target > c.params().power_limit()) {
 	new_target = c.params().power_limit();
     };
+    
     return target_to_bits(new_target)
 }
 

@@ -5,13 +5,10 @@ use bitcoin_spv::block_header::{new_block_header};
 use bitcoin_spv::light_block::LightBlock;
 
 
-public struct Params has key, store{
-    id: UID,
+public struct Params has store{
     power_limit: u256,
     blocks_pre_retarget: u64,
     target_timespan: u64,
-    min_retarget_timespan: u64,
-    max_retarget_timespan: u64
 }
 
 public struct LightClient has key, store{
@@ -25,6 +22,7 @@ fun init(_ctx: &mut TxContext) {
 }
 
 // === Entry methods ===
+
 /// insert new header to bitcoin spv
 public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
     // insert a new header to current light client
@@ -36,6 +34,7 @@ public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
     current_header.verify_next_block(&next_header);
 
 }
+
 
 public entry fun verify_tx_inclusive(_c: &LightClient, _block_hash: vector<u8>, _tx_id: vector<u8>, _proof: vector<u8>): bool {
     return true
@@ -73,14 +72,6 @@ public fun blocks_pre_retarget(p: &Params) : u64{
     return p.blocks_pre_retarget
 }
 
-public fun min_retarget_timespan(p: &Params): u64 {
-    return p.min_retarget_timespan
-}
-
-public fun max_retarget_timespan(p: &Params): u64 {
-    return p.max_retarget_timespan
-}
-
 public fun power_limit(p: &Params): u256 {
     return p.power_limit
 }
@@ -89,3 +80,20 @@ public fun target_timespan(p: &Params): u64 {
     p.target_timespan
 }
 
+
+public fun new_lc(params: Params, ctx: &mut TxContext): LightClient {
+    let lc = LightClient {
+	id: object::new(ctx),
+	params: params
+    };
+
+    return lc
+}
+
+public fun new_params(): Params {
+    return Params {
+	power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+	blocks_pre_retarget: 2016,
+	target_timespan: 2016 * 60 * 10, // 2 weeks
+    }
+}
