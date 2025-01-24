@@ -12,8 +12,8 @@ public fun to_u32(v: vector<u8>): u32 {
     let mut ans = 0u32;
     let mut i = 0;
     while (i < 4) {
-        ans = ans + (v[i] as u32 << i*8);
-        i = i + 1
+        ans = ans + (v[i] as u32 << (i*8 as u8));
+        i = i + 1;
     };
 
     ans

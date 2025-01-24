@@ -12,11 +12,12 @@ fun btc_hash_test() {
 }
 
 #[test]
-fun to_u32_test() {    
+fun to_u32_test() {
+    //  Bytes vector is in little-endian format.
     assert!(btc_math::to_u32(x"00000000") == 0u32);
-    assert!(btc_math::to_u32(x"00000001") == 1u32);
-    assert!(btc_math::to_u32(x"000000ff") == 255u32);
-    assert!(btc_math::to_u32(x"00000100") == 256u32);
+    assert!(btc_math::to_u32(x"01000000") == 1u32);
+    assert!(btc_math::to_u32(x"ff000000") == 255u32);
+    assert!(btc_math::to_u32(x"00010000") == 256u32);
     assert!(btc_math::to_u32(x"ffffffff") == 4294967295u32);
     assert!(btc_math::to_u32(x"01020304") == 67305985u32);
 }
