@@ -1,42 +1,64 @@
 module bitcoin_spv::block_header;
 
-use bitcoin_spv::chainctx::Chain;
-use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
-use sui::dynamic_object_field as dof;
+use bitcoin_spv::btc_math::{btc_hash, to_u32};
+use bitcoin_spv::utils;
 
-public struct Header has key, store {
-    id: UID,
-    version: u32,
-    prev_block: vector<u8>,
-    merkle_root: vector<u8>,
-    timestamp: u32,
-    bits: u32,
-    nonce: u32
+// === Constants ===
+const BLOCK_HEADER_SIZE :u64 = 80;
+
+// === Errors ===
+const EBlockHashNotMatch: u64 = 0;
+const EInvalidBlockHeaderSize: u64 = 1;
+
+public struct BlockHeader has store, drop, copy{
+   internal: vector<u8> 
 }
 
 
-public struct LightBlock has key, store {
-    id: UID,
-    height: u32,
-    header: Header,
+// === Block header methods ===
+
+/// New block header
+public fun new_block_header(raw_block_header: vector<u8>): BlockHeader {
+    assert!(raw_block_header.length() == BLOCK_HEADER_SIZE, EInvalidBlockHeaderSize);
+
+    return BlockHeader {
+        internal: raw_block_header
+    }
+}
+
+public fun block_hash(header: &BlockHeader) : vector<u8> {
+    return btc_hash(header.internal)
+}
+public fun version(header: &BlockHeader): u32 {
+    return to_u32(header.slice(0, 4))
+}
+
+public fun prev_block(header: &BlockHeader): vector<u8> {
+    return header.slice(4, 36)
+}
+
+public fun merkle_root(header: &BlockHeader): vector<u8> {
+    return header.slice(36, 68)
+}
+
+public fun timestamp(header: &BlockHeader): u32 {
+    return to_u32(header.slice(68, 72))
+}
+
+public fun bits(header: &BlockHeader): u32 {
+    return to_u32(header.slice(72, 76))
+}
+
+public fun nonce(header: &BlockHeader): u32 {
+    return to_u32(header.slice(76, 80))
+}
+
+public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHeader): bool {
+    assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+    return true
 }
 
 
-public fun height(lb: &LightBlock): u32 {
-    return lb.height
-}
-
-public fun bits(lb: &LightBlock): u32 {
-    return lb.header.bits
-}
-
-public fun timestamp(lb: &LightBlock): u32 {
-    return lb.header.timestamp
-}
-
-public fun relative_ancestor(lb: &LightBlock, distance: u32, c: &Chain): &LightBlock {
-    let ancestor_height: u32 = lb.height - distance;
-    
-    let ancestor: &LightBlock = dof::borrow(c.id(), ancestor_height);
-    return ancestor
+fun slice(header: &BlockHeader, start: u64, end: u64): vector<u8> {
+    utils::slice(header.internal, start, end)
 }

@@ -1,5 +1,8 @@
 module bitcoin_spv::difficulty;
 
+use bitcoin_spv::bitcoin_spv::LightClient;
+use bitcoin_spv::light_block::LightBlock;
+
 /// number of bytes to represent number. 
 fun bytes_of(number: u256) : u8 {
     let mut b : u8 = 255;
@@ -73,7 +76,7 @@ public fun bits_to_target(bits: u32): u256 {
     return target
 }
 
-public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, _new_block_time: u32) : u32 {
+public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, _new_block_time: u32) : u32 {
 
     // TODO: handle lastHeader is nil or genesis block
 
@@ -89,25 +92,25 @@ public fun calc_next_block_difficulty(c: &Chain, last_block: &LightBlock, _new_b
 	// }
 
 	// Return previous block difficulty
-	return last_block.bits()
+	return last_block.header().bits()
     };
 
     // we compute a new difficulty
-    let first_block = last_block.relative_ancestor(blocks_pre_retarget - 1, c);
-
-    let acctual_timespan = last_block.timestamp() - first_block.timestamp();
+    // let first_block = last_block.relative_ancestor(blocks_pre_retarget - 1, c);
+    let first_block = c.relative_ancestor(last_block, blocks_pre_retarget - 1);
+    let acctual_timespan = last_block.header().timestamp() - first_block.header().timestamp();
     let mut adjusted_timespan: u64 = acctual_timespan as u64;
     
-    if ((acctual_timespan as u64) < c.min_retarget_timespan()) {
-	adjusted_timespan = c.min_retarget_timespan();
-    } else if ((acctual_timespan as u64)> c.max_retarget_timespan()){
-	adjusted_timespan = c.max_retarget_timespan();
+    if ((acctual_timespan as u64) < c.params().min_retarget_timespan()) {
+	adjusted_timespan = c.params().min_retarget_timespan();
+    } else if ((acctual_timespan as u64)> c.params().max_retarget_timespan()){
+	adjusted_timespan = c.params().max_retarget_timespan();
     };
 
     // compute new target
     // You can check this blogs for more information
     // https://learnmeabitcoin.com/technical/mining/target
-    let old_target = bits_to_target(first_block.bits());
+    let old_target = bits_to_target(first_block.header().bits());
     // TODO: ensure this one can't overflow
     let mut new_target = old_target * (adjusted_timespan as u256);
     // TODO: make this more sense.

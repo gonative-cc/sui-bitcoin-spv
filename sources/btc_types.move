@@ -82,16 +82,3 @@ fun slices(v: vector<u8>, start: u64, end: u64) : vector<u8>{
 fun slice(header: &BlockHeader, start: u64, end: u64) : vector<u8> {
     slices(header.internal, start, end)
 }
-// === Light Block methods ===
-
-public fun height(lb: &LightBlock): u32 {
-    return lb.height
-}
-
-public fun header(lb: &LightBlock): &BlockHeader {
-    return &lb.header
-}
-
-public fun id(lb: &LightBlock): &UID {
-    return &lb.id
-}

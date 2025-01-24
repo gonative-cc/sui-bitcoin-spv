@@ -10,17 +10,19 @@ build: .git/hooks/pre-commit
 # used as pre-commit
 lint-git:
 	@git diff --name-only --cached | grep  -E '\.md$$' | xargs -r markdownlint-cli2
-
+	@sui move build --lint
 # lint changed files
 lint:
 	@git diff --name-only | grep  -E '\.md$$' | xargs -r markdownlint-cli2
+	@ sui move build --lint
 
 lint-all:
-	markdownlint-cli2 **.md
+	@markdownlint-cli2 **.md
+	@sui move build --lint
 
 lint-fix-all:
-	markdownlint-cli2 --fix **.md
-
+	@markdownlint-cli2 --fix **.md
+	@echo "Sui move lint will be fixed by manual"
 
 .PHONY: build setup
 .PHONY: lint lint-all lint-fix-all
