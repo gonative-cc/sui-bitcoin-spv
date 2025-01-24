@@ -67,7 +67,8 @@ public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHe
 }
 
 
-fun slices(v: vector<u8>, start: u64, end: u64) : vector<u8>{
+/// slice() extracts up to but not including end.
+fun slice(v: vector<u8>, start: u64, end: u64) : vector<u8>{
     // TODO: handle error when start,end position > length's v.
     let mut ans = vector[];
     let mut i = start;

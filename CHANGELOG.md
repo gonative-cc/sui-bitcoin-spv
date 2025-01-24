@@ -21,7 +21,7 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ### Features
 
-- Create a basic entry for package #11  
+- #11: Create a basic entry for package
 
 ### Breaking Changes
 

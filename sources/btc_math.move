@@ -10,9 +10,9 @@ const EInvalidLength: u64 = 0;
 public fun to_u32(v: vector<u8>): u32 {
     assert!(v.length() == 4, EInvalidLength);
     let mut ans = 0u32;
-    let mut i = 0;
+    let mut i = 0u8;
     while (i < 4) {
-        ans = ans + (v[i] as u32 << (i*8 as u8));
+        ans = ans + (v[i] as u32 << i*8);
         i = i + 1;
     };
 
