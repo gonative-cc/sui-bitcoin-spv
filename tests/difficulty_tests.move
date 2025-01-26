@@ -51,27 +51,28 @@ fun difficulty_computation_tests() {
     let mut lc = new_lc(p, scenario.ctx());
 
     
-    let first_block = new_light_block(
+    let last_block = new_light_block(
 	860831u256,
-	x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1662000ffff807427ca",
+	x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
 	scenario.ctx()
     );
-
-    dof::add(lc.client_id_mut(), 860831u256, first_block);
     
-    let last_block = new_light_block(
+    dof::add(lc.client_id_mut(), 860831u256, last_block);
+    
+    let first_block = new_light_block(
 	858816u256,
 	x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
 	scenario.ctx()
     );
 
-    let last_block_bits = last_block.header().bits();
+
     
-    dof::add(lc.client_id_mut(), 858816u256, last_block);
+    dof::add(lc.client_id_mut(), 858816u256, first_block);
     
     let new_bits = calc_next_block_difficulty(&lc, dof::borrow(lc.client_id(), 860831u256), 0);
 
-    assert!(new_bits == last_block_bits);
+    // 0x1703098c is bits of block 860832
+    assert!(new_bits == 0x1703098c);
     sui::test_utils::destroy(lc);
     scenario.end();
 }

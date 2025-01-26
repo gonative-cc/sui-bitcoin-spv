@@ -98,7 +98,7 @@ public fun target_timespan(p: &Params): u256 {
 
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u256): &LightBlock {
     let ancestor_height = lb.height() - distance;
-    
+
     let ancestor: &LightBlock = dof::borrow(c.client_id(), ancestor_height);
     return ancestor
 }

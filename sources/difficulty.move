@@ -60,9 +60,8 @@ public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, 
     let previous_target = first_header.target();
     let first_timestamp = first_header.timestamp();
     let last_timestamp = last_block.header().timestamp();
-    
-    let new_target = retarget_algorithm(c.params(), previous_target, first_timestamp as u256, last_timestamp as u256);
 
+    let new_target = retarget_algorithm(c.params(), previous_target, first_timestamp as u256, last_timestamp as u256);
     let new_bits = target_to_bits(new_target);
     return new_bits
 }
