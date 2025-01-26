@@ -20,13 +20,13 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     if (actual_timespan > target_timespan * 4){
 	actual_timespan = target_timespan * 4; 
     };    
-    // TODO: handle overflow 
+    // Trick from summa-tx/bitcoin-spv
     // NB: high targets e.g. ffff0020 can cause overflows here
     // so we divide it by 256**2, then multiply by 256**2 later
     // we know the target is evenly divisible by 256**2, so this isn't an issue
 
-    let mut next_target = previous_target * actual_timespan;
-    next_target = next_target / target_timespan;
+    let mut next_target = previous_target / (1 << 16) * actual_timespan;
+    next_target = next_target / target_timespan * (1 << 16);
     
     if (next_target > p.power_limit()) {
 	next_target = p.power_limit();

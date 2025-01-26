@@ -3,10 +3,44 @@ module bitcoin_spv::difficulty_test;
 
 use bitcoin_spv::bitcoin_spv::{mainnet_params, new_lc};
 use bitcoin_spv::light_block::{new_light_block};
-use bitcoin_spv::difficulty::{calc_next_block_difficulty};
+use bitcoin_spv::difficulty::{calc_next_block_difficulty, retarget_algorithm};
+use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
+
 use sui::dynamic_object_field as dof;
 use sui::test_scenario;
+#[test_only]
+fun is_equal_target(x: u256, y: u256): bool {
+   target_to_bits(x) == target_to_bits(y)
+}
 
+#[test]
+fun retarget_algorithm_tests() {
+    // sources: https://learnmeabitcoin.com/explorer/block/00000000000000000002819359a9af460f342404bec23e7478512a619584083b
+    let p = mainnet_params();
+
+    // NOTES: In Move, we are using big endian. So format here is big endian.
+    // this is reverse order of data in raw block
+    let previous_target = bits_to_target(0x1702905c);
+    let first_timestamp = 0x6771c559;
+    
+    let expected = bits_to_target(0x17028c61);
+    let second_timestamp = 0x67841db6;
+    let actual = retarget_algorithm(&p, previous_target, first_timestamp, second_timestamp);
+    assert!(actual == 244084856254285558118414851546990328505140483644194816);
+    assert!(is_equal_target(expected, actual));
+
+    // overflow tests
+    // 2000ffff
+    let previous_target = bits_to_target(0x2000ffff);
+    let first_timestamp = 0x00000000;
+    let second_timestamp = 0xffffffff;
+    // second_timestamp - first_timestamp always greater than target_timespan * 4
+    let actual = retarget_algorithm(&p, previous_target, first_timestamp, second_timestamp);
+    let expected = 26959946667150639794667015087019630673637144422540572481103610249215;
+    assert!(actual == expected);
+    
+    sui::test_utils::destroy(p);
+}
 
 #[test]
 fun difficulty_computation_tests() {
@@ -37,8 +71,6 @@ fun difficulty_computation_tests() {
     
     let new_bits = calc_next_block_difficulty(&lc, dof::borrow(lc.client_id(), 860831u256), 0);
 
-    std::debug::print(&last_block_bits);
-    std::debug::print(&new_bits);
     assert!(new_bits == last_block_bits);
     sui::test_utils::destroy(lc);
     scenario.end();
