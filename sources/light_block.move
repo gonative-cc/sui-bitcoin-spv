@@ -4,11 +4,11 @@ use bitcoin_spv::block_header::{BlockHeader, new_block_header};
 
 public struct LightBlock has key, store {
     id: UID,
-    height: u64,
+    height: u256,
     header: BlockHeader
 }
 
-public fun new_light_block(height: u64, block_header: vector<u8>, ctx: &mut TxContext): LightBlock {
+public fun new_light_block(height: u256, block_header: vector<u8>, ctx: &mut TxContext): LightBlock {
     LightBlock {
 	id: object::new(ctx),
 	height,
@@ -16,7 +16,7 @@ public fun new_light_block(height: u64, block_header: vector<u8>, ctx: &mut TxCo
     }
 }
 // === Light Block methods ===
-public fun height(lb: &LightBlock): u64 {
+public fun height(lb: &LightBlock): u256 {
     return lb.height
 }
 

@@ -1,6 +1,6 @@
 module bitcoin_spv::block_header;
 
-use bitcoin_spv::btc_math::{btc_hash, to_u32};
+use bitcoin_spv::btc_math::{btc_hash, to_u32, bits_to_target};
 use bitcoin_spv::utils;
 
 // === Constants ===
@@ -52,7 +52,10 @@ public fun bits(header: &BlockHeader): u32 {
 public fun nonce(header: &BlockHeader): u32 {
     return to_u32(header.slice(76, 80))
 }
-
+public fun target(header :&BlockHeader): u256 {
+    let bits = header.bits();
+    bits_to_target(bits)
+}
 public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHeader): bool {
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
     return true

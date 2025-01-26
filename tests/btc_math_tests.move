@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::btc_math_tests;
-use bitcoin_spv::btc_math;
+use bitcoin_spv::btc_math::{target_to_bits, bits_to_target, Self};
 
 
 #[test]
@@ -20,4 +20,26 @@ fun to_u32_test() {
     assert!(btc_math::to_u32(x"00010000") == 256u32);
     assert!(btc_math::to_u32(x"ffffffff") == 4294967295u32);
     assert!(btc_math::to_u32(x"01020304") == 67305985u32);
+}
+
+#[test]
+fun bits_to_target_tests() {
+    // Data get from btc main net at block 880,086
+    let bits = 0x17028c61;
+    let target = bits_to_target(bits);
+    assert!(target == 0x000000000000000000028c610000000000000000000000000000000000000000);
+    assert!(bits == target_to_bits(target));
+    
+    // data from block 489,888
+    let bits = 0x1800eb30;
+    let target = bits_to_target(bits);
+    assert!(target == 0x000000000000000000eb30000000000000000000000000000000000000000000);
+    assert!(bits == target_to_bits(target));
+
+
+    let bits = 0x2000ffff;
+    let target = bits_to_target(bits);
+    assert!(target == 0x00ffff0000000000000000000000000000000000000000000000000000000000);
+    assert!(bits == target_to_bits(target));
+
 }

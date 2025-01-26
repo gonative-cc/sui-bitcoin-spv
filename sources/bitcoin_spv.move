@@ -7,8 +7,8 @@ use bitcoin_spv::light_block::LightBlock;
 
 public struct Params has store{
     power_limit: u256,
-    blocks_pre_retarget: u64,
-    target_timespan: u64,
+    blocks_pre_retarget: u256,
+    target_timespan: u256,
 }
 
 public struct LightClient has key, store{
@@ -83,7 +83,7 @@ public fun client_id_mut(c: &mut LightClient): &mut UID {
     return &mut c.id
 }
 
-public fun blocks_pre_retarget(p: &Params) : u64{
+public fun blocks_pre_retarget(p: &Params) : u256{
     return p.blocks_pre_retarget
 }
 
@@ -91,13 +91,13 @@ public fun power_limit(p: &Params): u256 {
     return p.power_limit
 }
 
-public fun target_timespan(p: &Params): u64 {
+public fun target_timespan(p: &Params): u256 {
     p.target_timespan
 }
 
 
-public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
-    let ancestor_height: u64 = lb.height() - distance;
+public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u256): &LightBlock {
+    let ancestor_height = lb.height() - distance;
     
     let ancestor: &LightBlock = dof::borrow(c.client_id(), ancestor_height);
     return ancestor
