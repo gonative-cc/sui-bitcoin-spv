@@ -2,7 +2,7 @@
 module bitcoin_spv::difficulty_test;
 
 use bitcoin_spv::difficulty::{bits_to_target, target_to_bits};
-use bitcoin_spv::bitcoin_spv::{Params, LightClient, new_params, new_lc};
+use bitcoin_spv::bitcoin_spv::{mainnet_params, new_lc};
 use bitcoin_spv::light_block::{new_light_block};
 use bitcoin_spv::difficulty::{calc_next_block_difficulty};
 use sui::dynamic_object_field as dof;
@@ -28,7 +28,7 @@ fun difficulty_computation_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     
-    let p = new_params();
+    let p = mainnet_params();
     let mut lc = new_lc(p, scenario.ctx());
 
     

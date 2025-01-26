@@ -21,6 +21,24 @@ fun init(_ctx: &mut TxContext) {
     // TODO: Init this module with parameter
 }
 
+public fun new_lc(params: Params, ctx: &mut TxContext): LightClient {
+    let lc = LightClient {
+	id: object::new(ctx),
+	params: params
+    };
+
+    return lc
+}
+
+// default params for bitcoin mainnet
+public fun mainnet_params(): Params {
+    return Params {
+	power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+	blocks_pre_retarget: 2016,
+	target_timespan: 2016 * 60 * 10, // 2 weeks
+    }
+}
+
 // === Entry methods ===
 
 /// insert new header to bitcoin spv
@@ -64,12 +82,6 @@ public fun client_id(c: &LightClient): &UID {
 public fun client_id_mut(c: &mut LightClient): &mut UID {
     return &mut c.id
 }
-public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
-    let ancestor_height: u64 = lb.height() - distance;
-    
-    let ancestor: &LightBlock = dof::borrow(c.client_id(), ancestor_height);
-    return ancestor
-}
 
 public fun blocks_pre_retarget(p: &Params) : u64{
     return p.blocks_pre_retarget
@@ -84,19 +96,9 @@ public fun target_timespan(p: &Params): u64 {
 }
 
 
-public fun new_lc(params: Params, ctx: &mut TxContext): LightClient {
-    let lc = LightClient {
-	id: object::new(ctx),
-	params: params
-    };
-
-    return lc
-}
-
-public fun new_params(): Params {
-    return Params {
-	power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
-	blocks_pre_retarget: 2016,
-	target_timespan: 2016 * 60 * 10, // 2 weeks
-    }
+public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
+    let ancestor_height: u64 = lb.height() - distance;
+    
+    let ancestor: &LightBlock = dof::borrow(c.client_id(), ancestor_height);
+    return ancestor
 }
