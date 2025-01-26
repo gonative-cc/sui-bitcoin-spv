@@ -21,6 +21,13 @@ fun bits_to_target_tests() {
     let target = bits_to_target(bits);
     assert!(target == 0x000000000000000000eb30000000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
+
+
+    let bits = 0x2000ffff;
+    let target = bits_to_target(bits);
+    assert!(target == 0x00ffff0000000000000000000000000000000000000000000000000000000000);
+    assert!(bits == target_to_bits(target));
+
 }
 
 #[test]
@@ -34,7 +41,7 @@ fun difficulty_computation_tests() {
     
     let first_block = new_light_block(
 	860831,
-	x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
+	x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1662000ffff807427ca",
 	scenario.ctx()
     );
 
@@ -49,9 +56,11 @@ fun difficulty_computation_tests() {
     let last_block_bits = last_block.header().bits();
     
     dof::add(lc.client_id_mut(), 858816, last_block);
+    
+    let new_bits = calc_next_block_difficulty(&lc, dof::borrow(lc.client_id(), 860831), 0);
 
-    let new_bits= calc_next_block_difficulty(&lc, dof::borrow(lc.client_id(), 858816), 0);
-
+    std::debug::print(&last_block_bits);
+    std::debug::print(&new_bits);
     assert!(new_bits == last_block_bits);
     sui::test_utils::destroy(lc);
     scenario.end();
