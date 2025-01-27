@@ -55,17 +55,17 @@ public fun nonce(header: &BlockHeader): u32 {
 }
 
 public fun target(header :&BlockHeader): u256 {
-    let bits = header.bits();
-    bits_to_target(bits)
+    bits_to_target(header.bits())
 }
 
+// fails if block hash doesn't meet target requirement
 public fun pow_check(header: &BlockHeader){
     let work = header.block_hash();
     let target = header.target();
-    assert!(to_u256(work) <= target, EPoW);
+    assert!(to_u256(work) >= target, EPoW);
 }
 
-public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHeader): bool {
+public fun verify_next_block(prev: &BlockHeader, next: &BlockHeader): bool {
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
     pow_check(next_header);
     return true
