@@ -61,6 +61,7 @@ public fun target(header :&BlockHeader): u256 {
 
 public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHeader): bool {
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+    
     let work = next_header.block_hash();
     let target = next_header.target();
     assert!(to_u256(work) <= target, EPoW);
