@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::btc_types_test;
-use bitcoin_spv::block_header::{new_block_header};
+use bitcoin_spv::block_header::{new_block_header, EPoW};
 use bitcoin_spv::btc_math::to_u32;
 
 #[test]
@@ -19,4 +19,23 @@ fun block_header_tests() {
     assert!(header.nonce() == to_u32(x"67c0c9fd"));
 
     assert!(header.block_hash() == x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000");
+}
+
+
+#[test]
+fun pow_check_happy_tests() {
+    // https://learnmeabitcoin.com/explorer/block/00000000f01df1dbc52bce6d8d31167a8fef76f1a8eb67897469cf92205e806b
+    let header = new_block_header(x"01000000cb60e68ead74025dcfd4bf4673f3f71b1e678be9c6e6585f4544c79900000000c7f42be7f83eddf2005272412b01204352a5fddbca81942c115468c3c4ec2fff827ad949ffff001d21e05e45");
+    header.pow_check();
+    
+    // https://learnmeabitcoin.com/explorer/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+    let header = new_block_header(x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c");
+    header.pow_check();
+}
+
+#[test]
+#[expected_failure(abort_code = EPoW)] // ENotFound is a constant defined in the module
+fun test(){
+    let header = new_block_header(x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d00000000");
+    header.pow_check();
 }

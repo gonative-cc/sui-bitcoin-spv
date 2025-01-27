@@ -59,13 +59,15 @@ public fun target(header :&BlockHeader): u256 {
     bits_to_target(bits)
 }
 
+public fun pow_check(header: &BlockHeader){
+    let work = header.block_hash();
+    let target = header.target();
+    assert!(to_u256(work) <= target, EPoW);
+}
+
 public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHeader): bool {
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    
-    let work = next_header.block_hash();
-    let target = next_header.target();
-    assert!(to_u256(work) <= target, EPoW);
-    
+    pow_check(next_header);
     return true
 }
 
