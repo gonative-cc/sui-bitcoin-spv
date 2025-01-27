@@ -26,11 +26,11 @@ public fun btc_hash(data: vector<u8>): vector<u8> {
     return second_hash
 }
 
-/// number of bytes to represent number. 
+/// number of bytes to represent number.
 fun bytes_of(number: u256) : u8 {
     let mut b : u8 = 255;
     while (number & (1 << b) == 0 && b > 0) {
-	b = b - 1;
+	    b = b - 1;
     };
     // Follow logic in bitcoin core
     ((b as u32 + 7 ) / 8) as u8
@@ -47,21 +47,21 @@ fun get_last_32_bits(number: u256): u32 {
 /// format of bits = <1 byte for exponent><3 bytes for coefficient>
 /// target = coefficient * 2^ (coefficient - 3) (note: 3 = bytes length of the coefficient).
 /// Caution:
-///    The first significant byte for the coefficient must be below 80. If it's not, you have to take the preceding 00 as the first byte. 
+///    The first significant byte for the coefficient must be below 80. If it's not, you have to take the preceding 00 as the first byte.
 /// More & examples: https://learnmeabitcoin.com/technical/block/bits.
 public fun target_to_bits(target: u256): u32 {
     // TODO: Handle case nagative target?
     // I checked bitcoin-code. They did't create any negative target.
-    
+
     let mut exponent = bytes_of(target);
     let mut coefficient;
     if (exponent <= 3) {
-	let bits_shift: u8 = 8 * ( 3 - exponent);
-	coefficient = get_last_32_bits(target) << bits_shift;
+	    let bits_shift: u8 = 8 * ( 3 - exponent);
+	    coefficient = get_last_32_bits(target) << bits_shift;
     } else {
-	let bits_shift : u8 = 8 * (exponent - 3);
-	let bn = target >> bits_shift;
-	coefficient = get_last_32_bits(bn)
+	    let bits_shift : u8 = 8 * (exponent - 3);
+	    let bn = target >> bits_shift;
+	    coefficient = get_last_32_bits(bn)
     };
 
 
@@ -69,16 +69,16 @@ public fun target_to_bits(target: u256): u32 {
     // 0x00800000 is set then it indicates a negative value
     // and target can be nagative
     if (coefficient & 0x00800000 > 0) {
-	// we push 00 before coefficet
-	coefficient = coefficient >> 8;
-	exponent = exponent + 1;
+	    // we push 00 before coefficet
+	    coefficient = coefficient >> 8;
+	    exponent = exponent + 1;
     };
-    
+
     let compact = coefficient | ((exponent as u32) << 24);
 
     // TODO: Check case target is a negative number.
     // However, the target mustn't be a negative number
-    
+
     compact
 }
 
@@ -86,15 +86,15 @@ public fun target_to_bits(target: u256): u32 {
 public fun bits_to_target(bits: u32): u256 {
     let exponent = bits >> 3*8;
 
-    // extract coefficient path or get last 24 bit of `bits` 
+    // extract coefficient path or get last 24 bit of `bits`
     let mut target = (bits & 0x007fffff) as u256;
-    
+
     if (exponent <= 3) {
-	let bits_shift = (8 * (3 - exponent)) as u8;
-	target = target >> bits_shift;
+	    let bits_shift = (8 * (3 - exponent)) as u8;
+	    target = target >> bits_shift;
     } else {
-	let bits_shift = (8 * (exponent - 3)) as u8;
-	target = target << bits_shift;
+	    let bits_shift = (8 * (exponent - 3)) as u8;
+	    target = target << bits_shift;
     };
     return target
 }

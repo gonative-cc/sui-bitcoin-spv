@@ -55,6 +55,8 @@ public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
 
 
 public entry fun verify_tx_inclusive(_c: &LightClient, _block_hash: vector<u8>, _tx_id: vector<u8>, _proof: vector<u8>): bool {
+    // TODO: check transaction id (tx_id) inclusive in block
+    // we not decide the final infeface yet
     return true
 }
 
