@@ -1,7 +1,8 @@
 module bitcoin_spv::block_header;
 
-use bitcoin_spv::btc_math::{btc_hash, to_u32};
+use bitcoin_spv::btc_math::{btc_hash, to_u32, to_u256};
 use bitcoin_spv::utils;
+use bitcoin_spv::difficulty::bits_to_target;
 
 // === Constants ===
 const BLOCK_HEADER_SIZE :u64 = 80;
@@ -9,6 +10,7 @@ const BLOCK_HEADER_SIZE :u64 = 80;
 // === Errors ===
 const EBlockHashNotMatch: u64 = 0;
 const EInvalidBlockHeaderSize: u64 = 1;
+const EPoW: u64 = 2;
 
 public struct BlockHeader has store, drop, copy{
    internal: vector<u8> 
@@ -20,7 +22,6 @@ public struct BlockHeader has store, drop, copy{
 /// New block header
 public fun new_block_header(raw_block_header: vector<u8>): BlockHeader {
     assert!(raw_block_header.length() == BLOCK_HEADER_SIZE, EInvalidBlockHeaderSize);
-
     return BlockHeader {
         internal: raw_block_header
     }
@@ -53,8 +54,17 @@ public fun nonce(header: &BlockHeader): u32 {
     return to_u32(header.slice(76, 80))
 }
 
+public fun target(header :&BlockHeader): u256 {
+    let bits = header.bits();
+    bits_to_target(bits)
+}
+
 public fun verify_next_block(current_header: &BlockHeader, next_header: &BlockHeader): bool {
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+    let work = next_header.block_hash();
+    let target = next_header.target();
+    assert!(to_u256(work) <= target, EPoW);
+    
     return true
 }
 
