@@ -35,7 +35,7 @@ fun pow_check_happy_tests() {
 
 #[test]
 #[expected_failure(abort_code = EPoW)] // ENotFound is a constant defined in the module
-fun test(){
+fun pow_check_failure_tests(){
     let header = new_block_header(x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d00000000");
     header.pow_check();
 }
