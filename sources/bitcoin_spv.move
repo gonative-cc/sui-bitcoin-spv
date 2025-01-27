@@ -23,8 +23,8 @@ fun init(_ctx: &mut TxContext) {
 
 public fun new_light_client(params: Params, ctx: &mut TxContext): LightClient {
     let lc = LightClient {
-	id: object::new(ctx),
-	params: params
+	    id: object::new(ctx),
+	    params: params
     };
 
     return lc
@@ -33,9 +33,9 @@ public fun new_light_client(params: Params, ctx: &mut TxContext): LightClient {
 // default params for bitcoin mainnet
 public fun mainnet_params(): Params {
     return Params {
-	power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
-	blocks_pre_retarget: 2016,
-	target_timespan: 2016 * 60 * 10, // time in seconds when we update the target: 2016 blocks ~ 2 weeks.
+	    power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+	    blocks_pre_retarget: 2016,
+	    target_timespan: 2016 * 60 * 10, // time in seconds when we update the target: 2016 blocks ~ 2 weeks.
     }
 }
 
@@ -45,7 +45,7 @@ public fun mainnet_params(): Params {
 public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
     // insert a new header to current light client
     let next_header = new_block_header(raw_header);
-    
+
     let current_block = c.latest_finalized_block();
     let current_header = current_block.header();
 

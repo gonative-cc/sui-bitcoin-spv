@@ -14,7 +14,7 @@ fun is_equal_target(x: u256, y: u256): bool {
 }
 
 #[test]
-fun retarget_algorithm_tests() {
+fun retarget_algorithm_test() {
     let p = mainnet_params();
 
     // sources: https://learnmeabitcoin.com/explorer/block/00000000000000000002819359a9af460f342404bec23e7478512a619584083b
@@ -29,6 +29,16 @@ fun retarget_algorithm_tests() {
     assert!(actual == 244084856254285558118414851546990328505140483644194816);
     assert!(is_equal_target(expected, actual));
 
+
+    // source:https://learnmeabitcoin.com/explorer/block/00000000000000000002819359a9af460f342404bec23e7478512a619584083b
+    let previous_target = bits_to_target(0x1703098c);
+    let first_timestamp = 0x66e10dc5;
+    let expected = bits_to_target(0x17032f14);
+    let second_timestamp = 0x66f466dc;
+    let actual = retarget_algorithm(&p, previous_target, first_timestamp, second_timestamp);
+    assert!(is_equal_target(expected, actual));
+
+
     // overflow tests
     // 2000ffff
     let previous_target = bits_to_target(0x2000ffff);
@@ -39,12 +49,11 @@ fun retarget_algorithm_tests() {
     let expected = 26959946667150639794667015087019630673637144422540572481103610249215;
     assert!(actual == expected);
 
-
     sui::test_utils::destroy(p);
 }
 
 #[test]
-fun difficulty_computation_tests() {
+fun difficulty_computation_test() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 

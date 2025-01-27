@@ -10,9 +10,9 @@ public struct LightBlock has key, store {
 
 public fun new_light_block(height: u256, block_header: vector<u8>, ctx: &mut TxContext): LightBlock {
     LightBlock {
-	id: object::new(ctx),
-	height,
-	header: new_block_header(block_header)
+	    id: object::new(ctx),
+	    height,
+	    header: new_block_header(block_header)
     }
 }
 // === Light Block methods ===
