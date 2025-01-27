@@ -5,7 +5,7 @@ use bitcoin_spv::block_header::BlockHeader;
 public struct LightBlock has key, store {
     id: UID,
     height: u32,
-    header: BlockHeader
+    header: BlockHeader,
 }
 
 // === Light Block methods ===

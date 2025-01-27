@@ -10,7 +10,7 @@ fun bits_to_target_test() {
     let target = bits_to_target(bits);
     assert!(target == 0x000000000000000000028c610000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
-    
+
     // data from block 489,888
     let bits = 0x1800eb30;
     let target = bits_to_target(bits);
