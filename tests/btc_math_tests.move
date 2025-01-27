@@ -4,7 +4,7 @@ use bitcoin_spv::btc_math;
 
 
 #[test]
-fun btc_hash_tests() {
+fun btc_hash_test() {
     let pre_image = x"00000020acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000dd0258540ffa51df2af80bd4e3ae82b7781c167ec84d4001e09c2e4053cdc4410d0f8864697e0517893b3045";
     let result = x"37ed684e163e76275a38fc0a318730c0aed92967f64c03000000000000000000";
 
@@ -12,7 +12,7 @@ fun btc_hash_tests() {
 }
 
 #[test]
-fun to_u32_tests() {
+fun to_u32_test() {
     //  Bytes vector is in little-endian format.
     assert!(btc_math::to_u32(x"00000000") == 0u32);
     assert!(btc_math::to_u32(x"01000000") == 1u32);
@@ -23,7 +23,7 @@ fun to_u32_tests() {
 }
 
 #[test]
-fun to_u256_tests() {
+fun to_u256_test() {
     //  Bytes vector is in little-endian format.
     assert!(btc_math::to_u256(x"0000000000000000000000000000000000000000000000000000000000000000") == 0);
     assert!(btc_math::to_u256(x"0100000000000000000000000000000000000000000000000000000000000000") == 1);

@@ -13,7 +13,7 @@ const EInvalidBlockHeaderSize: u64 = 1;
 const EPoW: u64 = 2;
 
 public struct BlockHeader has store, drop, copy{
-   internal: vector<u8> 
+   internal: vector<u8>
 }
 
 
@@ -62,12 +62,12 @@ public fun target(header :&BlockHeader): u256 {
 public fun pow_check(header: &BlockHeader){
     let work = header.block_hash();
     let target = header.target();
-    assert!(to_u256(work) >= target, EPoW);
+    assert!(target >= to_u256(work), EPoW);
 }
 
 public fun verify_next_block(prev: &BlockHeader, next: &BlockHeader): bool {
-    assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    pow_check(next_header);
+    assert!(prev.block_hash() == next.prev_block(), EBlockHashNotMatch);
+    pow_check(next);
     return true
 }
 
