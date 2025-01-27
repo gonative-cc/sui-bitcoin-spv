@@ -48,13 +48,10 @@ public fun latest_finalized_block(c: &LightClient): &LightBlock{
 }
 
 public entry fun verify_tx_inclusive(c: &LightClient, height: u256, tx_id: vector<u8>, proof: vector<vector<u8>>, tx_index: u256): bool {
-    // TODO: update this when we have api for finalized block
+    // TODO: update this when we have APIs for finalized block.
+    // TODO: handle: light block not exist.
     let light_block = dof::borrow<_, LightBlock>(&c.id, height);
     let header = light_block.header();
     let merkle_root = header.merkle_root();
     return verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
 }
-
-
-
-
