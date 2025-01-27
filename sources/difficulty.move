@@ -17,9 +17,16 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 	actual_timespan = target_timespan / 4;
     };
     
-    if (actual_timespan > target_timespan * 4){
-	actual_timespan = target_timespan * 4; 
-    };    
+    // target adjustment is based on the time diff from the target_timestamp. We have max and min value:
+    // https://github.com/bitcoin/bitcoin/blob/v28.1/src/pow.cpp#L55
+    // https://github.com/btcsuite/btcd/blob/v0.24.2/blockchain/difficulty.go#L184
+    let min_timespan = target_timespan / 4;
+    let max_timespan = target_timespan * 4;
+    if (adjusted_timestmp > max_timespan){
+        adjusted_timestmp = max_timespan; 
+    } else if (adjusted_timestmp < min_timespan) {
+        adjusted_timestmp = min_timespan; 
+    };
     // Trick from summa-tx/bitcoin-spv
     // NB: high targets e.g. ffff0020 can cause overflows here
     // so we divide it by 256**2, then multiply by 256**2 later
@@ -35,11 +42,14 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     next_target
 }
 
-public fun calc_next_block_difficulty(c: &LightClient, last_block: &LightBlock, _new_block_time: u32) : u32 {
+// last_block is a new block that we are adding. The function calculates the required difficulty for the block
+// after the passed the `last_block`.
+public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBlock, _new_block_time: u32) : u32 {
 
     // TODO: handle lastHeader is nil or genesis block
-
-    let blocks_pre_retarget = c.params().blocks_pre_retarget();
+    
+    const params = c.params()
+    let blocks_pre_retarget = params.blocks_pre_retarget();
     
     // if this block not start a new retarget cycle
     if ((last_block.height() + 1) % blocks_pre_retarget != 0) {

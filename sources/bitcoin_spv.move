@@ -21,7 +21,7 @@ fun init(_ctx: &mut TxContext) {
     // TODO: Init this module with parameter
 }
 
-public fun new_lc(params: Params, ctx: &mut TxContext): LightClient {
+public fun new_light_client(params: Params, ctx: &mut TxContext): LightClient {
     let lc = LightClient {
 	id: object::new(ctx),
 	params: params
@@ -35,7 +35,7 @@ public fun mainnet_params(): Params {
     return Params {
 	power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
 	blocks_pre_retarget: 2016,
-	target_timespan: 2016 * 60 * 10, // 2 weeks
+	target_timespan: 2016 * 60 * 10, // time in seconds when we update the target: 2016 blocks ~ 2 weeks.
     }
 }
 
