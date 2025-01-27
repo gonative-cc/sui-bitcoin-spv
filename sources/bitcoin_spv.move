@@ -3,6 +3,7 @@ module bitcoin_spv::bitcoin_spv;
 use sui::dynamic_object_field as dof;
 use bitcoin_spv::block_header::{new_block_header};
 use bitcoin_spv::light_block::LightBlock;
+use bitcoin_spv::merkle_tree::verify_merkle_proof;
 
 
 public struct Params has key, store{
@@ -46,7 +47,14 @@ public fun latest_finalized_block(c: &LightClient): &LightBlock{
     return light_block
 }
 
-public entry fun verify_tx_inclusive(_c: &LightClient, _block_hash: vector<u8>, _tx_id: vector<u8>, _proof: vector<u8>): bool {
-    return true
+public entry fun verify_tx_inclusive(c: &LightClient, height: u256, tx_id: vector<u8>, proof: vector<vector<u8>>, tx_index: u256): bool {
+    // TODO: update this when we have api for finalized block
+    let light_block = dof::borrow<_, LightBlock>(&c.id, height);
+    let header = light_block.header();
+    let merkle_root = header.merkle_root();
+    return verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
 }
+
+
+
 
