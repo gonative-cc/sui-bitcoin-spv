@@ -11,7 +11,7 @@ const EBlockHashNotMatch: u64 = 0;
 const EInvalidBlockHeaderSize: u64 = 1;
 
 public struct BlockHeader has store, drop, copy{
-   internal: vector<u8> 
+   internal: vector<u8>
 }
 
 
