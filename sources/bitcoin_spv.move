@@ -1,8 +1,8 @@
 module bitcoin_spv::bitcoin_spv;
 
-use sui::dynamic_object_field as dof;
-use bitcoin_spv::block_header::{new_block_header};
+use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::light_block::LightBlock;
+use sui::dynamic_object_field as dof;
 
 
 public struct Params has store{
@@ -11,15 +11,13 @@ public struct Params has store{
     target_timespan: u256,
 }
 
-public struct LightClient has key, store{
+public struct LightClient has key, store {
     id: UID,
     params: Params,
 }
 
 // === Init function for module ====
-fun init(_ctx: &mut TxContext) {
-    // TODO: Init this module with parameter
-}
+fun init(_ctx: &mut TxContext) {}
 
 public fun new_light_client(params: Params, ctx: &mut TxContext): LightClient {
     let lc = LightClient {
@@ -50,11 +48,15 @@ public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
     let current_header = current_block.header();
 
     current_header.verify_next_block(&next_header);
-
 }
 
 
-public entry fun verify_tx_inclusive(_c: &LightClient, _block_hash: vector<u8>, _tx_id: vector<u8>, _proof: vector<u8>): bool {
+public entry fun verify_tx_inclusive(
+    _c: &LightClient,
+    _block_hash: vector<u8>,
+    _tx_id: vector<u8>,
+    _proof: vector<u8>
+): bool {
     // TODO: check transaction id (tx_id) inclusive in block
     // we not decide the final infeface yet
     return true
@@ -66,12 +68,13 @@ public fun latest_finalized_height(_c: &LightClient): u32 {
     return 0
 }
 
-public fun latest_finalized_block(c: &LightClient): &LightBlock{
+public fun latest_finalized_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_finalized_height();
-    let light_block = dof::borrow<_,LightBlock>(&c.id, height);
+    let light_block = dof::borrow<_, LightBlock>(&c.id, height);
     return light_block
 }
+
 
 public fun params(c: &LightClient): &Params{
     return &c.params
@@ -96,7 +99,6 @@ public fun power_limit(p: &Params): u256 {
 public fun target_timespan(p: &Params): u256 {
     p.target_timespan
 }
-
 
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u256): &LightBlock {
     let ancestor_height = lb.height() - distance;
