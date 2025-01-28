@@ -59,7 +59,9 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
 	    // Return previous block difficulty
 	    return last_block.header().bits()
     };
-    // we compute a new difficulty
+
+    // we compute a new difficulty for the new target cycle.
+    // this target applies at block  height + 1
     let first_block = c.relative_ancestor(last_block, blocks_pre_retarget - 1);
     let first_header = first_block.header();
     let previous_target = first_header.target();
