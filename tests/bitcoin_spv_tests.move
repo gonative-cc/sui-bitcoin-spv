@@ -23,7 +23,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
 }
 
 #[test]
-fun test_set_get_block() {
+fun test_set_get_block_happy_case() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -35,6 +35,22 @@ fun test_set_get_block() {
     sui::test_utils::destroy(lc);
     scenario.end();
 }
+
+
+#[test]
+#[expected_failure]
+fun test_set_get_block_failed_case() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let ctx = scenario.ctx();
+    let lc = new_lc_for_test(ctx);
+
+    lc.light_block_at_height(0);
+
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+
 #[test]
 fun test_insert_header_happy_cases() {
     let sender = @0x01;
