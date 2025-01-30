@@ -1,7 +1,7 @@
 module bitcoin_spv::bitcoin_spv;
 
 use bitcoin_spv::block_header::new_block_header;
-use bitcoin_spv::light_block::{LightBlock};
+use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use sui::dynamic_object_field as dof;
 use bitcoin_spv::btc_math::target_to_bits;
 
@@ -46,7 +46,7 @@ public fun mainnet_params(): Params {
 // === Entry methods ===
 
 /// insert new header to bitcoin spv
-public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
+public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx: &mut TxContext) {
     // insert a new header to current light client
     let next_header = new_block_header(raw_header);
     let current_block = c.latest_finalized_block();
@@ -57,6 +57,12 @@ public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
     next_header.pow_check();
+
+    let next_height = current_block.height() + 1;
+
+    let next_light_block = new_light_block(next_height, raw_header, ctx);
+
+    c.set_light_block(next_light_block);
 }
 
 
@@ -190,10 +196,9 @@ fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
 }
 
 #[test_only]
-public fun add_light_block(lc: &mut LightClient, lb: LightBlock): &mut LightClient {
+public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
     if (lb.height() > lc.latest_height) {
         lc.latest_height = lb.height();
     };
     set_light_block(lc, lb);
-    return lc
 }
