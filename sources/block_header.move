@@ -7,7 +7,6 @@ use bitcoin_spv::utils;
 const BLOCK_HEADER_SIZE: u64 = 80;
 
 // === Errors ===
-const EBlockHashNotMatch: u64 = 0;
 const EInvalidBlockHeaderSize: u64 = 1;
 const EPoW: u64 = 2;
 
@@ -58,16 +57,10 @@ public fun target(header: &BlockHeader): u256 {
 }
 
 // fails if block hash doesn't meet target requirement
-public fun pow_check(header: &BlockHeader) {
+public fun pow_check(header:BlockHeader) {
     let work = header.block_hash();
     let target = header.target();
     assert!(target >= to_u256(work), EPoW);
-}
-
-public fun verify_next_block(prev: &BlockHeader, next: &BlockHeader): bool {
-    assert!(prev.block_hash() == next.prev_block(), EBlockHashNotMatch);
-    pow_check(next);
-    return true
 }
 
 fun slice(header: &BlockHeader, start: u64, end: u64): vector<u8> {

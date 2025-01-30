@@ -5,6 +5,9 @@ use bitcoin_spv::light_block::{LightBlock};
 use sui::dynamic_object_field as dof;
 use bitcoin_spv::btc_math::target_to_bits;
 
+
+const EBlockHashNotMatch: u64 = 0;
+
 public struct Params has store{
     power_limit: u256,
     blocks_pre_retarget: u256,
@@ -14,6 +17,7 @@ public struct Params has store{
 public struct LightClient has key, store {
     id: UID,
     params: Params,
+    latest_height: u256
 }
 
 // === Init function for module ====
@@ -22,7 +26,8 @@ fun init(_ctx: &mut TxContext) {}
 public fun new_light_client(params: Params, ctx: &mut TxContext): LightClient {
     let lc = LightClient {
 	    id: object::new(ctx),
-	    params: params
+	    params: params,
+        latest_height: 0,
     };
 
     return lc
@@ -43,15 +48,15 @@ public fun mainnet_params(): Params {
 public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
     // insert a new header to current light client
     let next_header = new_block_header(raw_header);
-
     let current_block = c.latest_finalized_block();
     let current_header = current_block.header();
 
+    // check context
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
-
     assert!(next_block_difficulty == current_header.bits());
-
-    current_header.verify_next_block(&next_header);
+    // check sanity
+    assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+    next_header.pow_check();
 }
 
 
@@ -68,8 +73,8 @@ public entry fun verify_tx_inclusive(
 
 // === Views function ===
 
-public fun latest_finalized_height(_c: &LightClient): u32 {
-    return 0
+public fun latest_finalized_height(c: &LightClient): u256 {
+    return c.latest_height
 }
 
 public fun latest_finalized_block(c: &LightClient): &LightBlock {
@@ -103,6 +108,7 @@ public fun power_limit(p: &Params): u256 {
 public fun target_timespan(p: &Params): u256 {
     p.target_timespan
 }
+
 
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u256): &LightBlock {
     let ancestor_height = lb.height() - distance;
@@ -177,4 +183,16 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     };
 
     next_target
+}
+
+fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
+    dof::add(lc.client_id_mut(), lb.height(), lb);
+}
+
+#[test_only]
+public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
+    if (lb.height() > lc.latest_height) {
+        lc.latest_height = lb.height();
+    };
+    set_light_block(lc, lb);
 }
