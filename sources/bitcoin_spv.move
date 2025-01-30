@@ -62,6 +62,7 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
 
     let next_light_block = new_light_block(next_height, raw_header, ctx);
 
+    c.latest_height = next_height;
     c.set_light_block(next_light_block);
 }
 
@@ -86,10 +87,13 @@ public fun latest_finalized_height(c: &LightClient): u256 {
 public fun latest_finalized_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_finalized_height();
-    let light_block = dof::borrow<_, LightBlock>(&c.id, height);
-    return light_block
+    return c.light_block_at_height(height)
 }
 
+public fun light_block_at_height(c: &LightClient, height: u256) : &LightBlock {
+    let light_block = dof::borrow(c.client_id(), height);
+    return light_block
+}
 
 public fun params(c: &LightClient): &Params{
     return &c.params
@@ -194,6 +198,7 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
     dof::add(lc.client_id_mut(), lb.height(), lb);
 }
+
 
 #[test_only]
 public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
