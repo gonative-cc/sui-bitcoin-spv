@@ -7,6 +7,7 @@ use bitcoin_spv::btc_math::target_to_bits;
 
 
 const EBlockHashNotMatch: u64 = 0;
+const EDifficultyNotMatch: u64 = 1;
 
 public struct Params has store{
     power_limit: u256,
@@ -51,11 +52,10 @@ public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
     let current_block = c.latest_finalized_block();
     let current_header = current_block.header();
 
-    // check context
-    let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
-    assert!(next_block_difficulty == next_header.bits());
-    // check sanity
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+
+    let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
+    assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
     next_header.pow_check();
 }
 
@@ -190,9 +190,10 @@ fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
 }
 
 #[test_only]
-public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
+public fun add_light_block(lc: &mut LightClient, lb: LightBlock): &mut LightClient {
     if (lb.height() > lc.latest_height) {
         lc.latest_height = lb.height();
     };
     set_light_block(lc, lb);
+    return lc
 }
