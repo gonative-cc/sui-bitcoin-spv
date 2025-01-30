@@ -53,7 +53,7 @@ public entry fun insert_header(c: &LightClient, raw_header: vector<u8>) {
 
     // check context
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
-    assert!(next_block_difficulty == current_header.bits());
+    assert!(next_block_difficulty == next_header.bits());
     // check sanity
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
     next_header.pow_check();
