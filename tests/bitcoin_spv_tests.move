@@ -23,6 +23,19 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
 }
 
 #[test]
+fun test_set_get_block() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let ctx = scenario.ctx();
+    let lc = new_lc_for_test(ctx);
+    let header = new_block_header(x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a");
+    assert!(lc.latest_finalized_height() ==   858816);
+    assert!(lc.latest_finalized_block().header().block_hash() == header.block_hash());
+
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+#[test]
 fun test_insert_header_happy_cases() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
