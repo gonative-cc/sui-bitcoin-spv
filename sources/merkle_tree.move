@@ -16,16 +16,16 @@ public fun verify_merkle_proof(root: vector<u8>, merkle_path: vector<vector<u8>>
     let mut i = 0;
     let n = merkle_path.length();
     let mut index = tx_index;
-    
+
     while (i < n) {
-	if (index % 2 == 1) {
-	    hash_value = merkle_hash(merkle_path[i], hash_value);
-	} else {
-	    hash_value = merkle_hash(hash_value, merkle_path[i]);
-	};
-	index = index >> 1;
-	i = i + 1;
+	    if (index % 2 == 1) {
+	        hash_value = merkle_hash(merkle_path[i], hash_value);
+	    } else {
+	        hash_value = merkle_hash(hash_value, merkle_path[i]);
+	    };
+	    index = index >> 1;
+	    i = i + 1;
     };
-    
+
     return hash_value == root
 }
