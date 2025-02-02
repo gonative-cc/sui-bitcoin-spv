@@ -18,7 +18,7 @@ public struct Params has store{
 public struct LightClient has key, store {
     id: UID,
     params: Params,
-    latest_height: u256
+    finalized_height: u256
 }
 
 // === Init function for module ====
@@ -28,7 +28,7 @@ public fun new_light_client(params: Params, ctx: &mut TxContext): LightClient {
     let lc = LightClient {
 	    id: object::new(ctx),
 	    params: params,
-        latest_height: 0,
+        finalized_height: 0,
     };
 
     return lc
@@ -47,22 +47,20 @@ public fun mainnet_params(): Params {
 
 /// insert new header to bitcoin spv
 public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx: &mut TxContext) {
-    // insert a new header to current light client
     let next_header = new_block_header(raw_header);
     let current_block = c.latest_finalized_block();
     let current_header = current_block.header();
 
+    // verify new header
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
     next_header.pow_check();
 
+    // update new header
     let next_height = current_block.height() + 1;
-
     let next_light_block = new_light_block(next_height, raw_header, ctx);
-
-    c.latest_height = next_height;
+    c.finalized_height = next_height;
     c.set_light_block(next_light_block);
 }
 
@@ -81,7 +79,7 @@ public entry fun verify_tx_inclusive(
 // === Views function ===
 
 public fun latest_finalized_height(c: &LightClient): u256 {
-    return c.latest_height
+    return c.finalized_height
 }
 
 public fun latest_finalized_block(c: &LightClient): &LightBlock {
@@ -202,8 +200,8 @@ fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
 
 #[test_only]
 public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
-    if (lb.height() > lc.latest_height) {
-        lc.latest_height = lb.height();
+    if (lb.height() > lc.finalized_height) {
+        lc.finalized_height= lb.height();
     };
     set_light_block(lc, lb);
 }
