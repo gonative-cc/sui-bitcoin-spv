@@ -83,6 +83,10 @@ public fun light_block_at_height(c: &LightClient, height: u256) : &LightBlock {
     return light_block
 }
 
+/// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
+/// proof is merkle proof for tx_id. This is a sha256(32 bytes) vector.
+/// tx_index is index of transaction in block.
+/// We use little endian encoding for all data.
 public fun verify_tx(
     c: &LightClient,
     height: u256,
