@@ -3,6 +3,7 @@ module bitcoin_spv::bitcoin_spv;
 use bitcoin_spv::block_header::{BlockHeader, new_block_header};
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use sui::dynamic_object_field as dof;
+
 use bitcoin_spv::btc_math::target_to_bits;
 
 
@@ -21,9 +22,9 @@ public struct LightClient has key, store {
     finalized_height: u256
 }
 
+
 // === Init function for module ====
 fun init(_ctx: &mut TxContext) {}
-
 
 public fun new_light_client(params: Params, start_block: u256, snapshot_headers: vector<vector<u8>>, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
@@ -31,18 +32,17 @@ public fun new_light_client(params: Params, start_block: u256, snapshot_headers:
 	    params: params,
         finalized_height: 0,
     };
-    if (snapshot_headers.is_empty()) {
-        return lc;
+
+    if (!snapshot_headers.is_empty()) {
+        let mut height = start_block;
+        snapshot_headers.do!(|header| {
+            let light_block = new_light_block(height, header, ctx);
+            lc.set_light_block(light_block);
+            height = height + 1;
+        });
+
+        lc.finalized_height = height - 1;
     };
-
-    let mut height = start_block;
-    snapshot_headers.do!(|header| {
-        let light_block = new_light_block(height, header, ctx);
-        lc.set_light_block(light_block);
-        height = height + 1;
-    });
-
-    lc.finalized_height = height - 1;
     return lc
 }
 
@@ -55,6 +55,36 @@ public fun mainnet_params(): Params {
     }
 }
 
+// default params for bitcoin testnet
+public fun testnet_params(): Params {
+    return Params {
+	    power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+	    blocks_pre_retarget: 2016,
+	    target_timespan: 2016 * 60 * 10, // time in seconds when we update the target: 2016 blocks ~ 2 weeks.
+    }
+}
+
+// default params for bitcoin regtest
+public fun regtest_params(): Params {
+    return Params {
+	    power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+	    blocks_pre_retarget: 2016,
+	    target_timespan: 2016 * 60 * 10, // time in seconds when we update the target: 2016 blocks ~ 2 weeks.
+    }
+}
+
+
+public fun create_light_client(
+    client_type: u256, start_block: u256, snapshot_headers: vector<vector<u8>>, ctx: &mut TxContext
+)  {
+    let params = match (client_type) {
+        0 => mainnet_params(),
+            1 => testnet_params(),
+            _ => regtest_params()
+    };
+    let lc = new_light_client(params, start_block, snapshot_headers, ctx);
+    transfer::share_object(lc);
+}
 
 // === Entry methods ===
 
