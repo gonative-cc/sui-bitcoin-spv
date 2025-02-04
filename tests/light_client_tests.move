@@ -62,10 +62,8 @@ fun test_insert_header_happy_cases() {
 
     assert!(lc.light_block_at_height(latest_height).header() == new_block_header(raw_header));
 
-    let last_block = new_light_block(
-	    860831u256,
-	    x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
-	    ctx
+    let last_block = new_light_block(860831,    x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
+        ctx
     );
     let latest_height = lc.latest_finalized_height();
     lc.add_light_block(last_block);
