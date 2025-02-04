@@ -7,15 +7,39 @@ use bitcoin_spv::btc_math::target_to_bits;
 
 use sui::dynamic_object_field as dof;
 
-const EBlockHashNotMatch: u64 = 0;
-const EDifficultyNotMatch: u64 = 1;
+const EBlockHashNotMatch: u64 = 1;
+const EDifficultyNotMatch: u64 = 2;
 
 public struct Params has store{
     power_limit: u256,
     blocks_pre_retarget: u256,
-    // time in seconds when we update the target
+    /// time in seconds when we update the target
     target_timespan: u256,
 }
+
+// default params for bitcoin mainnet
+public fun mainnet_params(): Params {
+    return Params {
+        power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        blocks_pre_retarget: 2016,
+        target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
+    }
+}
+
+// default params for bitcoin testnet
+public fun testnet_params(): Params {
+    return mainnet_params()
+}
+
+// default params for bitcoin regtest
+public fun regtest_params(): Params {
+    return Params {
+        power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        blocks_pre_retarget: 2016,
+        target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
+    }
+}
+
 
 public struct LightClient has key, store {
     id: UID,
@@ -27,11 +51,13 @@ public struct LightClient has key, store {
 // === Init function for module ====
 fun init(ctx: &mut TxContext) {
     let p = mainnet_params();
+    // https://btcscan.org/block/00000000000003a5e28bef30ad31f1f9be706e91ae9dda54179a95c9f9cd9ad0
     let raw_header = x"010000009d6f4e09d579c93015a83e9081fee83a5c8b1ba3c86516b61f0400000000000025399317bb5c7c4daefe8fe2c4dfac0cea7e4e85913cd667030377240cadfe93a4906b50087e051a84297df7";
     let lc = new_light_client(p, 201600, vector[raw_header], ctx);
     transfer::transfer(lc, tx_context::sender(ctx));
 }
 
+// initializes Bitcoin light client by providing a trusted snapshot height and header
 public fun new_light_client(params: Params, start_height: u256, start_headers: vector<vector<u8>>, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
@@ -52,31 +78,7 @@ public fun new_light_client(params: Params, start_height: u256, start_headers: v
     return lc
 }
 
-// default params for bitcoin mainnet
-public fun mainnet_params(): Params {
-    return Params {
-	    power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
-	    blocks_pre_retarget: 2016,
-	    target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
-    }
-}
-
-// default params for bitcoin testnet
-public fun testnet_params(): Params {
-    return mainnet_params()
-}
-
-// default params for bitcoin regtest
-public fun regtest_params(): Params {
-    return Params {
-	    power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
-	    blocks_pre_retarget: 2016,
-	    target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
-    }
-}
-
-
-// initializes Bitcoin light client by providing a trusted snapshot height and header
+// Helper function to initialize new light client.
 // network: 0 = mainnet, 1 = testnet
 public fun new_btc_light_client(
     network: u8, start_height: u256, start_headers: vector<vector<u8>>, ctx: &mut TxContext
