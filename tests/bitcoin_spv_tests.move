@@ -29,7 +29,7 @@ fun test_set_get_block_happy_case() {
     let ctx = scenario.ctx();
     let lc = new_lc_for_test(ctx);
     let header = new_block_header(x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a");
-    assert!(lc.latest_finalized_height() ==   858816);
+    assert!(lc.latest_finalized_height() == 858816);
     assert!(lc.latest_finalized_block().header().block_hash() == header.block_hash());
 
     sui::test_utils::destroy(lc);
@@ -110,6 +110,26 @@ fun test_insert_header_failed_difficulty_not_match() {
     // we changed the block hash to make new header previous hash not match with last hash
     let new_header = x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031880f1e351";
     lc.insert_header(new_header, ctx);
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+
+#[test]
+fun test_verify_tx() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+
+    let ctx = scenario.ctx();
+    let mut lc = new_lc_for_test(ctx);
+
+    let raw_header = x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351";
+    lc.insert_header(raw_header, ctx);
+
+    let latest_height = lc.latest_finalized_height();
+
+    let verify = lc.verify_tx_inclusive(latest_height, x"82af4d84d07265074c0e783a6402b59709f42b5cc37b0e6774926a9aa61c3819", vector[],  0);
+
+    std::debug::print(&verify);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
