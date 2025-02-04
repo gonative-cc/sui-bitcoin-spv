@@ -112,7 +112,7 @@ public fun bits_to_target(bits: u32): u256 {
 }
 
 
-/// ===== internal test ====
+/// ==== internal test ====
 // TODO: Check best practice to improve test
 #[test]
 fun bytes_of_test() {

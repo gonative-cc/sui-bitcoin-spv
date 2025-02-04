@@ -6,7 +6,7 @@ use bitcoin_spv::btc_math::btc_hash;
 fun merkle_hash(x: vector<u8>, y: vector<u8>): vector<u8> {
     let mut z = x;
     z.append(y);
-    return btc_hash(z);
+    btc_hash(z)
 }
 
 
@@ -26,5 +26,5 @@ public fun verify_merkle_proof(root: vector<u8>, merkle_path: vector<vector<u8>>
 	    i = i + 1;
     };
 
-    return hash_value == root
+    hash_value == root
 }

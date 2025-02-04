@@ -19,7 +19,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
      );
 
     lc.add_light_block(first_block);
-    return lc
+    lc
 }
 
 #[test]
@@ -29,7 +29,7 @@ fun test_set_get_block_happy_case() {
     let ctx = scenario.ctx();
     let lc = new_lc_for_test(ctx);
     let header = new_block_header(x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a");
-    assert!(lc.latest_finalized_height() ==   858816);
+    assert!(lc.latest_finalized_height() == 858816);
     assert!(lc.latest_finalized_block().header().block_hash() == header.block_hash());
 
     sui::test_utils::destroy(lc);
@@ -115,7 +115,7 @@ fun test_insert_header_failed_difficulty_not_match() {
 }
 
 #[test_only]
-// returns a sample valid (height, tx_id, proof, tx_index)
+// s a sample valid (height, tx_id, proof, tx_index)
 fun sample_data(): (u256, vector<u8>, vector<vector<u8>>, u256) {
     let height = 858816u256;
     let tx_id = x"a1a81fcc85f94d84a7920aadf456c64a93ffab20dba7066124ba9bd7ef2b262a";
@@ -135,7 +135,7 @@ fun sample_data(): (u256, vector<u8>, vector<vector<u8>>, u256) {
         x"7e118f94a37ab7cdafd637c61d4eb6c9ade81cdbcd31d1d68d25e2118b712853"
     ];
 
-    return (
+     (
         height, tx_id, proof, tx_index
     )
 }
@@ -146,22 +146,22 @@ fun test_verify_tx() {
     let mut scenario = test_scenario::begin(sender);
     let lc = new_lc_for_test(scenario.ctx());
 
-    let (height, tx_id, proof, tx_index) = verify_tx_test_data();
+    let (height, tx_id, proof, tx_index) = sample_data();
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
     assert!(res == true);
 
-    let (height, tx_id, proof, _) = verify_tx_test_data();
+    let (height, tx_id, proof, _) = sample_data();
     let tx_index = 100;
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
     assert!(res == false);
 
-    let (height, _, proof, tx_index) = verify_tx_test_data();
+    let (height, _, proof, tx_index) = sample_data();
     let tx_id = x"010203";
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
     assert!(res == false);
 
 
-    let (height, tx_id, _, tx_index) = verify_tx_test_data();
+    let (height, tx_id, _, tx_index) = sample_data();
     let proof = vector[];
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
     assert!(res == false);
