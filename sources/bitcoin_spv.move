@@ -1,11 +1,11 @@
 module bitcoin_spv::bitcoin_spv;
 
-use bitcoin_spv::block_header::{BlockHeader, new_block_header};
+use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
-use sui::dynamic_object_field as dof;
-
+use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 
+use sui::dynamic_object_field as dof;
 
 const EBlockHashNotMatch: u64 = 0;
 const EDifficultyNotMatch: u64 = 1;
@@ -26,16 +26,16 @@ public struct LightClient has key, store {
 // === Init function for module ====
 fun init(_ctx: &mut TxContext) {}
 
-public fun new_light_client(params: Params, start_block: u256, snapshot_headers: vector<vector<u8>>, ctx: &mut TxContext): LightClient {
+public fun new_light_client(params: Params, start_height: u256, start_headers: vector<vector<u8>>, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
 	    id: object::new(ctx),
 	    params: params,
         finalized_height: 0,
     };
 
-    if (!snapshot_headers.is_empty()) {
-        let mut height = start_block;
-        snapshot_headers.do!(|header| {
+    if (!start_headers.is_empty()) {
+        let mut height = start_height;
+        start_headers.do!(|header| {
             let light_block = new_light_block(height, header, ctx);
             lc.set_light_block(light_block);
             height = height + 1;
@@ -74,16 +74,16 @@ public fun regtest_params(): Params {
 }
 
 
-// initializes Bitcoin light client by providing a trusted snapshot height and header 
-public fun new_light_client(
-    client_type: u256, start_height: u256, start_header: vector<u8>, ctx: &mut TxContext
+// initializes Bitcoin light client by providing a trusted snapshot height and header
+public fun new_btc_light_client(
+    network: u256, start_height: u256, start_headers: vector<vector<u8>>, ctx: &mut TxContext
 )  {
-    let params = match (client_type) {
+    let params = match (network) {
         0 => mainnet_params(),
             1 => testnet_params(),
             _ => regtest_params()
     };
-    let lc = new_light_client(params, start_block, snapshot_headers, ctx);
+    let lc = new_light_client(params, start_height, start_headers, ctx);
     transfer::share_object(lc);
 }
 
@@ -109,17 +109,6 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
 }
 
 
-public entry fun verify_tx_inclusive(
-    _c: &LightClient,
-    _block_hash: vector<u8>,
-    _tx_id: vector<u8>,
-    _proof: vector<u8>
-): bool {
-    // TODO: check transaction id (tx_id) inclusive in block
-    // we not decide the final infeface yet
-    return true
-}
-
 // === Views function ===
 
 public fun latest_finalized_height(c: &LightClient): u256 {
@@ -135,6 +124,25 @@ public fun latest_finalized_block(c: &LightClient): &LightBlock {
 public fun light_block_at_height(c: &LightClient, height: u256) : &LightBlock {
     let light_block = dof::borrow(c.client_id(), height);
     return light_block
+}
+
+/// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
+/// proof is merkle proof for tx_id. This is a sha256(32 bytes) vector.
+/// tx_index is index of transaction in block.
+/// We use little endian encoding for all data.
+public fun verify_tx(
+    c: &LightClient,
+    height: u256,
+    tx_id: vector<u8>,
+    proof: vector<vector<u8>>,
+    tx_index: u256
+): bool {
+    // TODO: update this when we have APIs for finalized block.
+    // TODO: handle: light block not exist.
+    let light_block = dof::borrow<_, LightBlock>(&c.id, height);
+    let header = light_block.header();
+    let merkle_root = header.merkle_root();
+    return verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
 }
 
 public fun params(c: &LightClient): &Params{
