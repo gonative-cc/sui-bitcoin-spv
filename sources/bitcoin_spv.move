@@ -83,7 +83,7 @@ public fun light_block_at_height(c: &LightClient, height: u256) : &LightBlock {
     return light_block
 }
 
-public fun verify_tx_inclusive(
+public fun verify_tx(
     c: &LightClient,
     height: u256,
     tx_id: vector<u8>,
