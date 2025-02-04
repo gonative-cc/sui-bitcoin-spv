@@ -6,8 +6,7 @@ use bitcoin_spv::btc_math::btc_hash;
 fun merkle_hash(x: vector<u8>, y: vector<u8>): vector<u8> {
     let mut z = x;
     z.append(y);
-    let h = btc_hash(z);
-    return h
+    return btc_hash(z);
 }
 
 

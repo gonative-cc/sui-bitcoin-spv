@@ -115,8 +115,8 @@ fun test_insert_header_failed_difficulty_not_match() {
 }
 
 #[test_only]
-
-fun verify_tx_test_data(): (u256, vector<u8>, vector<vector<u8>>, u256) {
+// returns a sample valid (height, tx_id, proof, tx_index)
+fun sample_data(): (u256, vector<u8>, vector<vector<u8>>, u256) {
     let height = 858816u256;
     let tx_id = x"a1a81fcc85f94d84a7920aadf456c64a93ffab20dba7066124ba9bd7ef2b262a";
     let tx_index = 99;
@@ -140,7 +140,6 @@ fun test_verify_tx() {
     let (height, tx_id, proof, _) = verify_tx_test_data();
     let tx_index = 100;
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
-
     assert!(res == false);
 
     let (height, _, proof, tx_index) = verify_tx_test_data();
