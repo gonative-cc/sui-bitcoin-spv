@@ -57,7 +57,7 @@ fun difficulty_computation_test() {
     let mut scenario = test_scenario::begin(sender);
 
     let p = mainnet_params();
-    let mut lc = new_light_client(p, scenario.ctx());
+    let mut lc = new_light_client(p, 0, vector[], scenario.ctx());
 
     let last_block = new_light_block(
 	    860831u256,
