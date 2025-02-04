@@ -3,7 +3,7 @@
 ## Prepare env
 
 ### Install Sui
-
+https://docs.sui.io/guides/developer/getting-started/sui-install
 ```sh
 cargo install --locked --git https://github.com/MystenLabs/sui.git --branch testnet sui --features tracing
 ```
@@ -13,7 +13,9 @@ cargo install --locked --git https://github.com/MystenLabs/sui.git --branch test
 ```bash
 sui client new-env --alias=devnet --rpc https://fullnode.devnet.sui.io:443
 ```
-
+Show active address on current env.
+```bash
+sui client active-address
 ### Sui faucet
 
 ```bash
@@ -70,5 +72,5 @@ sui client call --function verify_tx_inclusive --module bitcoin_spv --package $P
  0xe02ea982fca17073318a8454d8bb62ad63ce53c443819bb56e1723ab4520b7e9 \ # transaction id
  '[0x48d786523d393fc6e8a008c589dcbe22de0a059cd146d31ab975d310f644e273, 0xa6f51cba788b2bee19f0843bd99a6271f7ea16e65fa817b99e65c6e3523688dd, 0x56ebce9970e1ad5b283a50c0a2945cbdb001fcdee39d74529144c5cec9ef760c, 0xac68796d58d2dab839aea71fb1934755cf859efa709632a25ea6801193c8c4ae, 0xb69f80c6188b311f4cd8d8247490f4cd1de64de9a1f8f166a68cda4dbce98c80, 0x461d99173c20c66a91be8db500e612f48a9a60632e9ce2af52beb116daacb01e, 0x3cfa29d65131d09acdbfe70a484211a300af6c0fa55f0805b977c31edc580cc0]'  \ #merkle proof
  99 \ # transaction index
- --dev-inspect \ run function without create transaction
+ --dev-inspect \ # run function without create transaction
 ```
