@@ -12,9 +12,9 @@ const EDifficultyNotMatch: u64 = 2;
 
 public struct Params has store{
     power_limit: u256,
-    blocks_pre_retarget: u256,
+    blocks_pre_retarget: u64,
     /// time in seconds when we update the target
-    target_timespan: u256,
+    target_timespan: u64,
 }
 
 // default params for bitcoin mainnet
@@ -40,11 +40,26 @@ public fun regtest_params(): Params {
     }
 }
 
+public fun blocks_pre_retarget(p: &Params) : u64{
+    return p.blocks_pre_retarget
+}
+
+public fun power_limit(p: &Params): u256 {
+    return p.power_limit
+}
+
+public fun target_timespan(p: &Params): u64 {
+    p.target_timespan
+}
+
+/*
+ * Light Client
+ */
 
 public struct LightClient has key, store {
     id: UID,
     params: Params,
-    finalized_height: u256
+    finalized_height: u64
 }
 
 
@@ -58,7 +73,7 @@ fun init(ctx: &mut TxContext) {
 }
 
 // initializes Bitcoin light client by providing a trusted snapshot height and header
-public fun new_light_client(params: Params, start_height: u256, start_headers: vector<vector<u8>>, ctx: &mut TxContext): LightClient {
+public fun new_light_client(params: Params, start_height: u64, start_headers: vector<vector<u8>>, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -81,7 +96,7 @@ public fun new_light_client(params: Params, start_height: u256, start_headers: v
 // Helper function to initialize new light client.
 // network: 0 = mainnet, 1 = testnet
 public fun new_btc_light_client(
-    network: u8, start_height: u256, start_headers: vector<vector<u8>>, ctx: &mut TxContext
+    network: u8, start_height: u64, start_headers: vector<vector<u8>>, ctx: &mut TxContext
 )  {
     let params = match (network) {
         0 => mainnet_params(),
@@ -116,7 +131,7 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
 
 // === Views function ===
 
-public fun latest_finalized_height(c: &LightClient): u256 {
+public fun latest_finalized_height(c: &LightClient): u64 {
     return c.finalized_height
 }
 
@@ -126,7 +141,7 @@ public fun latest_finalized_block(c: &LightClient): &LightBlock {
     return c.light_block_at_height(height)
 }
 
-public fun light_block_at_height(c: &LightClient, height: u256) : &LightBlock {
+public fun light_block_at_height(c: &LightClient, height: u64) : &LightBlock {
     let light_block = dof::borrow(c.client_id(), height);
     return light_block
 }
@@ -162,20 +177,7 @@ public fun client_id_mut(c: &mut LightClient): &mut UID {
     return &mut c.id
 }
 
-public fun blocks_pre_retarget(p: &Params) : u256{
-    return p.blocks_pre_retarget
-}
-
-public fun power_limit(p: &Params): u256 {
-    return p.power_limit
-}
-
-public fun target_timespan(p: &Params): u256 {
-    p.target_timespan
-}
-
-
-public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u256): &LightBlock {
+public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
     let ancestor_height = lb.height() - distance;
 
     let ancestor: &LightBlock = dof::borrow(c.client_id(), ancestor_height);
@@ -212,7 +214,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     let first_timestamp = first_header.timestamp();
     let last_timestamp = last_block.header().timestamp();
 
-    let new_target = retarget_algorithm(c.params(), previous_target, first_timestamp as u256, last_timestamp as u256);
+    let new_target = retarget_algorithm(c.params(), previous_target, first_timestamp as u64, last_timestamp as u64);
     let new_bits = target_to_bits(new_target);
     return new_bits
 }
@@ -220,7 +222,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
 /// compute new target
 /// You can check this blogs for more information
 /// https://learnmeabitcoin.com/technical/mining/target
-public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp: u256, last_timestamp: u256): u256 {
+public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp: u64, last_timestamp: u64): u256 {
     let mut adjusted_timespan = last_timestamp - first_timestamp;
     let target_timespan = p.target_timespan();
 
@@ -240,8 +242,8 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     // so we divide it by 256**2, then multiply by 256**2 later.
     // we know the target is evenly divisible by 256**2, so this isn't an issue
     // notes: 256*2 = (1 << 16)
-    let mut next_target = previous_target / (1 << 16) * adjusted_timespan;
-    next_target = next_target / target_timespan * (1 << 16);
+    let mut next_target = previous_target / (1 << 16) * (adjusted_timespan as u256);
+    next_target = next_target / (target_timespan as u256) * (1 << 16);
 
     if (next_target > p.power_limit()) {
 	    next_target = p.power_limit();
