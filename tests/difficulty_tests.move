@@ -1,7 +1,7 @@
 #[test_only]
 module bitcoin_spv::difficulty_test;
 
-use bitcoin_spv::bitcoin_spv::{mainnet_params, new_light_client, retarget_algorithm, calc_next_required_difficulty};
+use bitcoin_spv::light_client::{mainnet_params, new_light_client, retarget_algorithm, calc_next_required_difficulty};
 use bitcoin_spv::light_block::{new_light_block};
 use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
 

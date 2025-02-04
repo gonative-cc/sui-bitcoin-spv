@@ -31,7 +31,7 @@ sui client publish --skip-dependency-verification  --gas-budget 100000000
 
 For this demo, we initialize the light client with a trusted snapshot at block height 201600.
 
-Check the output from the commant above, and save the package ID and the deployed module ID (LC_ID): 
+Check the output from the command above, and save the package ID and the deployed module ID (LC_ID): 
 
 ```fish
 set PACKAGE_ID 0x...

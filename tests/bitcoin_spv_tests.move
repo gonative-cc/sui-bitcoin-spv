@@ -2,7 +2,7 @@
 #[test_only]
 module bitcoin_spv::bitcoin_spv_tests;
 
-use bitcoin_spv::bitcoin_spv::{insert_header, new_light_client, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch};
+use bitcoin_spv::light_client::{insert_header, new_light_client, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::block_header::new_block_header;
 
