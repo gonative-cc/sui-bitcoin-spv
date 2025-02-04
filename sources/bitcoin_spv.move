@@ -60,7 +60,7 @@ public fun testnet_params(): Params {
     return Params {
 	    power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
 	    blocks_pre_retarget: 2016,
-	    target_timespan: 2016 * 60 * 10, // time in seconds when we update the target: 2016 blocks ~ 2 weeks.
+	    target_timespan: 2016 * 60 * 10, // time in seconds when we update the target difficulty: 2016 blocks ~ 2 weeks.
     }
 }
 
@@ -74,8 +74,9 @@ public fun regtest_params(): Params {
 }
 
 
-public fun create_light_client(
-    client_type: u256, start_block: u256, snapshot_headers: vector<vector<u8>>, ctx: &mut TxContext
+// initializes Bitcoin light client by providing a trusted snapshot height and header 
+public fun new_light_client(
+    client_type: u256, start_height: u256, start_header: vector<u8>, ctx: &mut TxContext
 )  {
     let params = match (client_type) {
         0 => mainnet_params(),
