@@ -73,6 +73,7 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
     c.set_light_block(next_light_block);
 }
 
+
 // === Views function ===
 
 public fun latest_finalized_height(c: &LightClient): u256 {
@@ -90,7 +91,11 @@ public fun light_block_at_height(c: &LightClient, height: u256) : &LightBlock {
     return light_block
 }
 
-public fun verify_tx_inclusive(
+/// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
+/// proof is merkle proof for tx_id. This is a sha256(32 bytes) vector.
+/// tx_index is index of transaction in block.
+/// We use little endian encoding for all data.
+public fun verify_tx(
     c: &LightClient,
     height: u256,
     tx_id: vector<u8>,
