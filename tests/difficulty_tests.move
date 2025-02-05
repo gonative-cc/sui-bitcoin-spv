@@ -60,22 +60,18 @@ fun test_difficulty_computation_mainnet() {
     let mut lc = new_light_client(p, 0, vector[x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c"], scenario.ctx());
 
     // The next difficulty at genesis block is equal power of limit.
-    assert!(calc_next_required_difficulty(&lc, lc.light_block_at_height(0), 0) == target_to_bits(lc.params().power_limit()));
+    assert!(calc_next_required_difficulty(&lc, lc.get_light_block(0), 0) == target_to_bits(lc.params().power_limit()));
 
-    let last_block = new_light_block(
-	    860831u256,
-	    x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
+    let last_block = new_light_block(860831,    x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
 	    scenario.ctx()
     );
     lc.add_light_block(last_block);
-    let first_block = new_light_block(
-	    858816u256,
-	    x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
+    let first_block = new_light_block(858816,   x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
 	    scenario.ctx()
     );
     lc.add_light_block(first_block);
 
-    let new_bits = calc_next_required_difficulty(&lc, lc.light_block_at_height(860831), 0);
+    let new_bits = calc_next_required_difficulty(&lc, lc.get_light_block(860831), 0);
 
     // 0x1703098c is bits of block 860832
     assert!(new_bits == 0x1703098c);
@@ -98,7 +94,7 @@ fun test_difficulty_computation_regtest() {
         scenario.ctx()
     );
 
-    let new_bits = calc_next_required_difficulty(&lc, lc.light_block_at_height(10), 0);
+    let new_bits = calc_next_required_difficulty(&lc, lc.get_light_block(10), 0);
     assert!(new_bits == target_to_bits(lc.params().power_limit()));
     sui::test_utils::destroy(lc);
     scenario.end();
