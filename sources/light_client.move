@@ -152,14 +152,14 @@ public fun light_block_at_height(c: &LightClient, height: u64) : &LightBlock {
 /// We use little endian encoding for all data.
 public fun verify_tx(
     c: &LightClient,
-    height: u256,
+    height: u64,
     tx_id: vector<u8>,
     proof: vector<vector<u8>>,
-    tx_index: u256
+    tx_index: u64
 ): bool {
     // TODO: update this when we have APIs for finalized block.
     // TODO: handle: light block not exist.
-    let light_block = dof::borrow<_, LightBlock>(&c.id, height);
+    let light_block = c.get_light_block(height);
     let header = light_block.header();
     let merkle_root = header.merkle_root();
     return verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
@@ -256,7 +256,9 @@ fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
     dof::add(lc.client_id_mut(), lb.height(), lb);
 }
 
-
+fun get_light_block(lc: &LightClient, height: u64): &LightBlock {
+    dof::borrow(lc.client_id(), height)
+}
 #[test_only]
 public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
     if (lb.height() > lc.finalized_height) {
