@@ -25,8 +25,8 @@ public fun to_u256(v: vector<u8>): u256 {
     let mut ans = 0u256;
     let mut i = 0;
     while (i < 32) {
-	    ans = ans +  ((v[i] as u256)  << (i * 8 as u8));
-	    i = i + 1;
+        ans = ans +  ((v[i] as u256)  << (i * 8 as u8));
+        i = i + 1;
     };
     ans
 }
@@ -42,7 +42,7 @@ public fun btc_hash(data: vector<u8>): vector<u8> {
 fun bytes_of(number: u256) : u8 {
     let mut b : u8 = 255;
     while (number & (1 << b) == 0 && b > 0) {
-	    b = b - 1;
+        b = b - 1;
     };
     // Follow logic in bitcoin core
     ((b as u32 + 7 ) / 8) as u8
@@ -68,12 +68,12 @@ public fun target_to_bits(target: u256): u32 {
     let mut exponent = bytes_of(target);
     let mut coefficient;
     if (exponent <= 3) {
-	    let bits_shift: u8 = 8 * ( 3 - exponent);
-	    coefficient = get_last_32_bits(target) << bits_shift;
+        let bits_shift: u8 = 8 * ( 3 - exponent);
+        coefficient = get_last_32_bits(target) << bits_shift;
     } else {
-	    let bits_shift : u8 = 8 * (exponent - 3);
-	    let bn = target >> bits_shift;
-	    coefficient = get_last_32_bits(bn)
+        let bits_shift : u8 = 8 * (exponent - 3);
+        let bn = target >> bits_shift;
+        coefficient = get_last_32_bits(bn)
     };
 
 
@@ -81,9 +81,9 @@ public fun target_to_bits(target: u256): u32 {
     // 0x00800000 is set then it indicates a negative value
     // and target can be nagative
     if (coefficient & 0x00800000 > 0) {
-	    // we push 00 before coefficet
-	    coefficient = coefficient >> 8;
-	    exponent = exponent + 1;
+        // we push 00 before coefficet
+        coefficient = coefficient >> 8;
+        exponent = exponent + 1;
     };
 
     let compact = coefficient | ((exponent as u32) << 24);
@@ -102,11 +102,11 @@ public fun bits_to_target(bits: u32): u256 {
     let mut target = (bits & 0x007fffff) as u256;
 
     if (exponent <= 3) {
-	    let bits_shift = (8 * (3 - exponent)) as u8;
-	    target = target >> bits_shift;
+        let bits_shift = (8 * (3 - exponent)) as u8;
+        target = target >> bits_shift;
     } else {
-	    let bits_shift = (8 * (exponent - 3)) as u8;
-	    target = target << bits_shift;
+        let bits_shift = (8 * (exponent - 3)) as u8;
+        target = target << bits_shift;
     };
     return target
 }

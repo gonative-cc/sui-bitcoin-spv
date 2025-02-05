@@ -16,7 +16,7 @@ fun verify_merkle_proof_with_single_node_test() {
 fun verify_merkle_proof_with_multiple_node_test() {
     let root = x"e54435f50bfc776b8f3d9ac047963ee6bdddd8d40b69236b4d97acb52a1fdce4";
     let proof = vector[
-	    x"7f27c8469739fe2bcccc60678924b6f9f0c48b7a0c8d5383ec3918adf75b2f8e",
+        x"7f27c8469739fe2bcccc60678924b6f9f0c48b7a0c8d5383ec3918adf75b2f8e",
         x"850074d84f29a79d18b21291b3b1865482ad7287a54ac9b8ca50d313ce97eb2f",
         x"bc9754fb09b76c4c91d4346a3d48176ca4eabb4872d83b35fd8381cf8968ba60",
         x"0cadf14fc97c255e921f3153094bfc3ec3107a11a4469362d079cd24db36f905",

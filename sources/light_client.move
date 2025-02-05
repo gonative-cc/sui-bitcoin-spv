@@ -201,11 +201,11 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     // if this block not start a new retarget cycle
     if ((last_block.height() + 1) % blocks_pre_retarget != 0) {
 
-	    // TODO: support ReduceMinDifficulty params
-	    // if c.params().reduce_min_difficulty {
-	    //     ...
-	    //     new_block_time is using in this logic
-	    // }
+        // TODO: support ReduceMinDifficulty params
+        // if c.params().reduce_min_difficulty {
+        //     ...
+        //     new_block_time is using in this logic
+        // }
 
         // Return previous block difficulty
         return last_block.header().bits()
@@ -251,7 +251,7 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     next_target = next_target / (target_timespan as u256) * (1 << 16);
 
     if (next_target > p.power_limit()) {
-	    next_target = p.power_limit();
+        next_target = p.power_limit();
     };
 
     next_target
