@@ -138,12 +138,7 @@ public fun latest_finalized_height(c: &LightClient): u64 {
 public fun latest_finalized_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_finalized_height();
-    return c.light_block_at_height(height)
-}
-
-public fun light_block_at_height(c: &LightClient, height: u64) : &LightBlock {
-    let light_block = dof::borrow(c.client_id(), height);
-    return light_block
+    return c.get_light_block(height)
 }
 
 /// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
@@ -179,9 +174,7 @@ public fun client_id_mut(c: &mut LightClient): &mut UID {
 
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
     let ancestor_height = lb.height() - distance;
-
-    let ancestor: &LightBlock = dof::borrow(c.client_id(), ancestor_height);
-    return ancestor
+    return c.get_light_block(ancestor_height)
 }
 
 
@@ -256,7 +249,7 @@ fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
     dof::add(lc.client_id_mut(), lb.height(), lb);
 }
 
-fun get_light_block(lc: &LightClient, height: u64): &LightBlock {
+public fun get_light_block(lc: &LightClient, height: u64): &LightBlock {
     dof::borrow(lc.client_id(), height)
 }
 
