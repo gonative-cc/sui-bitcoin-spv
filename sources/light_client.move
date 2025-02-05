@@ -7,8 +7,8 @@ use bitcoin_spv::btc_math::target_to_bits;
 
 use sui::dynamic_object_field as dof;
 
-const EBlockHashNotMatch: u64 = 1;
-const EDifficultyNotMatch: u64 = 2;
+const EBlockHashNotMatch: u64 = 0;
+const EDifficultyNotMatch: u64 = 1;
 
 public struct Params has store{
     power_limit: u256,
