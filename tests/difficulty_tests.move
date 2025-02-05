@@ -1,12 +1,12 @@
 #[test_only]
 module bitcoin_spv::difficulty_test;
 
-use bitcoin_spv::light_client::{mainnet_params, new_light_client, retarget_algorithm, calc_next_required_difficulty};
+use bitcoin_spv::light_client::{mainnet_params, regtest_params, new_light_client, retarget_algorithm, calc_next_required_difficulty};
 use bitcoin_spv::light_block::{new_light_block};
 use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
 
-use sui::dynamic_object_field as dof;
 use sui::test_scenario;
+
 #[test_only]
 fun is_equal_target(x: u256, y: u256): bool {
     target_to_bits(x) == target_to_bits(y)
@@ -52,12 +52,15 @@ fun retarget_algorithm_test() {
 }
 
 #[test]
-fun difficulty_computation_test() {
+fun test_difficulty_computation_mainnet() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
     let p = mainnet_params();
-    let mut lc = new_light_client(p, 0, vector[], scenario.ctx());
+    let mut lc = new_light_client(p, 0, vector[x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c"], scenario.ctx());
+
+    // The next difficulty at genesis block is equal power of limit.
+    assert!(calc_next_required_difficulty(&lc, lc.light_block_at_height(0), 0) == target_to_bits(lc.params().power_limit()));
 
     let last_block = new_light_block(
 	    860831u256,
@@ -72,10 +75,31 @@ fun difficulty_computation_test() {
     );
     lc.add_light_block(first_block);
 
-    let new_bits = calc_next_required_difficulty(&lc, dof::borrow(lc.client_id(), 860831u256), 0);
+    let new_bits = calc_next_required_difficulty(&lc, lc.light_block_at_height(860831), 0);
 
     // 0x1703098c is bits of block 860832
     assert!(new_bits == 0x1703098c);
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+
+#[test]
+fun test_difficulty_computation_regtest() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+
+    let p = regtest_params();
+    let lc = new_light_client(
+        p,
+        10,
+        // note: this is random header and when compute a new target in regtest mode this alway return constant
+        // this is power_limit.
+        vector[x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca"],
+        scenario.ctx()
+    );
+
+    let new_bits = calc_next_required_difficulty(&lc, lc.light_block_at_height(10), 0);
+    assert!(new_bits == target_to_bits(lc.params().power_limit()));
     sui::test_utils::destroy(lc);
     scenario.end();
 }
