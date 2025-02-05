@@ -202,8 +202,8 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
 	    //     new_block_time is using in this logic
 	    // }
 
-	    // Return previous block difficulty
-	    return last_block.header().bits()
+        // Return previous block difficulty
+        return last_block.header().bits()
     };
 
     // we compute a new difficulty for the new target cycle.
@@ -259,6 +259,7 @@ fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
 fun get_light_block(lc: &LightClient, height: u64): &LightBlock {
     dof::borrow(lc.client_id(), height)
 }
+
 #[test_only]
 public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
     if (lb.height() > lc.finalized_height) {
