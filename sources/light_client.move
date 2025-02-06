@@ -1,11 +1,12 @@
 module bitcoin_spv::light_client;
 
-use bitcoin_spv::block_header::new_block_header;
+use bitcoin_spv::block_header::{BlockHeader, new_block_header};
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 
 use sui::dynamic_object_field as dof;
+use sui::dynamic_field as df;
 
 const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
@@ -135,6 +136,13 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
 }
 
 
+public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>, ctx: &mut TxContext) {
+    assert!(raw_headers.is_empty());
+
+    let headers = raw_headers.map!(|raw_header| new_block_header(raw_header));
+
+}
+
 // === Views function ===
 
 public fun latest_finalized_height(c: &LightClient): u64 {
@@ -181,6 +189,22 @@ public fun client_id_mut(c: &mut LightClient): &mut UID {
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
     let ancestor_height = lb.height() - distance;
     return c.get_light_block(ancestor_height)
+}
+
+fun set_header_by_hash(c: &mut LightClient, header: BlockHeader) {
+    let block_hash = header.block_hash();
+    df::add(c.client_id_mut(), block_hash, header);
+}
+
+fun get_header_by_hash(c: &LightClient, block_hash: vector<u8>) : &BlockHeader{
+    df::borrow(c.client_id(), block_hash)
+}
+
+fun set_block_header_by_height(c: &mut LightClient, height: u64, block_hash: vector<u8>) {
+    df::add(c.client_id_mut(), height, block_hash)
+}
+fun get_block_hash_by_height(c: &LightClient, height: u64): &vector<u8> {
+    df::borrow(c.client_id(), height)
 }
 
 
