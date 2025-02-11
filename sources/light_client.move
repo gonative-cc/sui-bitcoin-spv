@@ -10,7 +10,7 @@ use sui::dynamic_object_field as dof;
 
 const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
-const EBlocktimeTooOld: u64 = 3;
+const ETimeTooOld: u64 = 3;
 
 public struct Params has store{
     power_limit: u256,
