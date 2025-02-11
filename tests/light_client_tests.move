@@ -88,7 +88,7 @@ fun test_insert_header_happy_cases() {
 }
 
 #[test]
-#[expected_failure(abort_code = EBlockHashNotMatch)] // ENotFound is a constant defined in the module
+#[expected_failure(abort_code = EBlockHashNotMatch)]
 fun test_insert_header_failed_block_hash_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -104,7 +104,7 @@ fun test_insert_header_failed_block_hash_not_match() {
 }
 
 #[test]
-#[expected_failure(abort_code = EDifficultyNotMatch)] // ENotFound is a constant defined in the module
+#[expected_failure(abort_code = EDifficultyNotMatch)]
 fun test_insert_header_failed_difficulty_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -119,7 +119,7 @@ fun test_insert_header_failed_difficulty_not_match() {
 }
 
 #[test]
-#[expected_failure(abort_code = ETimeTooOld)] // ENotFound is a constant defined in the module
+#[expected_failure(abort_code = ETimeTooOld)]
 fun test_insert_header_failed_timestamp_too_old() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
