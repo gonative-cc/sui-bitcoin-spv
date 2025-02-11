@@ -61,10 +61,10 @@ public fun target_timespan(p: &Params): u64 {
 public fun pow_no_retargeting(p: &Params): bool {
     p.pow_no_retargeting
 }
+
 /*
  * Light Client
  */
-
 public struct LightClient has key, store {
     id: UID,
     params: Params,
@@ -199,22 +199,14 @@ public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &
     return c.get_light_block(ancestor_height)
 }
 
-fun set_header_by_hash(c: &mut LightClient, header: BlockHeader) {
-    let block_hash = header.block_hash();
-    df::add(c.client_id_mut(), block_hash, header);
+fun set_block_header_by_hash(c: &mut LightClient, block_header: BlockHeader) {
+    let block_hash = block_header.block_hash();
+    df::add(c.client_id_mut(), block_hash, block_header);
 }
 
-fun get_header_by_hash(c: &LightClient, block_hash: vector<u8>) : &BlockHeader{
+fun get_block_header_by_hash(c: &LightClient, block_hash: vector<u8>): &BlockHeader {
     df::borrow(c.client_id(), block_hash)
 }
-
-fun set_block_header_by_height(c: &mut LightClient, height: u64, block_hash: vector<u8>) {
-    df::add(c.client_id_mut(), height, block_hash)
-}
-fun get_block_hash_by_height(c: &LightClient, height: u64): &vector<u8> {
-    df::borrow(c.client_id(), height)
-}
-
 
 // last_block is a new block that we are adding. The function calculates the required difficulty for the block
 // after the passed the `last_block`.

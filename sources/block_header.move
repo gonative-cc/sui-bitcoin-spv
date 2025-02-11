@@ -56,6 +56,20 @@ public fun target(header: &BlockHeader): u256 {
     bits_to_target(header.bits())
 }
 
+public fun calc_work(header: &BlockHeader): u256 {
+    // We compute the total expected hashes or expected "calc_work".
+    // calc_work of header = 2**256 / (target+1).
+    // This is a very clever way to compute this value from bitcoin core (replicate comments from bitcoin core):
+    // We need to compute 2**256 / (bnTarget+1), but we can't represent 2**256
+    // as it's too large for an arith_uint256. However, as 2**256 is at least as large
+    // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
+    // or ~bnTarget / (bnTarget+1) + 1.
+    //
+    // movelang don't support ~ operator however, we have 2**256 - 1 = 2**255 + 1.
+    // so we have formula bellow:
+    let target = header.target();
+    return (((1 << 255) + 1 - target) / (target + 1)) + 1
+}
 // fails if block hash doesn't meet target requirement
 public fun pow_check(header:BlockHeader) {
     let work = header.block_hash();
