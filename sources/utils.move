@@ -14,7 +14,7 @@ public fun slice(v: vector<u8>, start: u64, end: u64): vector<u8> {
 }
 
 
-public fun nth_element(v: &mut vector<u64>, n: u64): u64 {
+public fun nth_element(v: &mut vector<u32>, n: u64): u32 {
     let mut i = 0;
     let len = v.length();
 

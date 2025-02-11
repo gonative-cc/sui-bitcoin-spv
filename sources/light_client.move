@@ -4,11 +4,13 @@ use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
+use bitcoin_spv::utils::nth_element;
 
 use sui::dynamic_object_field as dof;
 
 const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
+const ETimeTooOld: u64 = 3;
 
 public struct Params has store{
     power_limit: u256,
@@ -125,6 +127,8 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
+    let median_time = calc_past_median_time(c, current_block);
+    assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
 
     // update new header
@@ -255,6 +259,23 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     };
 
     next_target
+}
+
+fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
+    let median_time_blocks = 11;
+    let mut timestamps = vector[];
+    let mut i = 0;
+    let mut node = lb;
+    while (i < median_time_blocks && lb.height() >= 0) {
+        timestamps.push_back(lb.header().timestamp());
+        if (lb.height() != 0) {
+            node = c.relative_ancestor(node, 1);
+        };
+        i = i + 1;
+    };
+
+    let size = timestamps.length();
+    nth_element(&mut timestamps, size / 2)
 }
 
 fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
