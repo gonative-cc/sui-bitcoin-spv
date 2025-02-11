@@ -10,7 +10,7 @@ use sui::dynamic_object_field as dof;
 
 const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
-const ETimeTooOld: u64 = 3;
+const EBlocktimeTooOld: u64 = 3;
 
 public struct Params has store{
     power_limit: u256,
@@ -128,9 +128,9 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
-    // Check this blog: https://learnmeabitcoin.com/technical/block/time
+    // https://learnmeabitcoin.com/technical/block/time
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
-    // because  network adjusted time require local time.
+    // because  network adjusted time requires a miners local time.
     let median_time = calc_past_median_time(c, current_block);
     assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
