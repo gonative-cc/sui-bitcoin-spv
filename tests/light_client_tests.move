@@ -2,7 +2,7 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
-use bitcoin_spv::light_client::{insert_header, new_light_client, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch};
+use bitcoin_spv::light_client::{insert_header, new_light_client, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::block_header::new_block_header;
 
@@ -113,6 +113,21 @@ fun test_insert_header_failed_difficulty_not_match() {
 
     // we changed the block hash to make new header previous hash not match with last hash
     let new_header = x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031880f1e351";
+    lc.insert_header(new_header, ctx);
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+
+#[test]
+#[expected_failure(abort_code = ETimeTooOld)] // ENotFound is a constant defined in the module
+fun test_insert_header_failed_timestamp_too_old() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let mut lc = new_lc_for_test(scenario.ctx());
+    let ctx = scenario.ctx();
+
+    // we changed timestamp from 1c35cf66 to 0c35cf46
+    let new_header = x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f600c35cf465b25031780f1e351";
     lc.insert_header(new_header, ctx);
     sui::test_utils::destroy(lc);
     scenario.end();
