@@ -127,6 +127,10 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
+
+    // Check this blog: https://learnmeabitcoin.com/technical/block/time
+    // we only check the case "A timestamp greater than the median time of the last 11 blocks".
+    // because  network adjusted time require local time.
     let median_time = calc_past_median_time(c, current_block);
     assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
@@ -262,16 +266,19 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 }
 
 fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
+    // Follow implementation from btcsuite/btcd
+    // https://github.com/btcsuite/btcd/blob/bc6396ddfd097f93e2eaf0d1346ab80735eaa169/blockchain/blockindex.go#L312
+    // https://learnmeabitcoin.com/technical/block/time
     let median_time_blocks = 11;
     let mut timestamps = vector[];
     let mut i = 0;
     let mut prev_lb = lb;
     while (i < median_time_blocks) {
-        timestamps.push_back(node.header().timestamp());
-        if (!c.exist(node.height() - 1)) {
+        timestamps.push_back(prev_lb.header().timestamp());
+        if (!c.exist(prev_lb.height() - 1)) {
             break
         };
-        node = c.relative_ancestor(node, 1);
+        prev_lb = c.relative_ancestor(prev_lb, 1);
         i = i + 1;
     };
 
