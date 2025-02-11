@@ -74,27 +74,31 @@ public struct LightClient has key, store {
 
 // === Init function for module ====
 fun init(ctx: &mut TxContext) {
-    let p = mainnet_params();
-    // https://btcscan.org/block/00000000000003a5e28bef30ad31f1f9be706e91ae9dda54179a95c9f9cd9ad0
-    let raw_header = x"010000009d6f4e09d579c93015a83e9081fee83a5c8b1ba3c86516b61f0400000000000025399317bb5c7c4daefe8fe2c4dfac0cea7e4e85913cd667030377240cadfe93a4906b50087e051a84297df7";
-    let lc = new_light_client(p, 201600, vector[raw_header], ctx);
-    transfer::transfer(lc, tx_context::sender(ctx));
+    // let p = mainnet_params();
+    // // https://btcscan.org/block/00000000000003a5e28bef30ad31f1f9be706e91ae9dda54179a95c9f9cd9ad0
+    // let raw_header = x"010000009d6f4e09d579c93015a83e9081fee83a5c8b1ba3c86516b61f0400000000000025399317bb5c7c4daefe8fe2c4dfac0cea7e4e85913cd667030377240cadfe93a4906b50087e051a84297df7";
+    // let lc = new_light_client(p, 201600, vector[raw_header], ctx);
+    // transfer::transfer(lc, tx_context::sender(ctx));
 }
 
 // initializes Bitcoin light client by providing a trusted snapshot height and header
-public fun new_light_client(params: Params, start_height: u64, start_headers: vector<vector<u8>>, ctx: &mut TxContext): LightClient {
+public fun new_light_client(params: Params, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
         finalized_height: 0,
     };
 
+    let mut current_chain_work = start_chain_work;
+
     if (!start_headers.is_empty()) {
         let mut height = start_height;
         start_headers.do!(|header| {
-            let light_block = new_light_block(height, header, ctx);
+            let light_block = new_light_block(height, header, current_chain_work, ctx);
+            let header_calc_work = light_block.header().calc_work();
             lc.set_light_block(light_block);
             height = height + 1;
+            current_chain_work = current_chain_work + header_calc_work;
         });
 
         lc.finalized_height = height - 1;
@@ -105,14 +109,14 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
 // Helper function to initialize new light client.
 // network: 0 = mainnet, 1 = testnet
 public fun new_btc_light_client(
-    network: u8, start_height: u64, start_headers: vector<vector<u8>>, ctx: &mut TxContext
+    network: u8, start_height: u64, start_headers: vector<vector<u8>>, pre_start_chain_work: u256, ctx: &mut TxContext
 )  {
     let params = match (network) {
         0 => mainnet_params(),
         1 => testnet_params(),
         _ => regtest_params()
     };
-    let lc = new_light_client(params, start_height, start_headers, ctx);
+    let lc = new_light_client(params, start_height, start_headers, pre_start_chain_work, ctx);
     transfer::share_object(lc);
 }
 
@@ -138,7 +142,8 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
 
     // update new header
     let next_height = current_block.height() + 1;
-    let next_light_block = new_light_block(next_height, raw_header, ctx);
+    let next_chain_work = current_block.chain_work() + next_header.calc_work();
+    let next_light_block = new_light_block(next_height, raw_header, next_chain_work, ctx);
     c.finalized_height = next_height;
     c.set_light_block(next_light_block);
 }

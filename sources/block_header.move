@@ -70,6 +70,7 @@ public fun calc_work(header: &BlockHeader): u256 {
     let target = header.target();
     return (((1 << 255) + 1 - target) / (target + 1)) + 1
 }
+
 // fails if block hash doesn't meet target requirement
 public fun pow_check(header:BlockHeader) {
     let work = header.block_hash();
