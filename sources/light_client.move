@@ -6,9 +6,17 @@ use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 
 use sui::dynamic_object_field as dof;
+use sui::event;
 
 const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
+
+// ==== Events Struct ====
+public struct EventHeader has copy, drop{
+    header: vector<u8>,
+    height: u64
+}
+
 
 public struct Params has store{
     power_limit: u256,
@@ -132,6 +140,11 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
     let next_light_block = new_light_block(next_height, raw_header, ctx);
     c.finalized_height = next_height;
     c.set_light_block(next_light_block);
+
+    event::emit(EventHeader {
+        height: next_height,
+        header: raw_header
+    })
 }
 
 
