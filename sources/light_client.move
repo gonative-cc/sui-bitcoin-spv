@@ -265,7 +265,7 @@ fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
     let median_time_blocks = 11;
     let mut timestamps = vector[];
     let mut i = 0;
-    let mut node = lb;
+    let mut prev_lb = lb;
     while (i < median_time_blocks) {
         timestamps.push_back(node.header().timestamp());
         if (!c.exist(node.height() - 1)) {
@@ -290,6 +290,7 @@ public fun get_light_block(lc: &LightClient, height: u64): &LightBlock {
 fun exist(lc: &LightClient, height: u64): bool {
     dof::exists_(lc.client_id(), height)
 }
+
 #[test_only]
 public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
     if (lb.height() > lc.finalized_height) {
