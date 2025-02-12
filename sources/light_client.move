@@ -94,7 +94,7 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
     if (!start_headers.is_empty()) {
         let mut height = start_height;
         start_headers.do!(|header| {
-            let light_block = new_light_block(height, header, current_chain_work, ctx);
+            let light_block = new_light_block(height, header, current_chain_work);
             let header_calc_work = light_block.header().calc_work();
             lc.set_block_header_by_height(height, new_block_header(header));
             lc.add_light_block(light_block);
@@ -124,39 +124,71 @@ public fun new_btc_light_client(
 // === Entry methods ===
 
 /// insert new header to bitcoin spv
-public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx: &mut TxContext) {
-    let next_header = new_block_header(raw_header);
-    let current_block = c.latest_finalized_block();
-    let current_header = current_block.header();
+public(package) fun insert_header(c: &mut LightClient, previous_block: &LightBlock, next_raw_header: vector<u8>, ctx: &mut TxContext): &LightBlock {
+    let next_header = new_block_header(next_raw_header);
+    let current_header = previous_block.header();
 
     // verify new header
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
+    let next_block_difficulty = calc_next_required_difficulty(c, previous_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
     // https://learnmeabitcoin.com/technical/block/time
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
-    let median_time = calc_past_median_time(c, current_block);
+    let median_time = calc_past_median_time(c, previous_block);
     assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
 
     // update new header
-    let next_height = current_block.height() + 1;
-    let next_chain_work = current_block.chain_work() + next_header.calc_work();
-    let next_light_block = new_light_block(next_height, raw_header, next_chain_work, ctx);
+    let next_height = previous_block.height() + 1;
+    let next_chain_work = previous_block.chain_work() + next_header.calc_work();
+    let next_light_block = new_light_block(next_height, next_raw_header, next_chain_work);
+
     c.finalized_height = next_height;
     c.add_light_block(next_light_block);
+    c.get_light_block_by_hash(current_header.block_hash())
 }
+
 
 
 public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>, ctx: &mut TxContext) {
     assert!(raw_headers.is_empty());
+    let first_header = new_block_header(raw_headers[0]);
+    let latest_block = c.latest_finalized_block();
 
-    let headers = raw_headers.map!(|raw_header| new_block_header(raw_header));
+    if (first_header.prev_block() == latest_block.header().block_hash()) {
+        // extend current fork
+        let previous_block = c.latest_finalized_block();
 
+        c.insert_header(previous_block, raw_headers[0], ctx);
+        raw_headers.do!(|raw_header| {
+            let previous_block = c.insert_header(previous_block, raw_header, ctx);
+        });
+    } else {
+        // choice fork
+        // TODO: error here
+        assert!(c.exist(first_header.prev_block()));
+
+        let current_best_fork_head = c.latest_finalized_block();
+        let parent_block_hash = first_header.prev_block();
+        let mut parent_block = c.get_light_block_by_hash(parent_block_hash);
+        raw_headers.do!(|raw_header| {
+            parent_block = c.insert_header(parent_block, raw_header, ctx);
+        });
+
+        assert!(current_best_fork_head.chain_work() < parent_block.chain_work());
+        // remove other fork which is less power than.
+        c.finalized_height = parent_block.height();
+    }
 }
 
+public(package) fun rollback(c: &mut LightClient, head: &BlockHeader, point: &BlockHeader) {
+    while (point.prev_block() != head.block_hash()) {
+        let remove_block_hash = head.block_hash();
+        c.remove_light_block(remove_block_hash);
+    }
+}
 // === Views function ===
 
 public fun latest_finalized_height(c: &LightClient): u64 {
@@ -300,16 +332,22 @@ fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
     nth_element(&mut timestamps, size / 2)
 }
 
+
+
 // update and query data
 public(package) fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
-    dof::add(lc.client_id_mut(), block_hash, lb);
+    df::add(lc.client_id_mut(), block_hash, lb);
 }
 
+public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<u8>) {
+    df::remove<_, LightBlock>(lc.client_id_mut(), block_hash);
+}
 public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &LightBlock {
     // TODO: Can we use option type?
-    dof::borrow(lc.client_id(), block_hash)
+    df::borrow(lc.client_id(), block_hash)
 }
+
 
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
     dof::exists_(lc.client_id(), block_hash)
