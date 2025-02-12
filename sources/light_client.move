@@ -96,7 +96,8 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
         start_headers.do!(|header| {
             let light_block = new_light_block(height, header, current_chain_work, ctx);
             let header_calc_work = light_block.header().calc_work();
-            lc.set_light_block(light_block);
+            lc.set_block_header_by_height(height, new_block_header(header));
+            lc.add_light_block(light_block);
             height = height + 1;
             current_chain_work = current_chain_work + header_calc_work;
         });
@@ -145,7 +146,7 @@ public entry fun insert_header(c: &mut LightClient, raw_header: vector<u8>, ctx:
     let next_chain_work = current_block.chain_work() + next_header.calc_work();
     let next_light_block = new_light_block(next_height, raw_header, next_chain_work, ctx);
     c.finalized_height = next_height;
-    c.set_light_block(next_light_block);
+    c.add_light_block(next_light_block);
 }
 
 
@@ -165,7 +166,8 @@ public fun latest_finalized_height(c: &LightClient): u64 {
 public fun latest_finalized_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_finalized_height();
-    return c.get_light_block(height)
+    let block_hash = c.get_block_header_by_height(height).block_hash();
+    c.get_light_block_by_hash(block_hash)
 }
 
 /// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
@@ -180,9 +182,8 @@ public fun verify_tx(
     tx_index: u64
 ): bool {
     // TODO: update this when we have APIs for finalized block.
-    // TODO: handle: light block not exist.
-    let light_block = c.get_light_block(height);
-    let header = light_block.header();
+    // TODO: handle: light block/block_header not exist.
+    let header = c.get_block_header_by_height(height);
     let merkle_root = header.merkle_root();
     return verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
 }
@@ -201,16 +202,8 @@ public fun client_id_mut(c: &mut LightClient): &mut UID {
 
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
     let ancestor_height = lb.height() - distance;
-    return c.get_light_block(ancestor_height)
-}
-
-fun set_block_header_by_hash(c: &mut LightClient, block_header: BlockHeader) {
-    let block_hash = block_header.block_hash();
-    df::add(c.client_id_mut(), block_hash, block_header);
-}
-
-fun get_block_header_by_hash(c: &LightClient, block_hash: vector<u8>): &BlockHeader {
-    df::borrow(c.client_id(), block_hash)
+    let ancestor_block_hash = c.get_block_header_by_height(ancestor_height).block_hash();
+    return c.get_light_block_by_hash(ancestor_block_hash)
 }
 
 // last_block is a new block that we are adding. The function calculates the required difficulty for the block
@@ -296,7 +289,7 @@ fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
     let mut prev_lb = lb;
     while (i < median_time_blocks) {
         timestamps.push_back(prev_lb.header().timestamp());
-        if (!c.exist(prev_lb.height() - 1)) {
+        if (!c.exist(prev_lb.header().prev_block())) {
             break
         };
         prev_lb = c.relative_ancestor(prev_lb, 1);
@@ -307,22 +300,25 @@ fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
     nth_element(&mut timestamps, size / 2)
 }
 
-fun set_light_block(lc: &mut LightClient, lb: LightBlock) {
-    dof::add(lc.client_id_mut(), lb.height(), lb);
+// update and query data
+public(package) fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
+    let block_hash = lb.header().block_hash();
+    dof::add(lc.client_id_mut(), block_hash, lb);
 }
 
-public fun get_light_block(lc: &LightClient, height: u64): &LightBlock {
-    dof::borrow(lc.client_id(), height)
+public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &LightBlock {
+    // TODO: Can we use option type?
+    dof::borrow(lc.client_id(), block_hash)
 }
 
-fun exist(lc: &LightClient, height: u64): bool {
-    dof::exists_(lc.client_id(), height)
+public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
+    dof::exists_(lc.client_id(), block_hash)
 }
 
-#[test_only]
-public fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
-    if (lb.height() > lc.finalized_height) {
-        lc.finalized_height= lb.height();
-    };
-    set_light_block(lc, lb);
+public(package) fun set_block_header_by_height(c: &mut LightClient, height: u64, block_header: BlockHeader) {
+    df::add(c.client_id_mut(), height, block_header);
+}
+
+public fun get_block_header_by_height(c: &LightClient, height: u64): &BlockHeader {
+    df::borrow(c.client_id(), height)
 }
