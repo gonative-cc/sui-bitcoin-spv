@@ -367,3 +367,9 @@ public(package) fun set_block_header_by_height(c: &mut LightClient, height: u64,
 public fun get_block_header_by_height(c: &LightClient, height: u64): &BlockHeader {
     df::borrow(c.client_id(), height)
 }
+
+public(package) fun set_latest_block(c: &mut LightClient, light_block: LightBlock) {
+    c.add_light_block(light_block);
+    c.set_block_header_by_height(light_block.height(), *light_block.header());
+    c.finalized_height = light_block.height();
+}
