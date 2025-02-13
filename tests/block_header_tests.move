@@ -22,10 +22,10 @@ fun block_header_test() {
     assert!(header.timestamp() == to_u32(x"560e8864"));
     assert!(header.bits() == to_u32(x"697e0517"));
     assert!(header.nonce() == to_u32(x"67c0c9fd"));
-
     assert!(
         header.block_hash() == x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000",
     );
+    assert!(header.calc_work() == 110026583797767945308373);
 }
 
 #[test]
