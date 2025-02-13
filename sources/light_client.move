@@ -12,6 +12,8 @@ use sui::dynamic_field as df;
 const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
 const ETimeTooOld: u64 = 3;
+const EHeaderListIsEmpty: u64 = 4;
+const EBlockDoesnotExist: u64 = 5;
 
 public struct Params has store{
     power_limit: u256,
@@ -122,7 +124,6 @@ public fun new_btc_light_client(
 }
 
 // === Entry methods ===
-
 /// insert new header to bitcoin spv
 public(package) fun insert_header(c: &mut LightClient, current_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
     let current_block = c.get_light_block_by_hash(current_block_hash);
@@ -152,15 +153,14 @@ public(package) fun insert_header(c: &mut LightClient, current_block_hash: vecto
 
 
 public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>) {
-    assert!(raw_headers.is_empty());
+    // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
+    assert!(raw_headers.is_empty(), EHeaderListIsEmpty);
+
     let first_header = new_block_header(raw_headers[0]);
-    let latest_block = c.latest_finalized_block();
-
-    if (first_header.prev_block() == latest_block.header().block_hash()) {
+    let latest_block_hash = c.latest_block().header().block_hash();
+    if (first_header.prev_block() == latest_block_hash) {
         // extend current fork
-        let previous_block = c.latest_finalized_block();
-        let mut previous_block_hash = previous_block.header().block_hash();
-
+        let mut previous_block_hash = latest_block_hash;
         raw_headers.do!(|raw_header| {
             let header = new_block_header(raw_header);
             previous_block_hash = c.insert_header(previous_block_hash, header);
@@ -168,7 +168,7 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
     } else {
         // choice fork
         // TODO: error here
-        assert!(c.exist(first_header.prev_block()));
+        assert!(c.exist(first_header.prev_block()), EBlockDoesnotExist);
 
         let mut parent_block_hash = first_header.prev_block();
         raw_headers.do!(|raw_header| {
@@ -177,7 +177,7 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         });
 
         let parent_block = c.get_light_block_by_hash(parent_block_hash);
-        let current_best_fork_head = c.latest_finalized_block();
+        let current_best_fork_head = c.latest_block();
 
         assert!(current_best_fork_head.chain_work() < parent_block.chain_work());
         // remove other fork which is less power than.
@@ -196,13 +196,13 @@ public(package) fun rollback(c: &mut LightClient, head: vector<u8>, point: vecto
 
 // === Views function ===
 
-public fun latest_finalized_height(c: &LightClient): u64 {
+public fun latest_height(c: &LightClient): u64 {
     return c.finalized_height
 }
 
-public fun latest_finalized_block(c: &LightClient): &LightBlock {
+public fun latest_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
-    let height = c.latest_finalized_height();
+    let height = c.latest_height();
     let block_hash = c.get_block_header_by_height(height).block_hash();
     c.get_light_block_by_hash(block_hash)
 }
