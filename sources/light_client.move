@@ -147,14 +147,16 @@ public(package) fun insert_header(c: &mut LightClient, current_block_hash: vecto
     let next_light_block = new_light_block(next_height, next_header, next_chain_work);
 
     c.finalized_height = next_height;
+
     c.add_light_block(next_light_block);
+    c.set_block_header_by_height(next_height, next_header);
     next_header.block_hash()
 }
 
 
 public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>) {
     // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
-    assert!(raw_headers.is_empty(), EHeaderListIsEmpty);
+    assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
     let first_header = new_block_header(raw_headers[0]);
     let latest_block_hash = c.latest_block().header().block_hash();
