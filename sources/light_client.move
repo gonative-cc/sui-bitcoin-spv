@@ -153,7 +153,6 @@ public(package) fun insert_header(c: &mut LightClient, previous_hash: vector<u8>
 }
 
 
-
 public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>, ctx: &mut TxContext) {
     assert!(raw_headers.is_empty());
     let first_header = new_block_header(raw_headers[0]);
@@ -179,16 +178,20 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 
         let parent_block = c.get_light_block_by_hash(parent_block_hash);
         let current_best_fork_head = c.latest_finalized_block();
+
         assert!(current_best_fork_head.chain_work() < parent_block.chain_work());
         // remove other fork which is less power than.
-        c.finalized_height = parent_block.height();
+        let parent_header = parent_block.header();
+        let tmp = current_best_fork_head.header();
+        c.rollback(parent_header.block_hash(), tmp.block_hash());
+        // c.finalized_height = parent_block.height();
     }
 }
 
-public(package) fun rollback(c: &mut LightClient, head: &BlockHeader, point: &BlockHeader) {
-    while (point.prev_block() != head.block_hash()) {
-        let remove_block_hash = head.block_hash();
-        c.remove_light_block(remove_block_hash);
+public(package) fun rollback(c: &mut LightClient, head: vector<u8>, point: vector<u8>) {
+    while (point != head) {
+        c.remove_light_block(head);
+        c.finalized_height = 0;
     }
 }
 // === Views function ===
