@@ -189,10 +189,13 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
     }
 }
 
-public(package) fun rollback(c: &mut LightClient, head: vector<u8>, point: vector<u8>) {
-    while (point != head) {
-        c.remove_light_block(head);
-        // c.finalized_height = height;
+/// Detele all block between head_hash to checkpoint_hash
+public(package) fun rollback(c: &mut LightClient, head_hash: vector<u8>, checkpoint_hash: vector<u8>) {
+    let mut block_hash = head_hash;
+    while (checkpoint_hash != block_hash) {
+        let previous_block_hash = c.get_light_block_by_hash(block_hash).header().prev_block();
+        c.remove_light_block(block_hash);
+        block_hash = previous_block_hash;
     }
 }
 
