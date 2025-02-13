@@ -1,6 +1,6 @@
 module bitcoin_spv::light_block;
 
-use bitcoin_spv::block_header::{BlockHeader, new_block_header};
+use bitcoin_spv::block_header::BlockHeader;
 
 public struct LightBlock has copy, store, drop {
     height: u64,
@@ -8,11 +8,11 @@ public struct LightBlock has copy, store, drop {
     header: BlockHeader
 }
 
-public fun new_light_block(height: u64, block_header: vector<u8>, chain_work: u256): LightBlock {
+public fun new_light_block(height: u64, header: BlockHeader, chain_work: u256): LightBlock {
     LightBlock {
         height,
         chain_work,
-        header: new_block_header(block_header)
+        header: header
     }
 }
 

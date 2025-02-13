@@ -73,7 +73,7 @@ public struct LightClient has key, store {
 
 
 // === Init function for module ====
-fun init(ctx: &mut TxContext) {
+fun init(_ctx: &mut TxContext) {
     // let p = mainnet_params();
     // // https://btcscan.org/block/00000000000003a5e28bef30ad31f1f9be706e91ae9dda54179a95c9f9cd9ad0
     // let raw_header = x"010000009d6f4e09d579c93015a83e9081fee83a5c8b1ba3c86516b61f0400000000000025399317bb5c7c4daefe8fe2c4dfac0cea7e4e85913cd667030377240cadfe93a4906b50087e051a84297df7";
@@ -90,13 +90,13 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
     };
 
     let mut current_chain_work = start_chain_work;
-
     if (!start_headers.is_empty()) {
         let mut height = start_height;
-        start_headers.do!(|header| {
+        start_headers.do!(|raw_header| {
+            let header = new_block_header(raw_header);
             let light_block = new_light_block(height, header, current_chain_work);
             let header_calc_work = light_block.header().calc_work();
-            lc.set_block_header_by_height(height, new_block_header(header));
+            lc.set_block_header_by_height(height, header);
             lc.add_light_block(light_block);
             height = height + 1;
             current_chain_work = current_chain_work + header_calc_work;
@@ -124,36 +124,34 @@ public fun new_btc_light_client(
 // === Entry methods ===
 
 /// insert new header to bitcoin spv
-public(package) fun insert_header(c: &mut LightClient, previous_hash: vector<u8>, next_raw_header: vector<u8>, ctx: &mut TxContext): vector<u8> {
-    let next_header = new_block_header(next_raw_header);
-    let previous_block = c.get_light_block_by_hash(previous_hash);
-    let current_header = previous_block.header();
+public(package) fun insert_header(c: &mut LightClient, current_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
+    let current_block = c.get_light_block_by_hash(current_block_hash);
+    let current_header = current_block.header();
 
     // verify new header
     assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(c, previous_block, 0);
+    let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
     // https://learnmeabitcoin.com/technical/block/time
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
-    let median_time = c.calc_past_median_time(previous_block);
+    let median_time = c.calc_past_median_time(current_block);
     assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
 
     // update new header
-    let next_height = previous_block.height() + 1;
-    let next_chain_work = previous_block.chain_work() + next_header.calc_work();
-    let next_light_block = new_light_block(next_height, next_raw_header, next_chain_work);
+    let next_height = current_block.height() + 1;
+    let next_chain_work = current_block.chain_work() + next_header.calc_work();
+    let next_light_block = new_light_block(next_height, next_header, next_chain_work);
 
     c.finalized_height = next_height;
     c.add_light_block(next_light_block);
-
     next_header.block_hash()
 }
 
 
-public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>, ctx: &mut TxContext) {
+public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>) {
     assert!(raw_headers.is_empty());
     let first_header = new_block_header(raw_headers[0]);
     let latest_block = c.latest_finalized_block();
@@ -164,7 +162,8 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         let mut previous_block_hash = previous_block.header().block_hash();
 
         raw_headers.do!(|raw_header| {
-            previous_block_hash = c.insert_header(previous_block_hash, raw_header, ctx);
+            let header = new_block_header(raw_header);
+            previous_block_hash = c.insert_header(previous_block_hash, header);
         });
     } else {
         // choice fork
@@ -173,7 +172,8 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 
         let mut parent_block_hash = first_header.prev_block();
         raw_headers.do!(|raw_header| {
-            parent_block_hash = c.insert_header(parent_block_hash, raw_header, ctx);
+            let header = new_block_header(raw_header);
+            parent_block_hash = c.insert_header(parent_block_hash, header);
         });
 
         let parent_block = c.get_light_block_by_hash(parent_block_hash);
@@ -184,16 +184,16 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         let parent_header = parent_block.header();
         let tmp = current_best_fork_head.header();
         c.rollback(parent_header.block_hash(), tmp.block_hash());
-        // c.finalized_height = parent_block.height();
     }
 }
 
 public(package) fun rollback(c: &mut LightClient, head: vector<u8>, point: vector<u8>) {
     while (point != head) {
         c.remove_light_block(head);
-        c.finalized_height = 0;
+        // c.finalized_height = height;
     }
 }
+
 // === Views function ===
 
 public fun latest_finalized_height(c: &LightClient): u64 {
