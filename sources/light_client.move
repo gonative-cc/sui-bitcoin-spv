@@ -124,8 +124,9 @@ public fun new_btc_light_client(
 // === Entry methods ===
 
 /// insert new header to bitcoin spv
-public(package) fun insert_header(c: &mut LightClient, previous_block: &LightBlock, next_raw_header: vector<u8>, ctx: &mut TxContext): &LightBlock {
+public(package) fun insert_header(c: &mut LightClient, previous_hash: vector<u8>, next_raw_header: vector<u8>, ctx: &mut TxContext): vector<u8> {
     let next_header = new_block_header(next_raw_header);
+    let previous_block = c.get_light_block_by_hash(previous_hash);
     let current_header = previous_block.header();
 
     // verify new header
@@ -136,7 +137,7 @@ public(package) fun insert_header(c: &mut LightClient, previous_block: &LightBlo
     // https://learnmeabitcoin.com/technical/block/time
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
-    let median_time = calc_past_median_time(c, previous_block);
+    let median_time = c.calc_past_median_time(previous_block);
     assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
 
@@ -147,7 +148,8 @@ public(package) fun insert_header(c: &mut LightClient, previous_block: &LightBlo
 
     c.finalized_height = next_height;
     c.add_light_block(next_light_block);
-    c.get_light_block_by_hash(current_header.block_hash())
+
+    next_header.block_hash()
 }
 
 
@@ -160,23 +162,23 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
     if (first_header.prev_block() == latest_block.header().block_hash()) {
         // extend current fork
         let previous_block = c.latest_finalized_block();
+        let mut previous_block_hash = previous_block.header().block_hash();
 
-        c.insert_header(previous_block, raw_headers[0], ctx);
         raw_headers.do!(|raw_header| {
-            let previous_block = c.insert_header(previous_block, raw_header, ctx);
+            previous_block_hash = c.insert_header(previous_block_hash, raw_header, ctx);
         });
     } else {
         // choice fork
         // TODO: error here
         assert!(c.exist(first_header.prev_block()));
 
-        let current_best_fork_head = c.latest_finalized_block();
-        let parent_block_hash = first_header.prev_block();
-        let mut parent_block = c.get_light_block_by_hash(parent_block_hash);
+        let mut parent_block_hash = first_header.prev_block();
         raw_headers.do!(|raw_header| {
-            parent_block = c.insert_header(parent_block, raw_header, ctx);
+            parent_block_hash = c.insert_header(parent_block_hash, raw_header, ctx);
         });
 
+        let parent_block = c.get_light_block_by_hash(parent_block_hash);
+        let current_best_fork_head = c.latest_finalized_block();
         assert!(current_best_fork_head.chain_work() < parent_block.chain_work());
         // remove other fork which is less power than.
         c.finalized_height = parent_block.height();
