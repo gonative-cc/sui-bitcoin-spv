@@ -3,7 +3,7 @@ module bitcoin_spv::light_client;
 use bitcoin_spv::block_header::{BlockHeader, new_block_header};
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
-use bitcoin_spv::btc_math::{target_to_bits, bits_to_target};
+use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
 
 use sui::dynamic_object_field as dof;
@@ -14,6 +14,7 @@ const EDifficultyNotMatch: u64 = 2;
 const ETimeTooOld: u64 = 3;
 const EHeaderListIsEmpty: u64 = 4;
 const EBlockDoesnotExist: u64 = 5;
+const EForkNotEnoughPower: u64 = 6;
 
 public struct Params has store{
     power_limit: u256,
@@ -172,21 +173,21 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         // choice fork
         // TODO: error here
         assert!(c.exist(first_header.prev_block()), EBlockDoesnotExist);
-
         let mut parent_block_hash = first_header.prev_block();
+
+        let current_chain_work = c.latest_block().chain_work();
+
         raw_headers.do!(|raw_header| {
             let header = new_block_header(raw_header);
             parent_block_hash = c.insert_header(parent_block_hash, header);
         });
 
         let parent_block = c.get_light_block_by_hash(parent_block_hash);
-        let current_best_fork_head = c.latest_block();
-
-        assert!(current_best_fork_head.chain_work() < parent_block.chain_work());
+        // let q = parent_block.chain_work();
+        assert!(current_chain_work < parent_block.chain_work(), EForkNotEnoughPower);
         // remove other fork which is less power than.
         let parent_header = parent_block.header();
-        let tmp = current_best_fork_head.header();
-        c.rollback(parent_header.block_hash(), tmp.block_hash());
+        c.rollback(first_header.block_hash(), parent_header.block_hash());
     }
 }
 
@@ -196,6 +197,8 @@ public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, h
     // B/c if this happend then this is just out of gas to run.
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
+        std::debug::print(&block_hash);
+        std::debug::print(&checkpoint_hash);
         let previous_block_hash = c.get_light_block_by_hash(block_hash).header().prev_block();
         c.remove_light_block(block_hash);
         block_hash = previous_block_hash;
@@ -354,6 +357,7 @@ fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
 public(package) fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
     df::add(lc.client_id_mut(), block_hash, lb);
+
 }
 
 public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<u8>) {
@@ -371,6 +375,7 @@ public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
 }
 
 public(package) fun set_block_header_by_height(c: &mut LightClient, height: u64, block_header: BlockHeader) {
+    df::remove_if_exists<u64, BlockHeader>(c.client_id_mut(), height);
     df::add(c.client_id_mut(), height, block_header);
 }
 

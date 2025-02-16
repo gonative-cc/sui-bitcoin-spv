@@ -65,7 +65,7 @@ public fun calc_work(header: &BlockHeader): u256 {
     // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
     // or ~bnTarget / (bnTarget+1) + 1.
     //
-    // movelang don't support ~ operator however, we have 2**256 - 1 = 2**255 + 1.
+    // movelang don't support ~ operator. However, we have 2**256 - 1 = 2**255 + 1.
     // so we have formula bellow:
     let target = header.target();
     return (((1 << 255) + 1 - target) / (target + 1)) + 1

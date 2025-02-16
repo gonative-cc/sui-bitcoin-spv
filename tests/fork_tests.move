@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
-use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params};
+use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkNotEnoughPower};
 use sui::test_scenario;
 
 
@@ -23,10 +23,7 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
         x"00000030e98bb046cd25a629c91f0c7623cc2ed0c12ef6db5e41956536c261eb673d0b0f813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f39c5b167ffff7f2004000000",
         x"000000304f58550f49b5c9dce6328bc8d7b8f5941823efcc51741a024c17d9745ba21111cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d452539c5b167ffff7f2004000000",
         x"00000030aa8bd6ce82edf1f9c03abc2243281f622594bc3aec5106a17f612371f76060084e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a39c5b167ffff7f2003000000",
-        x"0000003040ce8b407650044a4294fd43c6d78cbb4f78ac98527f858f3950dad92fc5982ddebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d23239c5b167ffff7f2002000000",
-        x"000000304a427aa8d030b59be4effcbf85dd59d4b1a0fce9445efc0bebe082a45a420d28494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb39c5b167ffff7f2005000000",
-        x"00000030c7539017ca888b9198e730f12d5b3ed200604bb9b1f1578690ee9fc3650e7d344ca6a58af04afaa3eea3d8c6fa6c29eb0454a7e18d5953a1766ab994152f5f163ac5b167ffff7f2001000000",
-        x"0000003097596c6dd9d983aacc408db4ebd0d0fad5265a0a7bc031c3a1b1c73f90c81f55240a1d2cf05759689835b13573161887f2c284aece535a39642db5d5bf2588e53ac5b167ffff7f2001000000"
+        x"0000003040ce8b407650044a4294fd43c6d78cbb4f78ac98527f858f3950dad92fc5982ddebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d23239c5b167ffff7f2002000000"
     ];
 
     let params = regtest_params();
@@ -41,7 +38,23 @@ fun insert_headers_switch_fork_tests() {
 }
 
 #[test]
-fun insert_header_fork_not_enought_power_tests() {
+#[expected_failure(abort_code = EForkNotEnoughPower)]
+fun insert_headers_fork_not_enought_power_tests() {
+    let headers = vector[
+        x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
+        x"000000302ba076eb907ec3c060954d36dfcf0e735c815c9531f6d44667aa32f5999f412d813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f9dc5b167ffff7f2001000000",
+        x"00000030525bda2756ff6f9e440c91590490462ac33e0fedb05b1558cfd3f7ce90920d16cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d45259dc5b167ffff7f2002000000",
+        x"000000306052592f4f0e4886a0eca2c1d154e8b9761e011b4f7b3a00908e2a830f7f6c6a4e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a9dc5b167ffff7f2001000000",
+        x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
+        x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000"
+    ];
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let ctx = scenario.ctx();
+    let mut lc = new_lc_for_test(ctx);
+    lc.insert_headers(headers);
+    sui::test_utils::destroy(lc);
+    scenario.end();
 }
 
 #[test]
