@@ -192,6 +192,8 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 
 /// Detele all block between head_hash to checkpoint_hash
 public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
+    // TODO: Should we handle the case head hash never reach to checkpoint?
+    // B/c if this happend then this is just out of gas to run.
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
         let previous_block_hash = c.get_light_block_by_hash(block_hash).header().prev_block();
@@ -206,26 +208,14 @@ public fun latest_height(c: &LightClient): u64 {
     return c.finalized_height
 }
 
-public struct LatestBlockEvent has drop, copy{
-    light_block: LightBlock
-}
 public fun latest_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_height();
     let block_hash = c.get_block_header_by_height(height).block_hash();
     let b = c.get_light_block_by_hash(block_hash);
-    sui::event::emit(LatestBlockEvent {
-        light_block: *b
-    });
     b
 }
 
-public struct VerifyTxEvent has copy, drop{
-    height: u64,
-    tx_id: vector<u8>,
-    result: bool,
-    block_hash: vector<u8>
-}
 
 /// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
 /// proof is merkle proof for tx_id. This is a sha256(32 bytes) vector.
@@ -243,12 +233,6 @@ public fun verify_tx(
     let header = c.get_block_header_by_height(height);
     let merkle_root = header.merkle_root();
     let result = verify_merkle_proof(merkle_root, proof, tx_id, tx_index);
-    sui::event::emit(VerifyTxEvent {
-        block_hash: header.block_hash(),
-        height,
-        tx_id,
-        result,
-    });
     result
 }
 
@@ -375,23 +359,14 @@ public(package) fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
 public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<u8>) {
     df::remove<_, LightBlock>(lc.client_id_mut(), block_hash);
 }
+
 public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &LightBlock {
     // TODO: Can we use option type?
     df::borrow(lc.client_id(), block_hash)
 }
 
-
-public struct ExistEvent has copy, drop {
-    block_hash: vector<u8>,
-    exist: bool
-}
-
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
     let exist = df::exists_(lc.client_id(), block_hash);
-    sui::event::emit(ExistEvent {
-        block_hash,
-        exist
-    });
     exist
 }
 
