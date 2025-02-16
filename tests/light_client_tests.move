@@ -1,7 +1,7 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
-use bitcoin_spv::light_client::{insert_header, new_light_client, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
+use bitcoin_spv::light_client::{insert_header, new_light_client, LightClient, mainnet_params, regtest_params, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld, new_btc_light_client};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::block_header::new_block_header;
 

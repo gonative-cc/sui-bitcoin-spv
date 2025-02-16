@@ -3,7 +3,7 @@ module bitcoin_spv::light_client;
 use bitcoin_spv::block_header::{BlockHeader, new_block_header};
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
-use bitcoin_spv::btc_math::target_to_bits;
+use bitcoin_spv::btc_math::{target_to_bits, bits_to_target};
 use bitcoin_spv::utils::nth_element;
 
 use sui::dynamic_object_field as dof;
@@ -20,7 +20,7 @@ public struct Params has store{
     blocks_pre_retarget: u64,
     /// time in seconds when we update the target
     target_timespan: u64,
-    pow_no_retargeting: bool
+    pow_no_retargeting: bool,
 }
 
 // default params for bitcoin mainnet
@@ -41,7 +41,7 @@ public fun testnet_params(): Params {
 // default params for bitcoin regtest
 public fun regtest_params(): Params {
     return Params {
-        power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        power_limit: 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
         pow_no_retargeting: true,
@@ -134,11 +134,12 @@ public(package) fun insert_header(c: &mut LightClient, current_block_hash: vecto
     let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
+
     // https://learnmeabitcoin.com/technical/block/time
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
     let median_time = c.calc_past_median_time(current_block);
-    assert!(next_header.timestamp() > median_time, ETimeTooOld);
+    assert!(next_header.timestamp() >= median_time, ETimeTooOld);
     next_header.pow_check();
 
     // update new header
@@ -190,7 +191,7 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 }
 
 /// Detele all block between head_hash to checkpoint_hash
-public(package) fun rollback(c: &mut LightClient, head_hash: vector<u8>, checkpoint_hash: vector<u8>) {
+public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
         let previous_block_hash = c.get_light_block_by_hash(block_hash).header().prev_block();
@@ -205,11 +206,25 @@ public fun latest_height(c: &LightClient): u64 {
     return c.finalized_height
 }
 
+public struct LatestBlockEvent has drop, copy{
+    light_block: LightBlock
+}
 public fun latest_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_height();
     let block_hash = c.get_block_header_by_height(height).block_hash();
-    c.get_light_block_by_hash(block_hash)
+    let b = c.get_light_block_by_hash(block_hash);
+    sui::event::emit(LatestBlockEvent {
+        light_block: *b
+    });
+    b
+}
+
+public struct VerifyTxEvent has copy, drop{
+    height: u64,
+    tx_id: vector<u8>,
+    result: bool,
+    block_hash: vector<u8>
 }
 
 /// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
@@ -227,7 +242,14 @@ public fun verify_tx(
     // TODO: handle: light block/block_header not exist.
     let header = c.get_block_header_by_height(height);
     let merkle_root = header.merkle_root();
-    return verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
+    let result = verify_merkle_proof(merkle_root, proof, tx_id, tx_index);
+    sui::event::emit(VerifyTxEvent {
+        block_hash: header.block_hash(),
+        height,
+        tx_id,
+        result,
+    });
+    result
 }
 
 public fun params(c: &LightClient): &Params{
@@ -359,8 +381,18 @@ public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &L
 }
 
 
+public struct ExistEvent has copy, drop {
+    block_hash: vector<u8>,
+    exist: bool
+}
+
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
-    dof::exists_(lc.client_id(), block_hash)
+    let exist = df::exists_(lc.client_id(), block_hash);
+    sui::event::emit(ExistEvent {
+        block_hash,
+        exist
+    });
+    exist
 }
 
 public(package) fun set_block_header_by_height(c: &mut LightClient, height: u64, block_header: BlockHeader) {
