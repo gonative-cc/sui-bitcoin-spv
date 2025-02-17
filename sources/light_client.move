@@ -15,6 +15,16 @@ const EHeaderListIsEmpty: u64 = 4;
 const EBlockDoesnotExist: u64 = 5;
 const EForkNotEnoughPower: u64 = 6;
 
+
+public struct InsertHeaderEvent has copy, drop {
+    fork: bool,
+    latest_block: BlockHeader
+}
+
+public struct CreatedLCEvent has copy, drop{
+    light_client_id: ID,
+}
+
 public struct Params has store{
     power_limit: u256,
     blocks_pre_retarget: u64,
@@ -106,8 +116,16 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
 
         lc.finalized_height = height - 1;
     };
+
+    sui::event::emit(
+        CreatedLCEvent {
+            light_client_id: object::id(&lc),
+
+        }
+    );
     return lc
 }
+
 
 // Helper function to initialize new light client.
 // network: 0 = mainnet, 1 = testnet
@@ -173,18 +191,30 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 
     if (first_header.prev_block() == latest_block_hash) {
         // extend current fork
-       c.extend_chain_from_block(first_header.prev_block(), raw_headers);
+        c.extend_chain_from_block(first_header.prev_block(), raw_headers);
+
+        sui::event::emit(InsertHeaderEvent {
+            fork: false,
+            latest_block: *c.latest_block().header()
+        });
     } else {
         // handle a fork choice
 
         assert!(c.exist(first_header.prev_block()), EBlockDoesnotExist);
         let current_chain_work = c.latest_block().chain_work();
+        let current_block_hash = c.latest_block().header().block_hash();
+
         let candidate_fork_head_hash = c.extend_chain_from_block(first_header.prev_block(), raw_headers);
 
         let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
-        let candidate_chain_work= candidate_head.chain_work();
+        let candidate_chain_work = candidate_head.chain_work();
         assert!(current_chain_work < candidate_chain_work, EForkNotEnoughPower);
-        c.rollback(first_header.block_hash(), candidate_head.header().block_hash());
+        c.rollback(first_header.prev_block(), current_block_hash);
+
+        sui::event::emit(InsertHeaderEvent {
+            fork: true,
+            latest_block: *c.latest_block().header()
+        });
     }
 }
 
