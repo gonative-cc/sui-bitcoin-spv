@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
-use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkNotEnoughPower};
+use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkNotEnoughPower, EBlockDoesnotExist};
 use sui::test_scenario;
 
 
@@ -34,7 +34,21 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
 
 #[test]
 fun insert_headers_switch_fork_tests() {
-
+     let headers = vector[
+        x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
+        x"000000302ba076eb907ec3c060954d36dfcf0e735c815c9531f6d44667aa32f5999f412d813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f9dc5b167ffff7f2001000000",
+        x"00000030525bda2756ff6f9e440c91590490462ac33e0fedb05b1558cfd3f7ce90920d16cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d45259dc5b167ffff7f2002000000",
+        x"000000306052592f4f0e4886a0eca2c1d154e8b9761e011b4f7b3a00908e2a830f7f6c6a4e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a9dc5b167ffff7f2001000000",
+        x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
+        x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000"
+    ];
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let ctx = scenario.ctx();
+    let mut lc = new_lc_for_test(ctx);
+    lc.insert_headers(headers);
+    sui::test_utils::destroy(lc);
+    scenario.end();
 }
 
 #[test]
@@ -46,7 +60,25 @@ fun insert_headers_fork_not_enought_power_tests() {
         x"00000030525bda2756ff6f9e440c91590490462ac33e0fedb05b1558cfd3f7ce90920d16cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d45259dc5b167ffff7f2002000000",
         x"000000306052592f4f0e4886a0eca2c1d154e8b9761e011b4f7b3a00908e2a830f7f6c6a4e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a9dc5b167ffff7f2001000000",
         x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
-        x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000"
+    ];
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let ctx = scenario.ctx();
+    let mut lc = new_lc_for_test(ctx);
+    lc.insert_headers(headers);
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+
+
+#[test]
+#[expected_failure(abort_code = EBlockDoesnotExist)]
+fun insert_headers_block_doesnot_exist() {
+
+    // we modifed the previous hash
+    // previous hash = db0338a432b1242c3bd22c245583e31788feaa6cb189673877b92f2a34eaf460 = sha256("This is null")
+    let headers = vector[
+        x"00000030db0338a432b1242c3bd22c245583e31788feaa6cb189673877b92f2a34eaf4606be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
     ];
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);

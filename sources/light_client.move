@@ -6,7 +6,6 @@ use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
 
-use sui::dynamic_object_field as dof;
 use sui::dynamic_field as df;
 
 const EBlockHashNotMatch: u64 = 1;
@@ -155,6 +154,15 @@ public(package) fun insert_header(c: &mut LightClient, current_block_hash: vecto
     next_header.block_hash()
 }
 
+fun extend_chain_from_block(c: &mut LightClient, start_point: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
+    let mut previous_block_hash = start_point;
+    raw_headers.do!(|raw_header| {
+        let header = new_block_header(raw_header);
+        previous_block_hash = c.insert_header(previous_block_hash, header);
+    });
+
+    previous_block_hash
+}
 
 public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>) {
     // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
@@ -162,32 +170,21 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 
     let first_header = new_block_header(raw_headers[0]);
     let latest_block_hash = c.latest_block().header().block_hash();
+
     if (first_header.prev_block() == latest_block_hash) {
         // extend current fork
-        let mut previous_block_hash = latest_block_hash;
-        raw_headers.do!(|raw_header| {
-            let header = new_block_header(raw_header);
-            previous_block_hash = c.insert_header(previous_block_hash, header);
-        });
+       c.extend_chain_from_block(first_header.prev_block(), raw_headers);
     } else {
-        // choice fork
-        // TODO: error here
+        // handle a fork choice
+
         assert!(c.exist(first_header.prev_block()), EBlockDoesnotExist);
-        let mut parent_block_hash = first_header.prev_block();
-
         let current_chain_work = c.latest_block().chain_work();
+        let candidate_fork_head_hash = c.extend_chain_from_block(first_header.prev_block(), raw_headers);
 
-        raw_headers.do!(|raw_header| {
-            let header = new_block_header(raw_header);
-            parent_block_hash = c.insert_header(parent_block_hash, header);
-        });
-
-        let parent_block = c.get_light_block_by_hash(parent_block_hash);
-        // let q = parent_block.chain_work();
-        assert!(current_chain_work < parent_block.chain_work(), EForkNotEnoughPower);
-        // remove other fork which is less power than.
-        let parent_header = parent_block.header();
-        c.rollback(first_header.block_hash(), parent_header.block_hash());
+        let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
+        let candidate_chain_work= candidate_head.chain_work();
+        assert!(current_chain_work < candidate_chain_work, EForkNotEnoughPower);
+        c.rollback(first_header.block_hash(), candidate_head.header().block_hash());
     }
 }
 
@@ -197,8 +194,6 @@ public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, h
     // B/c if this happend then this is just out of gas to run.
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
-        std::debug::print(&block_hash);
-        std::debug::print(&checkpoint_hash);
         let previous_block_hash = c.get_light_block_by_hash(block_hash).header().prev_block();
         c.remove_light_block(block_hash);
         block_hash = previous_block_hash;
