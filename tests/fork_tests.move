@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
-use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkNotEnoughPower, EBlockDoesnotExist};
+use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkNotEnoughPower, EBlockNotFound};
 use sui::test_scenario;
 
 
@@ -72,7 +72,7 @@ fun insert_headers_fork_not_enought_power_tests() {
 
 
 #[test]
-#[expected_failure(abort_code = EBlockDoesnotExist)]
+#[expected_failure(abort_code = EBlockNotFound)]
 fun insert_headers_block_doesnot_exist() {
 
     // we modifed the previous hash

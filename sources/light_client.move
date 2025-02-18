@@ -119,15 +119,15 @@ public fun new_btc_light_client(
         1 => testnet_params(),
         _ => regtest_params()
     };
-    let lc = new_light_client(params, start_height, start_headers, pre_start_chain_work, ctx);
+    let lc = new_light_client(params, start_height, start_headers, start_chain_work, ctx);
     transfer::share_object(lc);
 }
 
 // === Entry methods ===
 /// insert new header to bitcoin spv
 // parent: hash of the parent block, must be already recorded in the light client.
-public(package) fun insert_header(c: &mut LightClient, parent: vector<u8>, next_header: BlockHeader): vector<u8> {
-    let current_block = c.get_light_block_by_hash(current_block_hash);
+public(package) fun insert_header(c: &mut LightClient, parent_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
+    let current_block = c.get_light_block_by_hash(parent_block_hash);
     let current_header = current_block.header();
 
     // verify new header
@@ -155,8 +155,8 @@ public(package) fun insert_header(c: &mut LightClient, parent: vector<u8>, next_
     next_header.block_hash()
 }
 
-fun extend_chain(c: &mut LightClient, parent: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
-    let mut previous_block_hash = start_point;
+fun extend_chain(c: &mut LightClient, parent_block_hash: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
+    let mut previous_block_hash = parent_block_hash;
     raw_headers.do!(|raw_header| {
         let header = new_block_header(raw_header);
         previous_block_hash = c.insert_header(previous_block_hash, header);
@@ -174,18 +174,20 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 
     if (first_header.prev_block() == latest_block_hash) {
         // extend current fork
-       c.extend_chain_from_block(first_header.prev_block(), raw_headers);
+       c.extend_chain(first_header.prev_block(), raw_headers);
     } else {
         // handle a fork choice
 
-        assert!(c.exist(first_header.prev_block()), EBlockDoesnotExist);
+        assert!(c.exist(first_header.prev_block()), EBlockNotFound);
         let current_chain_work = c.latest_block().chain_work();
-        let candidate_fork_head_hash = c.extend_chain_from_block(first_header.prev_block(), raw_headers);
+        let current_block_hash = c.latest_block().header().block_hash();
+
+        let candidate_fork_head_hash = c.extend_chain(first_header.prev_block(), raw_headers);
 
         let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
         let candidate_chain_work= candidate_head.chain_work();
         assert!(current_chain_work < candidate_chain_work, EForkNotEnoughPower);
-        c.rollback(first_header.block_hash(), candidate_head.header().block_hash());
+        c.rollback(first_header.prev_block(), current_block_hash);
     }
 }
 
@@ -370,7 +372,7 @@ public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
 
 public(package) fun set_block_header_by_height(c: &mut LightClient, height: u64, block_header: BlockHeader) {
     let cm = c.client_id_mut();
-    df::remove_if_exists<u64, BlockHeader>(c.cm, height);
+    df::remove_if_exists<u64, BlockHeader>(cm, height);
     df::add(cm, height, block_header);
 }
 

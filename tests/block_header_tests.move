@@ -25,7 +25,7 @@ fun block_header_test() {
     assert!(
         header.block_hash() == x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000",
     );
-    assert!(header.calc_work() == 110026583797767945308373);
+    assert!(header.calc_work() == 220053167595535890616746);
 }
 
 #[test]
