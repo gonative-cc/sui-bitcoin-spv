@@ -15,6 +15,21 @@ const EHeaderListIsEmpty: u64 = 4;
 const EBlockDoesnotExist: u64 = 5;
 const EForkNotEnoughPower: u64 = 6;
 
+public struct ExistEvent has copy, drop {
+    block_hash: vector<u8>,
+    exist: bool
+}
+
+public struct LatestBlockEvent has drop, copy{
+    light_block: LightBlock
+}
+
+public struct VerifyTxEvent has copy, drop{
+    height: u64,
+    tx_id: vector<u8>,
+    result: bool,
+    block_hash: vector<u8>
+}
 
 public struct InsertHeaderEvent has copy, drop {
     fork: bool,
@@ -241,6 +256,9 @@ public fun latest_block(c: &LightClient): &LightBlock {
     let height = c.latest_height();
     let block_hash = c.get_block_header_by_height(height).block_hash();
     let b = c.get_light_block_by_hash(block_hash);
+    sui::event::emit(LatestBlockEvent {
+        light_block: *b
+    });
     b
 }
 
@@ -261,6 +279,12 @@ public fun verify_tx(
     let header = c.get_block_header_by_height(height);
     let merkle_root = header.merkle_root();
     let result = verify_merkle_proof(merkle_root, proof, tx_id, tx_index);
+    sui::event::emit(VerifyTxEvent {
+        block_hash: header.block_hash(),
+        height,
+        tx_id,
+        result,
+    });
     result
 }
 
@@ -396,6 +420,10 @@ public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &L
 
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
     let exist = df::exists_(lc.client_id(), block_hash);
+    sui::event::emit(ExistEvent {
+        block_hash,
+        exist
+    });
     exist
 }
 
