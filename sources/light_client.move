@@ -162,6 +162,7 @@ fun extend_chain(c: &mut LightClient, parent_block_hash: vector<u8>, raw_headers
     previous_block_hash
 }
 
+
 public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>) {
     // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
     assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
@@ -180,9 +181,13 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 
         let candidate_fork_head_hash = c.extend_chain(first_header.prev_block(), raw_headers);
         let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
-        let candidate_chain_work= candidate_head.chain_work();
+        let candidate_chain_work = candidate_head.chain_work();
 
         assert!(current_chain_work < candidate_chain_work, EForkNotEnoughPower);
+        // If transaction not abort. This is the current chain is less power than
+        // the fork. We will update the fork to main chain and remove the old fork
+        // notes: current_block_hash is hash of the old fork/chain in this case.
+        // TODO(vu): Make it more simple.
         c.rollback(first_header.prev_block(), current_block_hash);
     }
 }
