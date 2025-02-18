@@ -124,32 +124,30 @@ public fun new_btc_light_client(
 }
 
 // === Entry methods ===
-/// insert new header to bitcoin spv
+// insert new header to bitcoin spv
 // parent: hash of the parent block, must be already recorded in the light client.
 public(package) fun insert_header(c: &mut LightClient, parent_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
-    let current_block = c.get_light_block_by_hash(parent_block_hash);
-    let current_header = current_block.header();
+    let parent_block = c.get_light_block_by_hash(parent_block_hash);
+    let parent_header = parent_block.header();
 
     // verify new header
-    assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
+    assert!(parent_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+    let next_block_difficulty = calc_next_required_difficulty(c, parent_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
-
 
     // https://learnmeabitcoin.com/technical/block/time
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
-    let median_time = c.calc_past_median_time(current_block);
-    assert!(next_header.timestamp() >= median_time, ETimeTooOld);
+    let median_time = c.calc_past_median_time(parent_block);
+    assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
 
     // update new header
-    let next_height = current_block.height() + 1;
-    let next_chain_work = current_block.chain_work() + next_header.calc_work();
+    let next_height = parent_block.height() + 1;
+    let next_chain_work = parent_block.chain_work() + next_header.calc_work();
     let next_light_block = new_light_block(next_height, next_header, next_chain_work);
 
     c.finalized_height = next_height;
-
     c.add_light_block(next_light_block);
     c.set_block_header_by_height(next_height, next_header);
     next_header.block_hash()
@@ -161,7 +159,6 @@ fun extend_chain(c: &mut LightClient, parent_block_hash: vector<u8>, raw_headers
         let header = new_block_header(raw_header);
         previous_block_hash = c.insert_header(previous_block_hash, header);
     });
-
     previous_block_hash
 }
 
@@ -177,15 +174,14 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
        c.extend_chain(first_header.prev_block(), raw_headers);
     } else {
         // handle a fork choice
-
         assert!(c.exist(first_header.prev_block()), EBlockNotFound);
         let current_chain_work = c.latest_block().chain_work();
         let current_block_hash = c.latest_block().header().block_hash();
 
         let candidate_fork_head_hash = c.extend_chain(first_header.prev_block(), raw_headers);
-
         let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
         let candidate_chain_work= candidate_head.chain_work();
+
         assert!(current_chain_work < candidate_chain_work, EForkNotEnoughPower);
         c.rollback(first_header.prev_block(), current_block_hash);
     }
@@ -346,7 +342,6 @@ fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
     let size = timestamps.length();
     nth_element(&mut timestamps, size / 2)
 }
-
 
 
 // update and query data
