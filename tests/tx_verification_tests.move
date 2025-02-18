@@ -17,11 +17,13 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
 
 
 #[test_only]
-// a sample valid (height, tx_id, proof, tx_index)
-fun sample_data(): (u64, vector<u8>, vector<vector<u8>>, u64) {
+// a sample valid (block_hash, tx_id, proof, tx_index)
+fun sample_data(lc: &LightClient): (vector<u8>, vector<u8>, vector<vector<u8>>, u64) {
     let height = 858816;
     let tx_id = x"a1a81fcc85f94d84a7920aadf456c64a93ffab20dba7066124ba9bd7ef2b262a";
     let tx_index = 99;
+    let block = lc.get_block_header_by_height(height);
+
     let proof = vector[
         x"3226b3fd4e459a18d8e354750ba7802721076ec2b9a0b62704a79362a46d969c",
         x"9f2d6dd28be8e5c90c2c17f23092c0a8837df337cebdead83f0ddee9f18c3bd6",
@@ -38,7 +40,7 @@ fun sample_data(): (u64, vector<u8>, vector<vector<u8>>, u64) {
     ];
 
      (
-        height, tx_id, proof, tx_index
+        block.block_hash(), tx_id, proof, tx_index
     )
 }
 
@@ -49,24 +51,24 @@ fun test_verify_tx() {
     let mut scenario = test_scenario::begin(sender);
     let lc = new_lc_for_test(scenario.ctx());
 
-    let (height, tx_id, proof, tx_index) = sample_data();
-    let res = lc.verify_tx(height, tx_id, proof, tx_index);
+    let (block_hash, tx_id, proof, tx_index) = sample_data(&lc);
+    let res = lc.verify_tx(block_hash, tx_id, proof, tx_index);
     assert!(res == true);
 
-    let (height, tx_id, proof, _) = sample_data();
+    let (block_hash, tx_id, proof, _) = sample_data(&lc);
     let tx_index = 100;
-    let res = lc.verify_tx(height, tx_id, proof, tx_index);
+    let res = lc.verify_tx(block_hash, tx_id, proof, tx_index);
     assert!(res == false);
 
-    let (height, _, proof, tx_index) = sample_data();
+    let (block_hash, _, proof, tx_index) = sample_data(&lc);
     let tx_id = x"010203";
-    let res = lc.verify_tx(height, tx_id, proof, tx_index);
+    let res = lc.verify_tx(block_hash, tx_id, proof, tx_index);
     assert!(res == false);
 
 
-    let (height, tx_id, _, tx_index) = sample_data();
+    let (block_hash, tx_id, _, tx_index) = sample_data(&lc);
     let proof = vector[];
-    let res = lc.verify_tx(height, tx_id, proof, tx_index);
+    let res = lc.verify_tx(block_hash, tx_id, proof, tx_index);
     assert!(res == false);
 
     sui::test_utils::destroy(lc);

@@ -25,7 +25,6 @@ public struct LatestBlockEvent has drop, copy{
 }
 
 public struct VerifyTxEvent has copy, drop{
-    height: u64,
     tx_id: vector<u8>,
     result: bool,
     block_hash: vector<u8>
@@ -269,19 +268,18 @@ public fun latest_block(c: &LightClient): &LightBlock {
 /// We use little endian encoding for all data.
 public fun verify_tx(
     c: &LightClient,
-    height: u64,
+    block_hash: vector<u8>,
     tx_id: vector<u8>,
     proof: vector<vector<u8>>,
     tx_index: u64
 ): bool {
     // TODO: update this when we have APIs for finalized block.
     // TODO: handle: light block/block_header not exist.
-    let header = c.get_block_header_by_height(height);
+    let header = c.get_light_block_by_hash(block_hash).header();
     let merkle_root = header.merkle_root();
     let result = verify_merkle_proof(merkle_root, proof, tx_id, tx_index);
     sui::event::emit(VerifyTxEvent {
         block_hash: header.block_hash(),
-        height,
         tx_id,
         result,
     });
