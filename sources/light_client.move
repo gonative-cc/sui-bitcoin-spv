@@ -12,7 +12,7 @@ const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
 const ETimeTooOld: u64 = 3;
 const EHeaderListIsEmpty: u64 = 4;
-const EBlockDoesnotExist: u64 = 5;
+const EBlockNotFound: u64 = 5;
 const EForkNotEnoughPower: u64 = 6;
 
 public struct Params has store{
@@ -39,6 +39,7 @@ public fun testnet_params(): Params {
 }
 
 // default params for bitcoin regtest
+// https://github.com/bitcoin/bitcoin/blob/v28.1/src/kernel/chainparams.cpp#L523
 public fun regtest_params(): Params {
     return Params {
         power_limit: 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
@@ -97,11 +98,10 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
         start_headers.do!(|raw_header| {
             let header = new_block_header(raw_header);
             let light_block = new_light_block(height, header, current_chain_work);
-            let header_calc_work = light_block.header().calc_work();
             lc.set_block_header_by_height(height, header);
             lc.add_light_block(light_block);
             height = height + 1;
-            current_chain_work = current_chain_work + header_calc_work;
+            current_chain_work = current_chain_work + light_block.header().calc_work();
         });
 
         lc.finalized_height = height - 1;
@@ -112,7 +112,7 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
 // Helper function to initialize new light client.
 // network: 0 = mainnet, 1 = testnet
 public fun new_btc_light_client(
-    network: u8, start_height: u64, start_headers: vector<vector<u8>>, pre_start_chain_work: u256, ctx: &mut TxContext
+    network: u8, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext
 )  {
     let params = match (network) {
         0 => mainnet_params(),
@@ -125,7 +125,8 @@ public fun new_btc_light_client(
 
 // === Entry methods ===
 /// insert new header to bitcoin spv
-public(package) fun insert_header(c: &mut LightClient, current_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
+// parent: hash of the parent block, must be already recorded in the light client.
+public(package) fun insert_header(c: &mut LightClient, parent: vector<u8>, next_header: BlockHeader): vector<u8> {
     let current_block = c.get_light_block_by_hash(current_block_hash);
     let current_header = current_block.header();
 
@@ -154,7 +155,7 @@ public(package) fun insert_header(c: &mut LightClient, current_block_hash: vecto
     next_header.block_hash()
 }
 
-fun extend_chain_from_block(c: &mut LightClient, start_point: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
+fun extend_chain(c: &mut LightClient, parent: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
     let mut previous_block_hash = start_point;
     raw_headers.do!(|raw_header| {
         let header = new_block_header(raw_header);
@@ -210,8 +211,7 @@ public fun latest_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_height();
     let block_hash = c.get_block_header_by_height(height).block_hash();
-    let b = c.get_light_block_by_hash(block_hash);
-    b
+    c.get_light_block_by_hash(block_hash)
 }
 
 
@@ -230,8 +230,7 @@ public fun verify_tx(
     // TODO: handle: light block/block_header not exist.
     let header = c.get_block_header_by_height(height);
     let merkle_root = header.merkle_root();
-    let result = verify_merkle_proof(merkle_root, proof, tx_id, tx_index);
-    result
+    verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
 }
 
 public fun params(c: &LightClient): &Params{
@@ -370,8 +369,9 @@ public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
 }
 
 public(package) fun set_block_header_by_height(c: &mut LightClient, height: u64, block_header: BlockHeader) {
-    df::remove_if_exists<u64, BlockHeader>(c.client_id_mut(), height);
-    df::add(c.client_id_mut(), height, block_header);
+    let cm = c.client_id_mut();
+    df::remove_if_exists<u64, BlockHeader>(c.cm, height);
+    df::add(cm, height, block_header);
 }
 
 public fun get_block_header_by_height(c: &LightClient, height: u64): &BlockHeader {

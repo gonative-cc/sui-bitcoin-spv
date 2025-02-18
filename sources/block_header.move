@@ -58,8 +58,8 @@ public fun target(header: &BlockHeader): u256 {
 
 public fun calc_work(header: &BlockHeader): u256 {
     // We compute the total expected hashes or expected "calc_work".
-    // calc_work of header = 2**256 / (target+1).
-    // This is a very clever way to compute this value from bitcoin core (replicate comments from bitcoin core):
+    //    calc_work of header = 2**256 / (target+1).
+    // This is a very clever way to compute this value from bitcoin core. Comments from the bitcoin core:
     // We need to compute 2**256 / (bnTarget+1), but we can't represent 2**256
     // as it's too large for an arith_uint256. However, as 2**256 is at least as large
     // as bnTarget+1, it is equal to ((2**256 - bnTarget - 1) / (bnTarget+1)) + 1,
