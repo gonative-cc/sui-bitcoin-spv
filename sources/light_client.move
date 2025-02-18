@@ -20,10 +20,9 @@ public struct ExistEvent has copy, drop {
     exist: bool
 }
 
-public struct LatestBlockEvent has drop, copy{
+public struct LatestBlockEvent has copy, drop{
     light_block_hash: vector<u8>,
     height: u64
-
 }
 
 public struct VerifyTxEvent has copy, drop{
@@ -257,11 +256,24 @@ public fun latest_block(c: &LightClient): &LightBlock {
     let height = c.latest_height();
     let block_hash = c.get_block_header_by_height(height).block_hash();
     let b = c.get_light_block_by_hash(block_hash);
+    let hash = b.header().block_hash();
     sui::event::emit(LatestBlockEvent {
-        light_block_hash: b.header().block_hash(),
+        light_block_hash: hash,
         height: b.height()
     });
     b
+}
+
+public fun latest_block_hash(c: &LightClient) {
+    let height = c.latest_height();
+    let block_hash = c.get_block_header_by_height(height).block_hash();
+    let b = c.get_light_block_by_hash(block_hash);
+    let hash = b.header().block_hash();
+    sui::event::emit(LatestBlockEvent {
+        light_block_hash: hash,
+        height: b.height()
+    });
+
 }
 
 
