@@ -69,7 +69,8 @@ public fun calc_work(header: &BlockHeader): u256 {
     // A move language doesn't support ~ operator. However, we have 2**256 - 1 = 2**255 - 1 + 2*255;
     // so we have formula bellow:
     let target = header.target();
-    return (((1 << 255) - 1 - target + (1 << 255)) / (target + 1)) + 1
+    let n255 = 1 << 255;
+    return (n255 - 1 - target + n255) / (target + 1) + 1
 }
 
 // fails if block hash doesn't meet target requirement
