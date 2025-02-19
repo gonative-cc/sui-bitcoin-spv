@@ -122,7 +122,7 @@ public fun new_light_client(
         1 => testnet_params(),
         _ => regtest_params()
     };
-    let lc = new_light_client(params, start_height, start_headers, start_chain_work, ctx);
+    let lc = new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
     transfer::share_object(lc);
 }
 
