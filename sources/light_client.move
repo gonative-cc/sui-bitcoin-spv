@@ -130,6 +130,7 @@ public fun new_light_client(
 // insert new header to bitcoin spv
 // parent: hash of the parent block, must be already recorded in the light client.
 // NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be only called internally.
+// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be only called internally.
 public(package) fun insert_header(c: &mut LightClient, parent_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
     let parent_block = c.get_light_block_by_hash(parent_block_hash);
     let parent_header = parent_block.header();
