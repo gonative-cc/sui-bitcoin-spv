@@ -88,7 +88,7 @@ fun init(_ctx: &mut TxContext) {
 ///
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public(package) fun new_light_client(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
+public(package) fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -114,7 +114,7 @@ public(package) fun new_light_client(params: Params, start_height: u64, trusted_
 
 // Helper function to initialize new light client.
 // network: 0 = mainnet, 1 = testnet
-public fun new_btc_light_client(
+public fun new_light_client(
     network: u8, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext
 )  {
     let params = match (network) {
@@ -129,6 +129,7 @@ public fun new_btc_light_client(
 
 // insert new header to bitcoin spv
 // parent: hash of the parent block, must be already recorded in the light client.
+// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be only called internally.
 public(package) fun insert_header(c: &mut LightClient, parent_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
     let parent_block = c.get_light_block_by_hash(parent_block_hash);
     let parent_header = parent_block.header();
@@ -166,7 +167,7 @@ fun extend_chain(c: &mut LightClient, parent_block_hash: vector<u8>, raw_headers
 }
 
 
-/// Detele all block between head_hash to checkpoint_hash
+/// Delete all blocks between head_hash to checkpoint_hash
 public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
     // TODO: Should we handle the case head hash never reach to checkpoint?
     // B/c if this happend then this is just out of gas to run.
