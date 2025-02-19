@@ -1,8 +1,8 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
+use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkChainWorkTooSmall, EBlockNotFound};
 use sui::test_scenario;
-
 
 #[test_only]
 fun new_lc_for_test(ctx: &mut TxContext): LightClient {
@@ -45,8 +45,27 @@ fun insert_headers_switch_fork_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
+
     let mut lc = new_lc_for_test(ctx);
+
+    let first_header = new_block_header(headers[0]);
+    let last_header = new_block_header(headers[headers.length() - 1]);
+    let mut insert_point = lc.get_light_block_by_hash(first_header.prev_block()).height() + 1;
+
     lc.insert_headers(headers);
+
+    // assert insert new block correct
+    headers.do!(|h| {
+        let lc_header = lc.get_block_header_by_height(insert_point);
+        let inserted_block = lc.get_light_block_by_hash(lc_header.block_hash());
+        assert!(lc_header == new_block_header(h));
+        assert!(inserted_block.height() == insert_point);
+        assert!(inserted_block.header() == lc_header);
+        insert_point = insert_point + 1;
+    });
+
+    assert!(lc.latest_block().height() == insert_point - 1);
+    assert!(lc.latest_block().header() == last_header);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
