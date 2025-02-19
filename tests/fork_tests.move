@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
-use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkNotEnoughPower, EBlockNotFound};
+use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkChainWorkTooSmall, EBlockNotFound};
 use sui::test_scenario;
 
 
@@ -52,7 +52,7 @@ fun insert_headers_switch_fork_tests() {
 }
 
 #[test]
-#[expected_failure(abort_code = EForkNotEnoughPower)]
+#[expected_failure(abort_code = EForkChainWorkTooSmall)]
 fun insert_headers_fork_not_enought_power_tests() {
     let headers = vector[
         x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",

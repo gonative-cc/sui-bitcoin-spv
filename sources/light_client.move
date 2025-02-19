@@ -13,7 +13,7 @@ const EDifficultyNotMatch: u64 = 2;
 const ETimeTooOld: u64 = 3;
 const EHeaderListIsEmpty: u64 = 4;
 const EBlockNotFound: u64 = 5;
-const EForkNotEnoughPower: u64 = 6;
+const EForkChainWorkTooSmall: u64 = 6;
 
 public struct Params has store{
     power_limit: u256,
@@ -183,7 +183,7 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
         let candidate_chain_work = candidate_head.chain_work();
 
-        assert!(current_chain_work < candidate_chain_work, EForkNotEnoughPower);
+        assert!(current_chain_work < candidate_chain_work, EForkChainWorkTooSmall);
         // If transaction not abort. This is the current chain is less power than
         // the fork. We will update the fork to main chain and remove the old fork
         // notes: current_block_hash is hash of the old fork/chain in this case.
