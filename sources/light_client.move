@@ -77,15 +77,11 @@ public struct LightClient has key, store {
 
 // === Init function for module ====
 fun init(_ctx: &mut TxContext) {
-    // let p = mainnet_params();
-    // // https://btcscan.org/block/00000000000003a5e28bef30ad31f1f9be706e91ae9dda54179a95c9f9cd9ad0
-    // let raw_header = x"010000009d6f4e09d579c93015a83e9081fee83a5c8b1ba3c86516b61f0400000000000025399317bb5c7c4daefe8fe2c4dfac0cea7e4e85913cd667030377240cadfe93a4906b50087e051a84297df7";
-    // let lc = new_light_client(p, 201600, vector[raw_header], ctx);
-    // transfer::transfer(lc, tx_context::sender(ctx));
+    // LC creation is permissionless and it's done through new new_btc_light_client.
 }
 
 // initializes Bitcoin light client by providing a trusted snapshot height and header
-public fun new_light_client(params: Params, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
+public(package) fun new_light_client(params: Params, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
