@@ -4,6 +4,9 @@ use bitcoin_spv::block_header::{new_block_header, BlockHeader};
 use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkChainWorkTooSmall, EBlockNotFound};
 use sui::test_scenario;
 
+// Test for fork handle
+// All data gen from https://github.com/gonative-cc/relayer/blob/master/contrib/create-fork.sh
+
 #[test_only]
 fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
     let headers = vector[
