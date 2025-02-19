@@ -1,11 +1,11 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
-use bitcoin_spv::block_header::new_block_header;
+use bitcoin_spv::block_header::{new_block_header, BlockHeader};
 use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkChainWorkTooSmall, EBlockNotFound};
 use sui::test_scenario;
 
 #[test_only]
-fun new_lc_for_test(ctx: &mut TxContext): LightClient {
+fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
     let headers = vector[
         x"00000030759e91f85448e42780695a7c71a6e4f4e845ecd895b19fafaeb6f5e3c030e62233287429255f254a463d90b998ba5523634da7c67ef873268e1db40d1526d5583d5b6167ffff7f2000000000",
         x"0000003058deb19a44c75df6d732d4dc085df09dd053c9f0db5eee57cdbfbe09fe47237776bb7462ac45b258ea7c464a19c11fef595f3e5dfbef2fc31bc94d8aefc7223c3d5b6167ffff7f2000000000",
@@ -28,7 +28,9 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
 
     let params = regtest_params();
     let lc = new_light_client(params, 0, headers, 0, ctx);
-    lc
+
+    let block_headers = headers.map!(|h| new_block_header(h));
+    (lc, block_headers)
 }
 
 
@@ -46,7 +48,7 @@ fun insert_headers_switch_fork_tests() {
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
 
-    let mut lc = new_lc_for_test(ctx);
+    let (mut lc, _) = new_lc_for_test(ctx);
 
     let first_header = new_block_header(headers[0]);
     let last_header = new_block_header(headers[headers.length() - 1]);
@@ -83,7 +85,7 @@ fun insert_headers_fork_not_enought_power_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let mut lc = new_lc_for_test(ctx);
+    let (mut lc, _) = new_lc_for_test(ctx);
     lc.insert_headers(headers);
     sui::test_utils::destroy(lc);
     scenario.end();
@@ -102,7 +104,7 @@ fun insert_headers_block_doesnot_exist() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let mut lc = new_lc_for_test(ctx);
+    let (mut lc, _) = new_lc_for_test(ctx);
     lc.insert_headers(headers);
     sui::test_utils::destroy(lc);
     scenario.end();
@@ -113,12 +115,24 @@ fun rollback_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let mut lc = new_lc_for_test(ctx);
+    let (mut lc, headers) =  new_lc_for_test(ctx);
 
-    let checkpoint = lc.get_block_header_by_height(10).block_hash();
+    let checkpoint = headers[5].block_hash();
     let latest_block = lc.latest_block().header().block_hash();
 
     lc.rollback(checkpoint, latest_block);
+
+    let height = lc.get_light_block_by_hash(checkpoint).height();
+    let mut i = 0u64;
+
+    while (i < headers.length()) {
+        if (i <= height) {
+            assert!(lc.exist(headers[i].block_hash()));
+        } else {
+            assert!(!lc.exist(headers[i].block_hash()));
+        };
+        i = i + 1;
+    };
 
     sui::test_utils::destroy(lc);
     scenario.end();
