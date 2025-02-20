@@ -1,7 +1,7 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
-use bitcoin_spv::light_client::{insert_header, new_light_client, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
+use bitcoin_spv::light_client::{insert_header, new_light_client_with_params, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::block_header::new_block_header;
 
@@ -25,7 +25,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a"
     ];
     let params = mainnet_params();
-    let lc = new_light_client(params, start_block, headers, 0,  ctx);
+    let lc = new_light_client_with_params(params, start_block, headers, 0,  ctx);
     return lc
 }
 

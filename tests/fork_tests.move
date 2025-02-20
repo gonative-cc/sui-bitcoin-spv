@@ -1,11 +1,14 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
-use bitcoin_spv::light_client::{LightClient, new_light_client, regtest_params, EForkNotEnoughPower, EBlockDoesnotExist};
+use bitcoin_spv::block_header::{new_block_header, BlockHeader};
+use bitcoin_spv::light_client::{LightClient, new_light_client_with_params, regtest_params, EForkChainWorkTooSmall, EBlockNotFound};
 use sui::test_scenario;
 
+// Test for fork handle
+// All data gen from https://github.com/gonative-cc/relayer/blob/master/contrib/create-fork.sh
 
 #[test_only]
-fun new_lc_for_test(ctx: &mut TxContext): LightClient {
+fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
     let headers = vector[
         x"00000030759e91f85448e42780695a7c71a6e4f4e845ecd895b19fafaeb6f5e3c030e62233287429255f254a463d90b998ba5523634da7c67ef873268e1db40d1526d5583d5b6167ffff7f2000000000",
         x"0000003058deb19a44c75df6d732d4dc085df09dd053c9f0db5eee57cdbfbe09fe47237776bb7462ac45b258ea7c464a19c11fef595f3e5dfbef2fc31bc94d8aefc7223c3d5b6167ffff7f2000000000",
@@ -27,8 +30,10 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
     ];
 
     let params = regtest_params();
-    let lc = new_light_client(params, 0, headers, 0, ctx);
-    lc
+    let lc = new_light_client_with_params(params, 0, headers, 0, ctx);
+
+    let block_headers = headers.map!(|h| new_block_header(h));
+    (lc, block_headers)
 }
 
 
@@ -45,14 +50,33 @@ fun insert_headers_switch_fork_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let mut lc = new_lc_for_test(ctx);
+
+    let (mut lc, _) = new_lc_for_test(ctx);
+
+    let first_header = new_block_header(headers[0]);
+    let last_header = new_block_header(headers[headers.length() - 1]);
+    let mut insert_point = lc.get_light_block_by_hash(first_header.prev_block()).height() + 1;
+
     lc.insert_headers(headers);
+
+    // assert insert new block correct
+    headers.do!(|h| {
+        let lc_header = lc.get_block_header_by_height(insert_point);
+        let inserted_block = lc.get_light_block_by_hash(lc_header.block_hash());
+        assert!(lc_header == new_block_header(h));
+        assert!(inserted_block.height() == insert_point);
+        assert!(inserted_block.header() == lc_header);
+        insert_point = insert_point + 1;
+    });
+
+    assert!(lc.latest_block().height() == insert_point - 1);
+    assert!(lc.latest_block().header() == last_header);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
 
 #[test]
-#[expected_failure(abort_code = EForkNotEnoughPower)]
+#[expected_failure(abort_code = EForkChainWorkTooSmall)]
 fun insert_headers_fork_not_enought_power_tests() {
     let headers = vector[
         x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
@@ -64,7 +88,7 @@ fun insert_headers_fork_not_enought_power_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let mut lc = new_lc_for_test(ctx);
+    let (mut lc, _) = new_lc_for_test(ctx);
     lc.insert_headers(headers);
     sui::test_utils::destroy(lc);
     scenario.end();
@@ -72,7 +96,7 @@ fun insert_headers_fork_not_enought_power_tests() {
 
 
 #[test]
-#[expected_failure(abort_code = EBlockDoesnotExist)]
+#[expected_failure(abort_code = EBlockNotFound)]
 fun insert_headers_block_doesnot_exist() {
 
     // we modifed the previous hash
@@ -83,7 +107,7 @@ fun insert_headers_block_doesnot_exist() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let mut lc = new_lc_for_test(ctx);
+    let (mut lc, _) = new_lc_for_test(ctx);
     lc.insert_headers(headers);
     sui::test_utils::destroy(lc);
     scenario.end();
@@ -94,12 +118,24 @@ fun rollback_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let mut lc = new_lc_for_test(ctx);
+    let (mut lc, headers) =  new_lc_for_test(ctx);
 
-    let checkpoint = lc.get_block_header_by_height(10).block_hash();
+    let checkpoint = headers[5].block_hash();
     let latest_block = lc.latest_block().header().block_hash();
 
     lc.rollback(checkpoint, latest_block);
+
+    let height = lc.get_light_block_by_hash(checkpoint).height();
+    let mut i = 0u64;
+
+    while (i < headers.length()) {
+        if (i <= height) {
+            assert!(lc.exist(headers[i].block_hash()));
+        } else {
+            assert!(!lc.exist(headers[i].block_hash()));
+        };
+        i = i + 1;
+    };
 
     sui::test_utils::destroy(lc);
     scenario.end();
