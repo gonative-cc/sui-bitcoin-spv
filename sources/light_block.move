@@ -4,7 +4,7 @@ use bitcoin_spv::block_header::BlockHeader;
 
 public struct LightBlock has copy, store, drop {
     height: u64,
-    chain_work: u256,
+    chain_work: u256, // total work
     header: BlockHeader
 }
 

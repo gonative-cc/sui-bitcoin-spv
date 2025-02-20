@@ -12,18 +12,8 @@ const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
 const ETimeTooOld: u64 = 3;
 const EHeaderListIsEmpty: u64 = 4;
-const EBlockDoesnotExist: u64 = 5;
-const EForkNotEnoughPower: u64 = 6;
-
-
-public struct InsertHeaderEvent has copy, drop {
-    fork: bool,
-    latest_block: BlockHeader
-}
-
-public struct CreatedLCEvent has copy, drop{
-    light_client_id: ID,
-}
+const EBlockNotFound: u64 = 5;
+const EForkChainWorkTooSmall: u64 = 6;
 
 public struct Params has store{
     power_limit: u256,
@@ -49,6 +39,7 @@ public fun testnet_params(): Params {
 }
 
 // default params for bitcoin regtest
+// https://github.com/bitcoin/bitcoin/blob/v28.1/src/kernel/chainparams.cpp#L523
 public fun regtest_params(): Params {
     return Params {
         power_limit: 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
@@ -86,15 +77,18 @@ public struct LightClient has key, store {
 
 // === Init function for module ====
 fun init(_ctx: &mut TxContext) {
-    // let p = mainnet_params();
-    // // https://btcscan.org/block/00000000000003a5e28bef30ad31f1f9be706e91ae9dda54179a95c9f9cd9ad0
-    // let raw_header = x"010000009d6f4e09d579c93015a83e9081fee83a5c8b1ba3c86516b61f0400000000000025399317bb5c7c4daefe8fe2c4dfac0cea7e4e85913cd667030377240cadfe93a4906b50087e051a84297df7";
-    // let lc = new_light_client(p, 201600, vector[raw_header], ctx);
-    // transfer::transfer(lc, tx_context::sender(ctx));
+    // LC creation is permissionless and it's done through new new_btc_light_client.
 }
 
-// initializes Bitcoin light client by providing a trusted snapshot height and header
-public fun new_light_client(params: Params, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
+/// Initializes Bitcoin light client by providing a trusted snapshot height and header
+/// params: Mainnet, Testnet or Regtest
+/// start_height: the height of first trust block
+/// trusted_header: The list of trusted header in hex encode.
+/// strart_chain_work: the chain_work at first trusted block.
+///
+/// Encode header reference:
+/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
+public(package) fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -102,123 +96,82 @@ public fun new_light_client(params: Params, start_height: u64, start_headers: ve
     };
 
     let mut current_chain_work = start_chain_work;
-    if (!start_headers.is_empty()) {
+    if (!trusted_headers.is_empty()) {
         let mut height = start_height;
-        start_headers.do!(|raw_header| {
+        trusted_headers.do!(|raw_header| {
             let header = new_block_header(raw_header);
             let light_block = new_light_block(height, header, current_chain_work);
-            let header_calc_work = light_block.header().calc_work();
             lc.set_block_header_by_height(height, header);
             lc.add_light_block(light_block);
             height = height + 1;
-            current_chain_work = current_chain_work + header_calc_work;
+            current_chain_work = current_chain_work + light_block.header().calc_work();
         });
 
         lc.finalized_height = height - 1;
     };
 
-    sui::event::emit(
-        CreatedLCEvent {
-            light_client_id: object::id(&lc),
-
-        }
-    );
     return lc
 }
 
 
 // Helper function to initialize new light client.
 // network: 0 = mainnet, 1 = testnet
-public fun new_btc_light_client(
-    network: u8, start_height: u64, start_headers: vector<vector<u8>>, pre_start_chain_work: u256, ctx: &mut TxContext
+public fun new_light_client(
+    network: u8, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext
 )  {
     let params = match (network) {
         0 => mainnet_params(),
         1 => testnet_params(),
         _ => regtest_params()
     };
-    let lc = new_light_client(params, start_height, start_headers, pre_start_chain_work, ctx);
+    let lc = new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
     transfer::share_object(lc);
 }
 
-// === Entry methods ===
-/// insert new header to bitcoin spv
-public(package) fun insert_header(c: &mut LightClient, current_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
-    let current_block = c.get_light_block_by_hash(current_block_hash);
-    let current_header = current_block.header();
+
+// insert new header to bitcoin spv
+// parent: hash of the parent block, must be already recorded in the light client.
+// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be only called internally.
+// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be only called internally.
+public(package) fun insert_header(c: &mut LightClient, parent_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
+    let parent_block = c.get_light_block_by_hash(parent_block_hash);
+    let parent_header = parent_block.header();
 
     // verify new header
-    assert!(current_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(c, current_block, 0);
+    assert!(parent_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+    let next_block_difficulty = calc_next_required_difficulty(c, parent_block, 0);
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
 
     // https://learnmeabitcoin.com/technical/block/time
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
-    let median_time = c.calc_past_median_time(current_block);
-    assert!(next_header.timestamp() >= median_time, ETimeTooOld);
+    let median_time = c.calc_past_median_time(parent_block);
+    assert!(next_header.timestamp() > median_time, ETimeTooOld);
     next_header.pow_check();
 
     // update new header
-    let next_height = current_block.height() + 1;
-    let next_chain_work = current_block.chain_work() + next_header.calc_work();
+    let next_height = parent_block.height() + 1;
+    let next_chain_work = parent_block.chain_work() + next_header.calc_work();
     let next_light_block = new_light_block(next_height, next_header, next_chain_work);
 
     c.finalized_height = next_height;
-
     c.add_light_block(next_light_block);
     c.set_block_header_by_height(next_height, next_header);
     next_header.block_hash()
 }
 
-fun extend_chain_from_block(c: &mut LightClient, start_point: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
-    let mut previous_block_hash = start_point;
+fun extend_chain(c: &mut LightClient, parent_block_hash: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
+    let mut previous_block_hash = parent_block_hash;
     raw_headers.do!(|raw_header| {
         let header = new_block_header(raw_header);
         previous_block_hash = c.insert_header(previous_block_hash, header);
     });
-
     previous_block_hash
 }
 
-public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>) {
-    // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
-    assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
-    let first_header = new_block_header(raw_headers[0]);
-    let latest_block_hash = c.latest_block().header().block_hash();
-
-    if (first_header.prev_block() == latest_block_hash) {
-        // extend current fork
-        c.extend_chain_from_block(first_header.prev_block(), raw_headers);
-
-        sui::event::emit(InsertHeaderEvent {
-            fork: false,
-            latest_block: *c.latest_block().header()
-        });
-    } else {
-        // handle a fork choice
-
-        assert!(c.exist(first_header.prev_block()), EBlockDoesnotExist);
-        let current_chain_work = c.latest_block().chain_work();
-        let current_block_hash = c.latest_block().header().block_hash();
-
-        let candidate_fork_head_hash = c.extend_chain_from_block(first_header.prev_block(), raw_headers);
-
-        let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
-        let candidate_chain_work = candidate_head.chain_work();
-        assert!(current_chain_work < candidate_chain_work, EForkNotEnoughPower);
-        c.rollback(first_header.prev_block(), current_block_hash);
-
-        sui::event::emit(InsertHeaderEvent {
-            fork: true,
-            latest_block: *c.latest_block().header()
-        });
-    }
-}
-
-/// Detele all block between head_hash to checkpoint_hash
+/// Delete all blocks between head_hash to checkpoint_hash
 public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
     // TODO: Should we handle the case head hash never reach to checkpoint?
     // B/c if this happend then this is just out of gas to run.
@@ -240,8 +193,7 @@ public fun latest_block(c: &LightClient): &LightBlock {
     // TODO: decide return type
     let height = c.latest_height();
     let block_hash = c.get_block_header_by_height(height).block_hash();
-    let b = c.get_light_block_by_hash(block_hash);
-    b
+    c.get_light_block_by_hash(block_hash)
 }
 
 
@@ -260,8 +212,7 @@ public fun verify_tx(
     // TODO: handle: light block/block_header not exist.
     let header = c.get_block_header_by_height(height);
     let merkle_root = header.merkle_root();
-    let result = verify_merkle_proof(merkle_root, proof, tx_id, tx_index);
-    result
+    verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
 }
 
 public fun params(c: &LightClient): &Params{
@@ -377,7 +328,6 @@ fun calc_past_median_time(c: &LightClient, lb: &LightBlock): u32 {
 }
 
 
-
 // update and query data
 public(package) fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
@@ -400,11 +350,15 @@ public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
 }
 
 public(package) fun set_block_header_by_height(c: &mut LightClient, height: u64, block_header: BlockHeader) {
-    df::remove_if_exists<u64, BlockHeader>(c.client_id_mut(), height);
-    df::add(c.client_id_mut(), height, block_header);
+    let cm = c.client_id_mut();
+    df::remove_if_exists<u64, BlockHeader>(cm, height);
+    df::add(cm, height, block_header);
 }
 
 public fun get_block_header_by_height(c: &LightClient, height: u64): &BlockHeader {
+    // TODO: optimize state because we store header twin,
+    // one in height => header, one in block hash => light block
+    // https://github.com/gonative-cc/move-bitcoin-spv/issues/37
     df::borrow(c.client_id(), height)
 }
 
@@ -412,4 +366,34 @@ public(package) fun set_latest_block(c: &mut LightClient, light_block: LightBloc
     c.add_light_block(light_block);
     c.set_block_header_by_height(light_block.height(), *light_block.header());
     c.finalized_height = light_block.height();
+}
+
+// === Entry methods ===
+public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<u8>>) {
+    // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
+    assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
+
+    let first_header = new_block_header(raw_headers[0]);
+    let latest_block_hash = c.latest_block().header().block_hash();
+
+    if (first_header.prev_block() == latest_block_hash) {
+        // extend current fork
+       c.extend_chain(first_header.prev_block(), raw_headers);
+    } else {
+        // handle a fork choice
+        assert!(c.exist(first_header.prev_block()), EBlockNotFound);
+        let current_chain_work = c.latest_block().chain_work();
+        let current_block_hash = c.latest_block().header().block_hash();
+
+        let candidate_fork_head_hash = c.extend_chain(first_header.prev_block(), raw_headers);
+        let candidate_head = c.get_light_block_by_hash(candidate_fork_head_hash);
+        let candidate_chain_work = candidate_head.chain_work();
+
+        assert!(current_chain_work < candidate_chain_work, EForkChainWorkTooSmall);
+        // If transaction not abort. This is the current chain is less power than
+        // the fork. We will update the fork to main chain and remove the old fork
+        // notes: current_block_hash is hash of the old fork/chain in this case.
+        // TODO(vu): Make it more simple.
+        c.rollback(first_header.prev_block(), current_block_hash);
+    }
 }
