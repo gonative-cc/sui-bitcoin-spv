@@ -21,7 +21,8 @@ public struct Params has store{
     /// time in seconds when we update the target
     target_timespan: u64,
     pow_no_retargeting: bool,
-    reduce_min_difficulty: bool
+    reduce_min_difficulty: bool,
+    min_diff_reduction_time: u64,
 }
 
 // default params for bitcoin mainnet
@@ -32,6 +33,7 @@ public fun mainnet_params(): Params {
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
         reduce_min_difficulty: false,
+        min_diff_reduction_time: 0,
     }
 }
 
@@ -43,6 +45,7 @@ public fun testnet_params(): Params {
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
         reduce_min_difficulty: true,
+        min_diff_reduction_time: 20 * 60, // 20 minutes
     }
 }
 
@@ -55,6 +58,7 @@ public fun regtest_params(): Params {
         target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
         pow_no_retargeting: true,
         reduce_min_difficulty: false,
+        min_diff_reduction_time: 20 * 60, // 20 minutes
     }
 }
 
@@ -78,6 +82,9 @@ public fun reduce_min_difficulty(p: &Params): bool {
     p.reduce_min_difficulty
 }
 
+public fun min_diff_reduction_time(p: &Params): u64 {
+    p.min_diff_reduction_time
+}
 /*
  * Light Client
  */
