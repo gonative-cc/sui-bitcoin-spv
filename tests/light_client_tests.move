@@ -1,9 +1,11 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
-use bitcoin_spv::light_client::{insert_header, new_light_client_with_params, LightClient, mainnet_params, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
+use bitcoin_spv::light_client::{insert_header, new_light_client_with_params, LightClient, mainnet_params, testnet_params, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::block_header::new_block_header;
+
+use bitcoin_spv::btc_math::to_u32;
 
 use sui::test_scenario;
 

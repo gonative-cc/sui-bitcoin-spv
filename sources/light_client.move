@@ -152,14 +152,13 @@ public fun new_light_client(
 // insert new header to bitcoin spv
 // parent: hash of the parent block, must be already recorded in the light client.
 // NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be only called internally.
-// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be only called internally.
 public(package) fun insert_header(c: &mut LightClient, parent_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
     let parent_block = c.get_light_block_by_hash(parent_block_hash);
     let parent_header = parent_block.header();
 
     // verify new header
     assert!(parent_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(c, parent_block, 0);
+    let next_block_difficulty = calc_next_required_difficulty(c, parent_block, next_header.timestamp());
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
 
@@ -275,8 +274,9 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
                 // TODO: add power limit bits to params
                 let power_limit = params.power_limit();
                 return target_to_bits(power_limit)
-            }
+            };
 
+            return find_prev_test_net_difficulty(c, last_block)
 
         };
 
@@ -307,7 +307,7 @@ fun find_prev_test_net_difficulty(c: &LightClient, start_node: &LightBlock): u32
     while (
         iter_block.height() != 0 &&
         iter_block.height() % p.blocks_pre_retarget() != 0 &&
-        iter_block.header().bits() != power_limit_bits
+        iter_block.header().bits() == power_limit_bits
     ){
         iter_block = c.relative_ancestor(iter_block, 1); // parent_block
     };
