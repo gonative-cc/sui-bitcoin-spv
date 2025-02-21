@@ -22,7 +22,7 @@ public struct Params has store{
     target_timespan: u64,
     pow_no_retargeting: bool,
     reduce_min_difficulty: bool,
-    min_diff_reduction_time: u64,
+    min_diff_reduction_time: u32,
 }
 
 // default params for bitcoin mainnet
@@ -82,7 +82,7 @@ public fun reduce_min_difficulty(p: &Params): bool {
     p.reduce_min_difficulty
 }
 
-public fun min_diff_reduction_time(p: &Params): u64 {
+public fun min_diff_reduction_time(p: &Params): u32 {
     p.min_diff_reduction_time
 }
 /*
@@ -254,7 +254,7 @@ public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &
 
 // last_block is a new block that we are adding. The function calculates the required difficulty for the block
 // after the passed the `last_block`.
-public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBlock, _new_block_time: u32) : u32 {
+public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBlock, new_block_time: u32) : u32 {
     // reference from https://github.com/btcsuite/btcd/blob/master/blockchain/difficulty.go#L136
     // TODO: handle lastHeader is nil or genesis block
     let params = c.params();
@@ -269,6 +269,14 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     if ((last_block.height() + 1) % blocks_pre_retarget != 0) {
 
         if (params.reduce_min_difficulty()) {
+            let reduction_time = params.min_diff_reduction_time();
+            let allow_min_time = last_block.header().timestamp() + reduction_time;
+            if (new_block_time > allow_min_time) {
+                // TODO: add power limit bits to params
+                let power_limit = params.power_limit();
+                return target_to_bits(power_limit)
+            }
+
 
         };
 
@@ -287,6 +295,28 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     let new_target = retarget_algorithm(c.params(), previous_target, first_timestamp as u64, last_timestamp as u64);
     let new_bits = target_to_bits(new_target);
     return new_bits
+}
+
+fun find_prev_test_net_difficulty(c: &LightClient, start_node: &LightBlock): u32 {
+    // let mut iter_block_hash = start_node.header().block_hash();
+    // let mut iter_block = c.get_light_block_by_hash(iter_block_hash);
+    let mut iter_block = start_node;
+    let p = c.params();
+    let power_limit_bits = target_to_bits(p.power_limit());
+
+    while (
+        iter_block.height() != 0 &&
+        iter_block.height() % p.blocks_pre_retarget() != 0 &&
+        iter_block.header().bits() != power_limit_bits
+    ){
+        iter_block = c.relative_ancestor(iter_block, 1); // parent_block
+    };
+
+    if (iter_block.height() != 0) {
+        return iter_block.header().bits()
+    };
+
+    return power_limit_bits
 }
 
 /// compute new target
