@@ -21,6 +21,7 @@ public struct Params has store{
     /// time in seconds when we update the target
     target_timespan: u64,
     pow_no_retargeting: bool,
+    reduce_min_difficulty: bool
 }
 
 // default params for bitcoin mainnet
@@ -30,12 +31,19 @@ public fun mainnet_params(): Params {
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
+        reduce_min_difficulty: false,
     }
 }
 
 // default params for bitcoin testnet
 public fun testnet_params(): Params {
-    return mainnet_params()
+    return Params {
+        power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        blocks_pre_retarget: 2016,
+        target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
+        pow_no_retargeting: false,
+        reduce_min_difficulty: true,
+    }
 }
 
 // default params for bitcoin regtest
@@ -46,6 +54,7 @@ public fun regtest_params(): Params {
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
         pow_no_retargeting: true,
+        reduce_min_difficulty: false,
     }
 }
 
@@ -63,6 +72,10 @@ public fun target_timespan(p: &Params): u64 {
 
 public fun pow_no_retargeting(p: &Params): bool {
     p.pow_no_retargeting
+}
+
+public fun reduce_min_difficulty(p: &Params): bool {
+    p.reduce_min_difficulty
 }
 
 /*
@@ -240,7 +253,6 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     let params = c.params();
     let blocks_pre_retarget = params.blocks_pre_retarget();
 
-
     if (params.pow_no_retargeting() || last_block.height() == 0) {
         let power_limit = params.power_limit();
         return target_to_bits(power_limit)
@@ -249,11 +261,9 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     // if this block not start a new retarget cycle
     if ((last_block.height() + 1) % blocks_pre_retarget != 0) {
 
-        // TODO: support ReduceMinDifficulty params
-        // if c.params().reduce_min_difficulty {
-        //     ...
-        //     new_block_time is using in this logic
-        // }
+        if (params.reduce_min_difficulty()) {
+
+        };
 
         // Return previous block difficulty
         return last_block.header().bits()
