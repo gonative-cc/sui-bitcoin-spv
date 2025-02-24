@@ -190,8 +190,6 @@ fun extend_chain(c: &mut LightClient, parent_block_hash: vector<u8>, raw_headers
 
 /// Delete all blocks between head_hash to checkpoint_hash
 public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
-    // TODO: Should we handle the case head hash never reach to checkpoint?
-    // B/c if this happend then this is just out of gas to run.
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
         let previous_block_hash = c.get_light_block_by_hash(block_hash).header().prev_block();
@@ -402,9 +400,6 @@ public(package) fun set_block_hash_by_height(c: &mut LightClient, height: u64, b
 }
 
 public fun get_block_hash_by_height(c: &LightClient, height: u64): vector<u8> {
-    // TODO: optimize state because we store header twin,
-    // one in height => header, one in block hash => light block
-    // https://github.com/gonative-cc/move-bitcoin-spv/issues/37
     // copy the block hash
     *df::borrow<u64, vector<u8>>(c.client_id(), height)
 }
