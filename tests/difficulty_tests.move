@@ -160,7 +160,7 @@ fun test_testnet_use_previous_difficulty() {
 }
 
 #[test]
-fun test_find_prev_difficulty_testnet() {
+fun test_find_prev_testnet_difficulty() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
@@ -182,10 +182,10 @@ fun test_find_prev_difficulty_testnet() {
 
     // the case last_block bits not equal powert limit
     // we return bits of this block.
-    assert!(lc.find_prev_difficulty_testnet(lc.get_light_block_by_height(2018)) == 0x12345678);
+    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(2018)) == 0x12345678);
     // The case last_block bits equal power limit, return first block not equal power limit
     // or the nearest retarget block (height % 2016 == 0);
-    assert!(lc.find_prev_difficulty_testnet(lc.get_light_block_by_height(2017)) == 0x180440c4);
+    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(2017)) == 0x180440c4);
 
     let genesis_block = new_light_block(
         0,
@@ -199,7 +199,7 @@ fun test_find_prev_difficulty_testnet() {
     lc.add_light_block(genesis_block);
 
     // return power limit when genesis block
-    assert!(lc.find_prev_difficulty_testnet(lc.get_light_block_by_height(0)) == target_to_bits(lc.params().power_limit()));
+    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(0)) == target_to_bits(lc.params().power_limit()));
     sui::test_utils::destroy(lc);
     scenario.end();
 }

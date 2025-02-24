@@ -274,7 +274,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
                 return target_to_bits(power_limit)
             };
 
-            return find_prev_difficulty_testnet(c, last_block)
+            return find_prev_testnet_difficulty(c, last_block)
 
         };
 
@@ -296,24 +296,25 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
 }
 
 public(package) fun find_prev_testnet_difficulty(c: &LightClient, start_node: &LightBlock): u32 {
-    // let mut iter_block_hash = start_node.header().block_hash();
-    // let mut iter_block = c.get_light_block_by_hash(iter_block_hash);
     let mut iter_block = start_node;
     let p = c.params();
     let power_limit_bits = target_to_bits(p.power_limit());
+
     let mut height = iter_block.height();
+    let mut bits = iter_block.header().bits();
 
     while (
         height != 0 &&
         height % p.blocks_pre_retarget() != 0 &&
-        height == power_limit_bits
+        bits == power_limit_bits
     ){
         iter_block = c.relative_ancestor(iter_block, 1); // parent_block
         height = iter_block.height();
+        bits = iter_block.header().bits();
     };
 
     if (height != 0) {
-        return iter_block.header().bits()
+        return bits
     };
 
     return power_limit_bits
