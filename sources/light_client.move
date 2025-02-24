@@ -21,8 +21,8 @@ public struct Params has store{
     /// time in seconds when we update the target
     target_timespan: u64,
     pow_no_retargeting: bool,
-    reduce_min_difficulty: bool,
-    min_diff_reduction_time: u32,
+    reduce_min_difficulty: bool, // for Bitcoin testnet
+    min_diff_reduction_time: u32,  // time in seconds
 }
 
 // default params for bitcoin mainnet
@@ -295,22 +295,24 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     return new_bits
 }
 
-public(package) fun find_prev_difficulty_testnet(c: &LightClient, start_node: &LightBlock): u32 {
+public(package) fun find_prev_testnet_difficulty(c: &LightClient, start_node: &LightBlock): u32 {
     // let mut iter_block_hash = start_node.header().block_hash();
     // let mut iter_block = c.get_light_block_by_hash(iter_block_hash);
     let mut iter_block = start_node;
     let p = c.params();
     let power_limit_bits = target_to_bits(p.power_limit());
+    let mut height = iter_block.height();
 
     while (
-        iter_block.height() != 0 &&
-        iter_block.height() % p.blocks_pre_retarget() != 0 &&
-        iter_block.header().bits() == power_limit_bits
+        height != 0 &&
+        height % p.blocks_pre_retarget() != 0 &&
+        height == power_limit_bits
     ){
         iter_block = c.relative_ancestor(iter_block, 1); // parent_block
+        height = iter_block.height();
     };
 
-    if (iter_block.height() != 0) {
+    if (height != 0) {
         return iter_block.header().bits()
     };
 
