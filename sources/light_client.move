@@ -274,7 +274,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
                 return target_to_bits(power_limit)
             };
 
-            return find_prev_test_net_difficulty(c, last_block)
+            return find_prev_difficulty_testnet(c, last_block)
 
         };
 
@@ -295,7 +295,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     return new_bits
 }
 
-fun find_prev_test_net_difficulty(c: &LightClient, start_node: &LightBlock): u32 {
+public(package) fun find_prev_difficulty_testnet(c: &LightClient, start_node: &LightBlock): u32 {
     // let mut iter_block_hash = start_node.header().block_hash();
     // let mut iter_block = c.get_light_block_by_hash(iter_block_hash);
     let mut iter_block = start_node;
@@ -402,6 +402,11 @@ public(package) fun set_block_hash_by_height(c: &mut LightClient, height: u64, b
 public fun get_block_hash_by_height(c: &LightClient, height: u64): vector<u8> {
     // copy the block hash
     *df::borrow<u64, vector<u8>>(c.client_id(), height)
+}
+
+public fun get_light_block_by_height(c: &LightClient, height: u64): &LightBlock {
+    let block_hash = c.get_block_hash_by_height(height);
+    c.get_light_block_by_hash(block_hash)
 }
 
 public(package) fun set_latest_block(c: &mut LightClient, light_block: LightBlock) {
