@@ -15,7 +15,7 @@ const EHeaderListIsEmpty: u64 = 4;
 const EBlockNotFound: u64 = 5;
 const EForkChainWorkTooSmall: u64 = 6;
 
-public struct CreatedLightClientEvent has copy, drop {
+public struct NewLightClientEvent has copy, drop {
     network: u8,
     light_client_id: ID
 }
@@ -158,7 +158,6 @@ public fun new_light_client(
     };
     let lc = new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
 
-    let light_client_id = object::id(&lc);
 
     event::emit(CreatedLightClientEvent {
         network,
@@ -469,9 +468,8 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         fork_created = true;
     };
 
-    let latest_block = c.latest_block();
     event::emit(InsertedHeadersEvent{
-        chain_work: latest_block.chain_work(),
+        chain_work: c.latest_block().chain_work(),
         fork_chain: fork_created,
         best_block_hash: latest_block.header().block_hash(),
         height: latest_block.height(),
