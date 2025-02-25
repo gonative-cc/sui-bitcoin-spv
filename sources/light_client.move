@@ -5,8 +5,8 @@ use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
-
 use sui::dynamic_field as df;
+use sui::event;
 
 const EBlockHashNotMatch: u64 = 1;
 const EDifficultyNotMatch: u64 = 2;
@@ -14,6 +14,18 @@ const ETimeTooOld: u64 = 3;
 const EHeaderListIsEmpty: u64 = 4;
 const EBlockNotFound: u64 = 5;
 const EForkChainWorkTooSmall: u64 = 6;
+
+public struct CreatedLightClientEvent has copy, drop {
+    network: u8,
+    light_client_id: ID
+}
+
+public struct InsertedHeadersEvent has copy, drop {
+    chain_work: u256,
+    fork_chain: bool,
+    best_block_hash: vector<u8>,
+    height: u64,
+}
 
 public struct Params has store{
     power_limit: u256,
@@ -145,6 +157,14 @@ public fun new_light_client(
         _ => regtest_params()
     };
     let lc = new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
+
+    let light_client_id = object::id(&lc);
+
+    event::emit(CreatedLightClientEvent {
+        network,
+        light_client_id
+    });
+
     transfer::share_object(lc);
 }
 
@@ -426,9 +446,10 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
     let first_header = new_block_header(raw_headers[0]);
     let latest_block_hash = c.latest_block().header().block_hash();
 
+    let mut fork_created = false;
     if (first_header.prev_block() == latest_block_hash) {
         // extend current fork
-       c.extend_chain(first_header.prev_block(), raw_headers);
+        c.extend_chain(first_header.prev_block(), raw_headers);
     } else {
         // handle a fork choice
         assert!(c.exist(first_header.prev_block()), EBlockNotFound);
@@ -445,5 +466,14 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         // notes: current_block_hash is hash of the old fork/chain in this case.
         // TODO(vu): Make it more simple.
         c.rollback(first_header.prev_block(), current_block_hash);
-    }
+        fork_created = true;
+    };
+
+    let latest_block = c.latest_block();
+    event::emit(InsertedHeadersEvent{
+        chain_work: latest_block.chain_work(),
+        fork_chain: fork_created,
+        best_block_hash: latest_block.header().block_hash(),
+        height: latest_block.height(),
+    });
 }
