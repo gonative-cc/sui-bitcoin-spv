@@ -22,7 +22,7 @@ public struct NewLightClientEvent has copy, drop {
 
 public struct InsertedHeadersEvent has copy, drop {
     chain_work: u256,
-    fork_chain: bool,
+    is_forked: bool,
     best_block_hash: vector<u8>,
     height: u64,
 }
@@ -158,10 +158,9 @@ public fun new_light_client(
     };
     let lc = new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
 
-
-    event::emit(CreatedLightClientEvent {
+    event::emit(NewLightClientEvent {
         network,
-        light_client_id
+        light_client_id: object::id(&lc)
     });
 
     transfer::share_object(lc);
@@ -445,7 +444,7 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
     let first_header = new_block_header(raw_headers[0]);
     let latest_block_hash = c.latest_block().header().block_hash();
 
-    let mut fork_created = false;
+    let mut is_forked = false;
     if (first_header.prev_block() == latest_block_hash) {
         // extend current fork
         c.extend_chain(first_header.prev_block(), raw_headers);
@@ -465,13 +464,13 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
         // notes: current_block_hash is hash of the old fork/chain in this case.
         // TODO(vu): Make it more simple.
         c.rollback(first_header.prev_block(), current_block_hash);
-        fork_created = true;
+        is_forked = true;
     };
 
     event::emit(InsertedHeadersEvent{
         chain_work: c.latest_block().chain_work(),
-        fork_chain: fork_created,
-        best_block_hash: latest_block.header().block_hash(),
-        height: latest_block.height(),
+        is_forked,
+        best_block_hash: c.latest_block().header().block_hash(),
+        height: c.latest_block().height(),
     });
 }
