@@ -7,6 +7,9 @@ setup-hooks:
 build: .git/hooks/pre-commit
 	@sui move build
 
+publish:
+	@sui client publish --skip-dependency-verification  --gas-budget 100000000
+
 # used as pre-commit
 lint-git:
 	@git diff --name-only --cached | grep  -E '\.md$$' | xargs -r markdownlint-cli2
