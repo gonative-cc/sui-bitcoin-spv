@@ -38,6 +38,36 @@ public fun btc_hash(data: vector<u8>): vector<u8> {
     return second_hash
 }
 
+/// decode compact size from version
+public fun compact_size(v: vector<u8>): u256 {
+    if (v[0] < 0xfc) {
+        assert!(v.length() == 1);
+        return v[0] as u256
+    } else if (v[0] == 0xfd) {
+        assert!(v.length() == 3);
+        return to_number(v, 1, v.length())
+    } else if (v[0] == 0xfe) {
+        assert!(v.length() == 5);
+        return to_number(v, 1, v.length())
+    } else {
+        assert!(v.length() == 9);
+        return to_number(v, 1, v.length())
+    }
+}
+
+/// TODO: replace to_u256 and to_u32
+fun to_number(v: vector<u8>, start: u64, end: u64): u256{
+    let size = end - start;
+    assert!(size <= 32, EInvalidLength);
+    let mut ans = 0u256;
+    let mut i = start;
+    while (i < end) {
+        ans = ans +  ((v[i] as u256)  << (i * 8 as u8));
+        i = i + 1;
+    };
+    ans
+}
+
 /// number of bytes to represent number.
 fun bytes_of(number: u256) : u8 {
     let mut b : u8 = 255;
@@ -47,6 +77,7 @@ fun bytes_of(number: u256) : u8 {
     // Follow logic in bitcoin core
     ((b as u32 + 7 ) / 8) as u8
 }
+
 
 /// get last 32 bits of number
 fun get_last_32_bits(number: u256): u32 {
@@ -110,6 +141,7 @@ public fun bits_to_target(bits: u32): u256 {
     };
     return target
 }
+
 
 
 // internal test

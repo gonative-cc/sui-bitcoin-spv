@@ -19,3 +19,21 @@ public struct Transaction has copy, drop {
     witness: vector<u8>,
     look_time: vector<u8>
 }
+
+
+// TODO: better name for this.
+// we don't create any new transaction
+public fun new_transaction(
+    version: vector<u8>,
+    marker: Option<u8>,
+    flag: Option<u8>,
+    number_input: vector<u8>,
+    inputs: vector<Input>,
+    number_output: vector<u8>,
+    outputs: vector<Output>,
+    witness: Option<vector<u8>>,
+    lock_time: vector<u8>,
+) {
+
+
+}
