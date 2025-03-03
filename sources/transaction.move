@@ -76,3 +76,13 @@ public(package) fun inputs_to_bytes(inputs: vector<Input>) : vector<u8> {
     });
     decoded_bytes
 }
+
+public(package) fun output_to_bytes(outputs: vector<Output>): vector<u8> {
+    let mut decoded_bytes = vector[];
+    outputs.length().do!(|i| {
+        decoded_bytes.append(outputs[i].amount);
+        decoded_bytes.append(covert_to_compact_size(outputs[i].script_pubkey_size));
+        decoded_bytes.append(outputs[i].script_pubkey);
+    });
+    decoded_bytes
+}
