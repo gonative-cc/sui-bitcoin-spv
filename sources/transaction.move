@@ -22,8 +22,8 @@ public struct Transaction has copy, drop {
     inputs: vector<Input>,
     outputs: vector<Output>,
     tx_id: vector<u8>,
-    witness: vector<u8>,
-    look_time: vector<u8>
+    witness: Option<vector<u8>>,
+    lock_time: vector<u8>
 }
 
 
@@ -37,9 +37,7 @@ public fun new_transaction(
     outputs: vector<Output>,
     witness: Option<vector<u8>>,
     lock_time: vector<u8>,
-) {
-
-
+): Transaction {
     let number_input = covert_to_compact_size(inputs.length() as u256);
     let number_output = covert_to_compact_size(outputs.length() as u256);
 
@@ -54,6 +52,17 @@ public fun new_transaction(
     tx_data.append(outputs_bytes);
     tx_data.append(lock_time);
     let tx_id = btc_hash(tx_data);
+
+    Transaction {
+        version,
+        marker,
+        flag,
+        inputs,
+        outputs,
+        witness,
+        lock_time,
+        tx_id
+    }
 }
 
 public(package) fun input_wellform(input: &Input): bool {
