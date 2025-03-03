@@ -43,15 +43,17 @@ public fun new_transaction(
     let number_input = covert_to_compact_size(inputs.length() as u256);
     let number_output = covert_to_compact_size(outputs.length() as u256);
 
+    let inputs_bytes = inputs_to_bytes(inputs);
+    let outputs_bytes = outputs_to_bytes(outputs);
     // // compute TxID
-    // let mut tx_data = x"";
-    // tx_data.append(version);
-    // tx_data.append(number_input);
-    // tx_data.append(inputs);
-    // tx_data.append(number_output);
-    // tx_data.append(outputs);
-    // tx_data.append(lock_time);
-    // let tx_id = btc_hash(tx_data);
+    let mut tx_data = x"";
+    tx_data.append(version);
+    tx_data.append(number_input);
+    tx_data.append(inputs_bytes);
+    tx_data.append(number_output);
+    tx_data.append(outputs_bytes);
+    tx_data.append(lock_time);
+    let tx_id = btc_hash(tx_data);
 }
 
 public(package) fun input_wellform(input: &Input): bool {
@@ -77,7 +79,7 @@ public(package) fun inputs_to_bytes(inputs: vector<Input>) : vector<u8> {
     decoded_bytes
 }
 
-public(package) fun output_to_bytes(outputs: vector<Output>): vector<u8> {
+public(package) fun outputs_to_bytes(outputs: vector<Output>): vector<u8> {
     let mut decoded_bytes = vector[];
     outputs.length().do!(|i| {
         decoded_bytes.append(outputs[i].amount);
