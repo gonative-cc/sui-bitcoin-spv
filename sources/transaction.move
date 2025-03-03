@@ -10,7 +10,7 @@ public struct Input has copy, drop {
 }
 
 public struct Output has copy, drop {
-    amount: u256,
+    amount: vector<u8>,
     script_pubkey_size: u256, // compact,
     script_pubkey: vector<u8>
 }
@@ -65,4 +65,9 @@ public(package) fun input_wellform(input: &Input): bool {
         (input.vout.length() == 4) &&
         (input.script_sig.length() as u256 == input.script_size) &&
         (input.sequece.length() == 4)
+}
+
+public(package) fun output_wellform(output: &Output): bool {
+    (output.amount.length() == 8) &&
+        (output.script_pubkey_size == output.script_pubkey.length() as u256)
 }
