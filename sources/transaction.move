@@ -1,5 +1,5 @@
 module bitcoin_spv::transaction;
-use bitcoin_spv::btc_math::btc_hash;
+use bitcoin_spv::btc_math::{btc_hash, compact_size};
 
 public struct Input has copy, drop {
     input_bytes: vector<u8>,
@@ -28,12 +28,23 @@ public fun new_transaction(
     marker: Option<u8>,
     flag: Option<u8>,
     number_input: vector<u8>,
-    inputs: vector<Input>,
+    inputs: vector<u8>,
     number_output: vector<u8>,
-    outputs: vector<Output>,
+    outputs: vector<u8>,
     witness: Option<vector<u8>>,
     lock_time: vector<u8>,
 ) {
 
+    let input_count = compact_size(number_input);
+    let output_count = compact_size(number_output);
 
+    // compute TxID
+    let mut tx_data = x"";
+    tx_data.append(version);
+    tx_data.append(number_input);
+    tx_data.append(inputs);
+    tx_data.append(number_output);
+    tx_data.append(outputs);
+    tx_data.append(lock_time);
+    let tx_id = btc_hash(tx_data);
 }
