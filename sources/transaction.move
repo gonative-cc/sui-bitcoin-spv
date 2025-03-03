@@ -1,12 +1,18 @@
 module bitcoin_spv::transaction;
-use bitcoin_spv::btc_math::{btc_hash, compact_size};
+use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size};
 
 public struct Input has copy, drop {
-    input_bytes: vector<u8>,
+    tx_id: vector<u8>,
+    vout: vector<u8>,
+    script_size: u256,
+    script_sig: vector<u8>,
+    sequece: vector<u8>,
 }
 
 public struct Output has copy, drop {
-    output_bytes: vector<u8>
+    amount: u256,
+    script_pubkey_size: u256, // compact,
+    script_pubkey: vector<u8>
 }
 
 public struct Transaction has copy, drop {
@@ -33,8 +39,9 @@ public fun new_transaction(
     lock_time: vector<u8>,
 ) {
 
-    // let input_count = compact_size(number_input);
-    // let output_count = compact_size(number_output);
+    // let input_compact_size = covert_to_compact_size;
+
+
     // // We check inputs wellform
     // // We still do this check because we need ensure all data on transaction
     // // stay on the right place.
@@ -51,4 +58,11 @@ public fun new_transaction(
     // tx_data.append(outputs);
     // tx_data.append(lock_time);
     // let tx_id = btc_hash(tx_data);
+}
+
+public(package) fun input_wellform(input: &Input): bool {
+    (input.tx_id.length() == 32) &&
+        (input.vout.length() == 4) &&
+        (input.script_sig.length() as u256 == input.script_size) &&
+        (input.sequece.length() == 4)
 }
