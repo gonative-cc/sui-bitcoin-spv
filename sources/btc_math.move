@@ -4,7 +4,7 @@ use std::hash;
 
 /// === Errors ===
 const EInvalidLength: u64 = 0;
-
+const EInValidCompactSizeFormat: u64 = 1;
 
 /// convert 4 bytes in little endian format to u32 number
 public fun to_u32(v: vector<u8>): u32 {
@@ -38,21 +38,28 @@ public fun btc_hash(data: vector<u8>): vector<u8> {
     return second_hash
 }
 
+
+fun check_compact_size_format(v: vector<u8>): bool {
+    if (v[0] <= 0xfc) {
+        return v.length() == 1
+    } else if (v[0] == 0xfd) {
+        return v.length() == 3
+    } else if (v[0] == 0xfe) {
+        return v.length() == 5
+    } else if (v[0] == 0xff) {
+        return v.length() == 9
+    };
+    return false
+}
+
+
 /// decode compact size from version
 public fun compact_size(v: vector<u8>): u256 {
-    if (v[0] < 0xfc) {
-        assert!(v.length() == 1);
+    assert!(check_compact_size_format(v) == true, EInValidCompactSizeFormat);
+    if (v.length() == 1) {
         return v[0] as u256
-    } else if (v[0] == 0xfd) {
-        assert!(v.length() == 3);
-        return to_number(v, 1, v.length())
-    } else if (v[0] == 0xfe) {
-        assert!(v.length() == 5);
-        return to_number(v, 1, v.length())
-    } else {
-        assert!(v.length() == 9);
-        return to_number(v, 1, v.length())
-    }
+    };
+    to_number(v, 1, v.length())
 }
 
 /// TODO: replace to_u256 and to_u32
@@ -61,9 +68,11 @@ fun to_number(v: vector<u8>, start: u64, end: u64): u256{
     assert!(size <= 32, EInvalidLength);
     let mut ans = 0u256;
     let mut i = start;
+    let mut j = 0;
     while (i < end) {
-        ans = ans +  ((v[i] as u256)  << (i * 8 as u8));
+        ans = ans +  ((v[i] as u256)  << (j * 8 as u8));
         i = i + 1;
+        j = j + 1;
     };
     ans
 }
@@ -159,4 +168,37 @@ fun get_last_32_bits_test() {
     assert!(get_last_32_bits(0) == 0);
     assert!(get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 0xffffffff);
     assert!(get_last_32_bits(0x0123456789) == 0x23456789);
+}
+
+#[test]
+fun check_compact_size_format_test() {
+    let inputs = vector[
+        x"fa",
+        x"fc",
+        x"fddd07",
+        x"fe00000100",
+        x"ff0000000001000000",
+        x"fcff",
+        x"fd00",
+        x"ff00",
+        x"ab00",
+    ];
+    let outputs = vector[
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+    ];
+
+    let mut i = 0;
+    while (i < inputs.length()) {
+        assert!(check_compact_size_format(inputs[i]) == outputs[i]);
+        i = i + 1;
+    }
+
 }

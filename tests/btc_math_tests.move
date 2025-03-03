@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::btc_math_tests;
-use bitcoin_spv::btc_math::{target_to_bits, bits_to_target, Self};
+use bitcoin_spv::btc_math::{target_to_bits, bits_to_target, compact_size, Self};
 
 
 #[test]
@@ -72,4 +72,19 @@ fun bits_to_target_tests() {
     let target = bits_to_target(bits);
     assert!(target == 0x00ffff0000000000000000000000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
+}
+
+#[test]
+fun compact_size_tests() {
+    assert!(compact_size(x"fa") == 250);
+    assert!(compact_size(x"fc") == 252);
+    assert!(compact_size(x"fdfd00") == 253);
+    assert!(compact_size(x"fdd007") == 2000);
+    assert!(compact_size(x"fdffff") == 65535);
+    assert!(compact_size(x"fe00000100") == 65536);
+    assert!(compact_size(x"fe005a6202") == 40000000);
+    assert!(compact_size(x"feffffffff") == 4294967295);
+    assert!(compact_size(x"ff0000000001000000") == 4294967296);
+    assert!(compact_size(x"ff98fdffffffffffff") == 18446744073709551000);
+    assert!(compact_size(x"ffffffffffffffffff") == 18446744073709551615);
 }
