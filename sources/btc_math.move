@@ -1,6 +1,7 @@
 module bitcoin_spv::btc_math;
 
 use std::hash;
+use std::u64::do;
 
 /// === Errors ===
 const EInvalidLength: u64 = 0;
@@ -152,6 +153,35 @@ public fun bits_to_target(bits: u32): u256 {
 }
 
 
+public fun covert_to_compact_size(number: u256): vector<u8> {
+    let mut ans = vector[];
+    let mut n = number;
+    if (n <= 252) {
+        ans.push_back(n as u8);
+    } else if (n <= 65535) {
+        ans.push_back(0xfd);
+        do!(3, |_i| {
+            ans.push_back((n & 256) as u8);
+            n = n >> 8;
+        });
+    } else if (n <= 4294967295) {
+        ans.push_back(0xfe);
+        do!(5, |_i| {
+            ans.push_back((n & 256) as u8);
+            n = n >> 8;
+        });
+    } else if (n <= 18446744073709551615) {
+        ans.push_back(0xff);
+        do!(9, |_i| {
+            ans.push_back((n & 256) as u8);
+            n = n >> 8;
+        });
+    } else {
+        abort 0;
+    };
+
+    return ans
+}
 
 // internal test
 // TODO: Check best practice to improve test
