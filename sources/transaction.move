@@ -39,15 +39,9 @@ public fun new_transaction(
     lock_time: vector<u8>,
 ) {
 
-    // let input_compact_size = covert_to_compact_size;
 
-
-    // // We check inputs wellform
-    // // We still do this check because we need ensure all data on transaction
-    // // stay on the right place.
-
-
-    // // check outputs wellform
+    let number_input = covert_to_compact_size(inputs.length() as u256);
+    let number_output = covert_to_compact_size(outputs.length() as u256);
 
     // // compute TxID
     // let mut tx_data = x"";
@@ -70,4 +64,15 @@ public(package) fun input_wellform(input: &Input): bool {
 public(package) fun output_wellform(output: &Output): bool {
     (output.amount.length() == 8) &&
         (output.script_pubkey_size == output.script_pubkey.length() as u256)
+}
+
+public(package) fun inputs_to_bytes(inputs: vector<Input>) : vector<u8> {
+    let mut decoded_bytes = vector[];
+    inputs.length().do!(|i| {
+        decoded_bytes.append(inputs[i].tx_id);
+        decoded_bytes.append(inputs[i].vout);
+        decoded_bytes.append(covert_to_compact_size(inputs[i].script_size));
+        decoded_bytes.append(inputs[i].script_sig);
+    });
+    decoded_bytes
 }
