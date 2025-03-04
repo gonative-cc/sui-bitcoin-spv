@@ -74,17 +74,42 @@ fun bits_to_target_tests() {
     assert!(bits == target_to_bits(target));
 }
 
+
+
 #[test]
 fun compact_size_tests() {
-    assert!(compact_size(x"fa") == 250);
-    assert!(compact_size(x"fc") == 252);
-    assert!(compact_size(x"fdfd00") == 253);
-    assert!(compact_size(x"fdd007") == 2000);
-    assert!(compact_size(x"fdffff") == 65535);
-    assert!(compact_size(x"fe00000100") == 65536);
-    assert!(compact_size(x"fe005a6202") == 40000000);
-    assert!(compact_size(x"feffffffff") == 4294967295);
-    assert!(compact_size(x"ff0000000001000000") == 4294967296);
-    assert!(compact_size(x"ff98fdffffffffffff") == 18446744073709551000);
-    assert!(compact_size(x"ffffffffffffffffff") == 18446744073709551615);
+    let inputs = vector[
+        x"fa",
+        x"fc",
+        x"fdfd00",
+        x"fdd007",
+        x"fdffff",
+        x"fe00000100",
+        x"fe005a6202",
+        x"feffffffff",
+        x"ff0000000001000000",
+        x"ff98fdffffffffffff",
+        x"ffffffffffffffffff",
+    ];
+    let outputs = vector[
+        vector[250, 1],
+        vector[252, 1],
+        vector[253, 3],
+        vector[2000, 3],
+        vector[65535, 3],
+        vector[65536, 5],
+        vector[40000000, 5],
+        vector[4294967295, 5],
+        vector[4294967296, 9],
+        vector[18446744073709551000, 9],
+        vector[18446744073709551615, 9]
+    ];
+
+    let mut i = 0;
+    while (i < inputs.length()) {
+        let (x, y) = compact_size(inputs[i], 0);
+        assert!(x == outputs[i][0] && (y as u256) == outputs[i][1]);
+        i = i + 1;
+    }
+
 }

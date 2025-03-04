@@ -49,8 +49,7 @@ public fun new_transaction(
 
 
     // // compute TxID
-    let mut tx_data = x"";
-    tx_data.append(version);
+    let mut tx_data = version;
     tx_data.append(number_input);
     tx_data.append(inputs);
     tx_data.append(number_output);
@@ -74,8 +73,11 @@ public fun tx_id(tx: &Transaction): vector<u8> {
     return tx.tx_id
 }
 
+public fun outputs(tx: &Transaction): vector<Output> {
+    tx.outputs
+}
 
-public(package) fun btc_address(output: &Output): vector<u8> {
+public fun btc_address(output: &Output): vector<u8> {
     // TODO: we support P2PKH and P2PWKH now.
     // We will and more script after.
     let script = output.script_pubkey;
@@ -92,7 +94,7 @@ public(package) fun btc_address(output: &Output): vector<u8> {
     vector[]
 }
 
-public(package) fun amount(output: &Output): u256 {
+public fun amount(output: &Output): u256 {
     to_number(output.amount, 0, 8)
 }
 

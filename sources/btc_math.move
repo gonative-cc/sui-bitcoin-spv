@@ -42,23 +42,24 @@ public fun btc_hash(data: vector<u8>): vector<u8> {
 
 fun compact_size_offset(start_byte: u8): u64 {
     if (start_byte <= 0xfc) {
-        return 1
-    } else if (start_byte == 0xfd) {
-        return 2
-    } else if (start_byte == 0xfe) {
-        return 4
-    } else if (start_byte == 0xff) {
-        return 8
+        return 0
     };
-    return 0
+    if (start_byte == 0xfd) {
+        return 2
+    };
+    if (start_byte == 0xfe) {
+        return 4
+    };
+    // 0xff
+    return 8
 }
 
 
 /// decode compact size from vector
 public fun compact_size(v: vector<u8>, start: u64): (u256, u64) {
     let offset = compact_size_offset(v[0]);
-    assert!(offset != 0, EInValidCompactSizeFormat);
-    if (offset == 1) {
+    assert!(start + offset < v.length(), EInValidCompactSizeFormat);
+    if (offset == 0) {
         return (v[start] as u256, start + 1)
     };
     (to_number(v, start + 1, start + offset + 1), start + offset + 1)
@@ -204,31 +205,24 @@ fun get_last_32_bits_test() {
 #[test]
 fun check_compact_size_format_test() {
     let inputs = vector[
-        x"fa",
-        x"fc",
-        x"fddd07",
-        x"fe00000100",
-        x"ff0000000001000000",
-        x"fcff",
-        x"fd00",
-        x"ff00",
-        x"ab00",
+        0x0a,
+        0xfc,
+        0xfd,
+        0xfe,
+        0xff,
+
     ];
     let outputs = vector[
-        true,
-        true,
-        true,
-        true,
-        true,
-        false,
-        false,
-        false,
-        false,
+        0,
+        0,
+        2,
+        4,
+        8,
     ];
 
     let mut i = 0;
     while (i < inputs.length()) {
-        assert!(check_compact_size_format(inputs[i]) == outputs[i]);
+        assert!(compact_size_offset(inputs[i]) == outputs[i]);
         i = i + 1;
     }
 
