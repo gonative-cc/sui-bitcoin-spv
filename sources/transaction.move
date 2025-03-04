@@ -1,5 +1,13 @@
 module bitcoin_spv::transaction;
-use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size};
+use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size, to_number};
+use bitcoin_spv::utils::slice;
+
+// === BTC script opcode ===
+const OP_DUP: u8= 0x76;
+const OP_HASH160: u8 = 0xa9;
+const OP_DATA_20: u8 = 0x14;
+const OP_EQUALVERIFY: u8  = 0x88;
+const OP_CHECKSIG: u8 = 0xac;
 
 public struct Input has copy, drop {
     tx_id: vector<u8>,
@@ -90,4 +98,23 @@ public(package) fun outputs_to_bytes(outputs: vector<Output>): vector<u8> {
         decoded_bytes.append(outputs[i].script_pubkey);
     });
     decoded_bytes
+}
+
+public(package) fun btc_address(output: &Output): vector<u8> {
+    let script = output.script_pubkey;
+    if (
+        script.length() == 25 &&
+		script[0] == OP_DUP &&
+		script[1] == OP_HASH160 &&
+		script[2] == OP_DATA_20 &&
+		script[23] == OP_EQUALVERIFY &&
+		script[24] == OP_CHECKSIG
+    ) {
+		return slice(script, 3, 23)
+	};
+    vector[]
+}
+
+public(package) fun amount(output: &Output): u256 {
+    to_number(output.amount, 0, 8)
 }
