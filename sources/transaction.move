@@ -17,12 +17,9 @@ public struct Output has copy, drop {
 
 public struct Transaction has copy, drop {
     version: vector<u8>,
-    marker: Option<u8>,
-    flag: Option<u8>,
     inputs: vector<Input>,
     outputs: vector<Output>,
     tx_id: vector<u8>,
-    witness: Option<vector<u8>>,
     lock_time: vector<u8>
 }
 
@@ -31,11 +28,8 @@ public struct Transaction has copy, drop {
 // we don't create any new transaction
 public fun new_transaction(
     version: vector<u8>,
-    marker: Option<u8>,
-    flag: Option<u8>,
     inputs: vector<Input>,
     outputs: vector<Output>,
-    witness: Option<vector<u8>>,
     lock_time: vector<u8>,
 ): Transaction {
     let number_input = covert_to_compact_size(inputs.length() as u256);
@@ -43,6 +37,7 @@ public fun new_transaction(
 
     let inputs_bytes = inputs_to_bytes(inputs);
     let outputs_bytes = outputs_to_bytes(outputs);
+
     // // compute TxID
     let mut tx_data = x"";
     tx_data.append(version);
@@ -55,11 +50,8 @@ public fun new_transaction(
 
     Transaction {
         version,
-        marker,
-        flag,
         inputs,
         outputs,
-        witness,
         lock_time,
         tx_id
     }
@@ -80,6 +72,7 @@ public(package) fun output_wellform(output: &Output): bool {
 public(package) fun inputs_to_bytes(inputs: vector<Input>) : vector<u8> {
     let mut decoded_bytes = vector[];
     inputs.length().do!(|i| {
+        assert!(input_wellform(&inputs[i]));
         decoded_bytes.append(inputs[i].tx_id);
         decoded_bytes.append(inputs[i].vout);
         decoded_bytes.append(covert_to_compact_size(inputs[i].script_size));
@@ -91,6 +84,7 @@ public(package) fun inputs_to_bytes(inputs: vector<Input>) : vector<u8> {
 public(package) fun outputs_to_bytes(outputs: vector<Output>): vector<u8> {
     let mut decoded_bytes = vector[];
     outputs.length().do!(|i| {
+        assert!(output_wellform(&outputs[i]));
         decoded_bytes.append(outputs[i].amount);
         decoded_bytes.append(covert_to_compact_size(outputs[i].script_pubkey_size));
         decoded_bytes.append(outputs[i].script_pubkey);
