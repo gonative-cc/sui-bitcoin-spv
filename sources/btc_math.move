@@ -40,27 +40,28 @@ public fun btc_hash(data: vector<u8>): vector<u8> {
 }
 
 
-fun check_compact_size_format(v: vector<u8>): bool {
-    if (v[0] <= 0xfc) {
-        return v.length() == 1
-    } else if (v[0] == 0xfd) {
-        return v.length() == 3
-    } else if (v[0] == 0xfe) {
-        return v.length() == 5
-    } else if (v[0] == 0xff) {
-        return v.length() == 9
+fun compact_size_offset(start_byte: u8): u64 {
+    if (start_byte <= 0xfc) {
+        return 1
+    } else if (start_byte == 0xfd) {
+        return 2
+    } else if (start_byte == 0xfe) {
+        return 4
+    } else if (start_byte == 0xff) {
+        return 8
     };
-    return false
+    return 0
 }
 
 
-/// decode compact size from version
-public fun compact_size(v: vector<u8>): u256 {
-    assert!(check_compact_size_format(v) == true, EInValidCompactSizeFormat);
-    if (v.length() == 1) {
-        return v[0] as u256
+/// decode compact size from vector
+public fun compact_size(v: vector<u8>, start: u64): (u256, u64) {
+    let offset = compact_size_offset(v[0]);
+    assert!(offset != 0, EInValidCompactSizeFormat);
+    if (offset == 1) {
+        return (v[start] as u256, start + 1)
     };
-    to_number(v, 1, v.length())
+    (to_number(v, start + 1, start + offset + 1), start + offset + 1)
 }
 
 /// TODO: replace to_u256 and to_u32
