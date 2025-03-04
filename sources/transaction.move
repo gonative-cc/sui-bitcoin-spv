@@ -44,20 +44,22 @@ public fun new_transaction(
     outputs: vector<u8>,
     lock_time: vector<u8>,
 ): Transaction {
-    let number_input = covert_to_compact_size(input_count);
-    let number_output = covert_to_compact_size(output_count);
+    let number_input_bytes = covert_to_compact_size(input_count);
+    let number_output_bytes = covert_to_compact_size(output_count);
 
 
     // // compute TxID
     let mut tx_data = version;
-    tx_data.append(number_input);
+    tx_data.append(number_input_bytes);
     tx_data.append(inputs);
-    tx_data.append(number_output);
+    tx_data.append(number_output_bytes);
     tx_data.append(outputs);
     tx_data.append(lock_time);
+
     let tx_id = btc_hash(tx_data);
 
     let outputs_decoded = decode_outputs(output_count, outputs);
+
     Transaction {
         version,
         input_count,
@@ -101,15 +103,18 @@ public fun amount(output: &Output): u256 {
 public(package) fun decode_outputs(number_input: u256, inputs_bytes: vector<u8>): vector<Output> {
     let mut outputs = vector[];
     let mut start = 0u64;
+    let mut script_pubkey_size = 0;
     let mut i = 0;
 
     while (i < number_input) {
         let amount = slice(inputs_bytes, start, start + 8); // 8 bytes of amount
         start = start + 8;
-        let (script_pubkey_size, start) = compact_size(inputs_bytes, start);
+        (script_pubkey_size, start) = compact_size(inputs_bytes, start);
         let script_pubkey = slice(inputs_bytes, start, (start + (script_pubkey_size as u64)));
+        start = start + (script_pubkey_size as u64);
         outputs.push_back(Output {
-            amount, script_pubkey_size,
+            amount,
+            script_pubkey_size,
             script_pubkey,
         });
         i = i + 1;
