@@ -18,7 +18,7 @@ const OP_CHECKSIG: u8 = 0xac;
 // }
 
 public struct Output has copy, drop {
-    amount: vector<u8>,
+    amount: u256,
     script_pubkey_size: u256, // compact,
     script_pubkey: vector<u8>
 }
@@ -44,6 +44,8 @@ public fun new_transaction(
     outputs: vector<u8>,
     lock_time: vector<u8>,
 ): Transaction {
+    assert!(version.length() == 4);
+    assert!(lock_time.length() == 4);
     let number_input_bytes = covert_to_compact_size(input_count);
     let number_output_bytes = covert_to_compact_size(output_count);
 
@@ -96,9 +98,10 @@ public fun btc_address(output: &Output): vector<u8> {
 }
 
 public fun amount(output: &Output): u256 {
-    to_number(output.amount, 0, 8)
+    output.amount
 }
 
+// TODO: create readbytes APIs
 public(package) fun decode_outputs(number_input: u256, inputs_bytes: vector<u8>): vector<Output> {
     let mut outputs = vector[];
     let mut start = 0u64;
@@ -112,7 +115,7 @@ public(package) fun decode_outputs(number_input: u256, inputs_bytes: vector<u8>)
         let script_pubkey = slice(inputs_bytes, start, (start + (script_pubkey_size as u64)));
         start = start + (script_pubkey_size as u64);
         outputs.push_back(Output {
-            amount,
+            amount: to_number(amount, 0, 8),
             script_pubkey_size,
             script_pubkey,
         });

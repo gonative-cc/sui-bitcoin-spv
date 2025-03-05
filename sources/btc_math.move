@@ -5,8 +5,8 @@ use std::u64::do;
 
 /// === Errors ===
 const EInvalidLength: u64 = 0;
-const EInValidCompactSizeFormat: u64 = 1;
-
+const EInvalidCompactSizeDecode: u64 = 1;
+const EInvalidCompactSizeEncode: u64 = 2;
 /// convert 4 bytes in little endian format to u32 number
 public fun to_u32(v: vector<u8>): u32 {
     assert!(v.length() == 4, EInvalidLength);
@@ -58,7 +58,7 @@ fun compact_size_offset(start_byte: u8): u64 {
 /// decode compact size from vector
 public fun compact_size(v: vector<u8>, start: u64): (u256, u64) {
     let offset = compact_size_offset(v[start]);
-    assert!(start + offset < v.length(), EInValidCompactSizeFormat);
+    assert!(start + offset < v.length(), EInvalidCompactSizeDecode);
     if (offset == 0) {
         return (v[start] as u256, start + 1)
     };
@@ -179,7 +179,7 @@ public fun covert_to_compact_size(number: u256): vector<u8> {
             n = n >> 8;
         });
     } else {
-        abort 0;
+        abort EInvalidCompactSizeEncode
     };
 
     return ans
