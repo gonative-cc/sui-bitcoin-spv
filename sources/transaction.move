@@ -89,6 +89,7 @@ public fun outputs(tx: &Transaction): vector<Output> {
 public fun btc_address(output: &Output): vector<u8> {
     // TODO: we support P2PKH and P2PWKH now.
     // We will and more script after.
+    // and the script must return error if we don't support standard script
     let script = output.script_pubkey;
     if (
         script.length() == 25 &&

@@ -2,7 +2,7 @@
 module bitcoin_spv::transaction_tests;
 
 use bitcoin_spv::light_client::{new_light_client_with_params, mainnet_params};
-use bitcoin_spv::transaction::new_transaction;
+use bitcoin_spv::transaction::{new_transaction, new_output};
 use sui::test_scenario;
 
 
@@ -67,4 +67,10 @@ fun verify_output_test() {
 
     sui::test_utils::destroy(lc);
     scenario.end();
+}
+
+#[test]
+fun output_tests() {
+    let output = &new_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
+    assert!(output.btc_address() == vector[]);
 }
