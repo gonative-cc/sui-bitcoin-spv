@@ -47,8 +47,7 @@ public fun new_transaction(
     let number_input_bytes = covert_to_compact_size(input_count);
     let number_output_bytes = covert_to_compact_size(output_count);
 
-
-    // // compute TxID
+    // compute TxID
     let mut tx_data = version;
     tx_data.append(number_input_bytes);
     tx_data.append(inputs);
@@ -103,7 +102,7 @@ public fun amount(output: &Output): u256 {
 public(package) fun decode_outputs(number_input: u256, inputs_bytes: vector<u8>): vector<Output> {
     let mut outputs = vector[];
     let mut start = 0u64;
-    let mut script_pubkey_size = 0;
+    let mut script_pubkey_size;
     let mut i = 0;
 
     while (i < number_input) {
