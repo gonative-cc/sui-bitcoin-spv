@@ -478,6 +478,16 @@ public entry fun insert_headers(c: &mut LightClient, raw_headers: vector<vector<
 }
 
 // verify output transaction
+// height: block heigh transacion belong
+// proof: merkle tree proof, this is the vector of 32bytes
+// tx_index: index of transaction in block
+// version: version of transaction - 4 bytes.
+// input_count: number input in transaction
+// inputs: inputs encoded in bytes.
+// output_count: number output in transaction
+// outputs: outputs encode in transaction
+// lock_time: 4 bytes, lock time field in transaction
+// @return address and amount for each output
 public entry fun verify_output(
     c: &LightClient,
     height: u64,
