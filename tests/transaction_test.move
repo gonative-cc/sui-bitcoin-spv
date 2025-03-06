@@ -2,7 +2,7 @@
 module bitcoin_spv::transaction_tests;
 
 use bitcoin_spv::light_client::{new_light_client_with_params, mainnet_params};
-use bitcoin_spv::transaction::{new_transaction, new_output};
+use bitcoin_spv::transaction::{parse_transaction, parse_output};
 use sui::test_scenario;
 
 
@@ -11,7 +11,7 @@ fun decoded_transaction_tests() {
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
 
-    let tx = &new_transaction(
+    let tx = &parse_transaction(
         x"01000000",
         1,
         x"c08ce0edcedc47becf03f923479bec4c184cda060452959f59d47ae8923da032010000006b483045022100cfdcc3fc354c8d2bbf22d708723e1c3836629c0ed6ef9485004d674ca06e0c6102204dee8d1180a309d22aa66e83554d992b751298208bc1b1e0d60f74fe834634330121036b4468fc9f4dc283365c70f7989b944586a260fca5358a91dfc50bf13c071b1effffffff",
@@ -24,9 +24,9 @@ fun decoded_transaction_tests() {
 
     let outputs = tx.outputs();
 
-    assert!(outputs[0].btc_address() == x"0fef69f3ac0d9d0473a318ae508875ad0eae3dcc");
+    assert!(outputs[0].p2pkh_address() == x"0fef69f3ac0d9d0473a318ae508875ad0eae3dcc");
     assert!(outputs[0].amount() == 500000);
-    assert!(outputs[1].btc_address() == x"51e6b602f387b4c5bb8a4d8cdf1b059c826374e3");
+    assert!(outputs[1].p2pkh_address() == x"51e6b602f387b4c5bb8a4d8cdf1b059c826374e3");
     assert!(outputs[1].amount() == 7466184);
 }
 
@@ -71,6 +71,6 @@ fun verify_output_test() {
 
 #[test]
 fun output_tests() {
-    let output = &new_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
-    assert!(output.btc_address() == vector[]);
+    let output = &parse_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
+    assert!(output.p2pkh_address() == vector[]);
 }

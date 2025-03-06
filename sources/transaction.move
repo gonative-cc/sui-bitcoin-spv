@@ -71,7 +71,7 @@ public fun parse_transaction(
     }
 }
 
-public fun new_output(amount: u256, script_pubkey: vector<u8>): Output {
+public fun parse_output(amount: u256, script_pubkey: vector<u8>): Output {
     Output {
         amount,
         script_pubkey
@@ -121,7 +121,7 @@ public(package) fun decode_outputs(number_input: u256, inputs_bytes: vector<u8>)
         (script_pubkey_size, start) = compact_size(inputs_bytes, start);
         let script_pubkey = slice(inputs_bytes, start, (start + (script_pubkey_size as u64)));
         start = start + (script_pubkey_size as u64);
-        let output = new_output(to_number(amount, 0, 8), script_pubkey);
+        let output = parse_output(to_number(amount, 0, 8), script_pubkey);
         outputs.push_back(output);
         i = i + 1;
     };
