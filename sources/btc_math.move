@@ -66,10 +66,10 @@ public fun compact_size(v: vector<u8>, start: u64): (u256, u64) {
 }
 
 /// TODO: replace to_u256 and to_u32
-public fun to_number(v: vector<u8>, start: u64, end: u64): u256{
+public fun to_number(v: vector<u8>, start: u64, end: u64): u256 {
     let size = end - start;
     assert!(size <= 32, EInvalidLength);
-    let mut ans = 0u256;
+    let mut ans = 0;
     let mut i = start;
     let mut j = 0;
     while (i < end) {
