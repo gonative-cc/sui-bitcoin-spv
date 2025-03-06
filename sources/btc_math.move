@@ -39,7 +39,7 @@ public fun btc_hash(data: vector<u8>): vector<u8> {
     return second_hash
 }
 
-
+/// Calculates offset for decoding a Bitcoin compact size integer.
 fun compact_size_offset(start_byte: u8): u64 {
     if (start_byte <= 0xfc) {
         return 0
@@ -55,7 +55,7 @@ fun compact_size_offset(start_byte: u8): u64 {
 }
 
 
-/// decode compact size from vector
+/// Decodes a compact size integer from vector.
 public fun compact_size(v: vector<u8>, start: u64): (u256, u64) {
     let offset = compact_size_offset(v[start]);
     assert!(start + offset < v.length(), EInvalidCompactSizeDecode);

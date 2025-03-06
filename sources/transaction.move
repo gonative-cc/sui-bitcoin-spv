@@ -16,12 +16,12 @@ const OP_CHECKSIG: u8 = 0xac;
 //     script_sig: vector<u8>,
 //     sequece: vector<u8>,
 // }
-
+/// Represents a Bitcoin transaction output
 public struct Output has copy, drop {
     amount: u256,
     script_pubkey: vector<u8>
 }
-
+// Represents a Bitcoin transaction
 public struct Transaction has copy, drop {
     version: vector<u8>,
     input_count: u256,
@@ -35,7 +35,7 @@ public struct Transaction has copy, drop {
 
 // TODO: better name for this.
 // we don't create any new transaction
-public fun new_transaction(
+public fun parse_transaction(
     version: vector<u8>,
     input_count: u256,
     inputs: vector<u8>,
@@ -86,7 +86,7 @@ public fun outputs(tx: &Transaction): vector<Output> {
     tx.outputs
 }
 
-public fun btc_address(output: &Output): vector<u8> {
+public fun p2pkh_address(output: &Output): vector<u8> {
     // TODO: we support P2PKH and P2PWKH now.
     // We will and more script after.
     // and the script must return error if we don't support standard script
