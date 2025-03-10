@@ -12,7 +12,7 @@ public struct Params has store{
 
 // default params for bitcoin mainnet
 public fun mainnet(): Params {
-    return Params {
+    Params {
         power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
@@ -24,7 +24,7 @@ public fun mainnet(): Params {
 
 // default params for bitcoin testnet
 public fun testnet(): Params {
-    return Params {
+    Params {
         power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
@@ -37,7 +37,7 @@ public fun testnet(): Params {
 // default params for bitcoin regtest
 // https://github.com/bitcoin/bitcoin/blob/v28.1/src/kernel/chainparams.cpp#L523
 public fun regtest(): Params {
-    return Params {
+    Params {
         power_limit: 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
