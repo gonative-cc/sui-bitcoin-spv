@@ -1,7 +1,8 @@
 #[test_only]
 module bitcoin_spv::difficulty_test;
 
-use bitcoin_spv::light_client::{mainnet_params, testnet_params, regtest_params, new_light_client_with_params, retarget_algorithm, calc_next_required_difficulty};
+use bitcoin_spv::params;
+use bitcoin_spv::light_client::{new_light_client_with_params, retarget_algorithm, calc_next_required_difficulty};
 use bitcoin_spv::light_block::{new_light_block};
 use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
 use bitcoin_spv::block_header::new_block_header;
@@ -15,7 +16,7 @@ fun is_equal_target(x: u256, y: u256): bool {
 
 #[test]
 fun retarget_algorithm_test() {
-    let p = mainnet_params();
+    let p = params::mainnet();
 
     // sources: https://learnmeabitcoin.com/explorer/block/00000000000000000002819359a9af460f342404bec23e7478512a619584083b
     // NOTES: In Move, we are using big endian. So format here is big endian.
@@ -57,8 +58,7 @@ fun test_difficulty_computation_mainnet() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
-    let p = mainnet_params();
-    let mut lc = new_light_client_with_params(p, 0, vector[x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c"], 0, scenario.ctx());
+    let mut lc = new_light_client_with_params(params::mainnet(), 0, vector[x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c"], 0, scenario.ctx());
 
     let block_hash = lc.get_block_hash_by_height(0);
 
@@ -94,9 +94,8 @@ fun test_difficulty_computation_regtest() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
-    let p = regtest_params();
     let lc = new_light_client_with_params(
-        p,
+        params::regtest(),
         10,
         // note: this is random header and when compute a new target in regtest mode this alway return constant
         // this is power_limit.
@@ -117,9 +116,8 @@ fun test_testnet_reset_dificulty() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
-    let p = testnet_params();
     let lc = new_light_client_with_params(
-        p,
+        params::testnet(),
         10, // We use 10 because this not a block we adjust the target/difficulty. This is not random number!
         // This header is random, we only care about timestamp in this case.
         vector[x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058c440041806bc3f79"],
@@ -141,9 +139,8 @@ fun test_testnet_use_previous_difficulty() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
-    let p = testnet_params();
     let lc = new_light_client_with_params(
-        p,
+        params::testnet(),
         10, // We use 10 because this not a block we adjust the target/difficulty. This is not random number!
         // This header is random, we only care about timestamp in this case.
         vector[x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058c440041806bc3f79"],
@@ -164,10 +161,8 @@ fun test_find_prev_testnet_difficulty() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
-    let p = testnet_params();
-
     let mut lc = new_light_client_with_params(
-        p,
+        params::testnet(),
         2016,
         // This header is random, we only care about timestamp and bits
          vector[

@@ -6,6 +6,10 @@ use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
 use bitcoin_spv::transaction::parse_transaction;
+use bitcoin_spv::params::{Params};
+use bitcoin_spv::params;
+
+
 use sui::dynamic_field as df;
 use sui::event;
 
@@ -29,76 +33,7 @@ public struct InsertedHeadersEvent has copy, drop {
     height: u64,
 }
 
-public struct Params has store{
-    power_limit: u256,
-    blocks_pre_retarget: u64,
-    /// time in seconds when we update the target
-    target_timespan: u64,
-    pow_no_retargeting: bool,
-    reduce_min_difficulty: bool, // for Bitcoin testnet
-    min_diff_reduction_time: u32,  // time in seconds
-}
 
-// default params for bitcoin mainnet
-public fun mainnet_params(): Params {
-    return Params {
-        power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
-        blocks_pre_retarget: 2016,
-        target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
-        pow_no_retargeting: false,
-        reduce_min_difficulty: false,
-        min_diff_reduction_time: 0,
-    }
-}
-
-// default params for bitcoin testnet
-public fun testnet_params(): Params {
-    return Params {
-        power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
-        blocks_pre_retarget: 2016,
-        target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
-        pow_no_retargeting: false,
-        reduce_min_difficulty: true,
-        min_diff_reduction_time: 20 * 60, // 20 minutes
-    }
-}
-
-// default params for bitcoin regtest
-// https://github.com/bitcoin/bitcoin/blob/v28.1/src/kernel/chainparams.cpp#L523
-public fun regtest_params(): Params {
-    return Params {
-        power_limit: 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
-        blocks_pre_retarget: 2016,
-        target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
-        pow_no_retargeting: true,
-        reduce_min_difficulty: false,
-        min_diff_reduction_time: 20 * 60, // 20 minutes
-    }
-}
-
-public fun blocks_pre_retarget(p: &Params) : u64 {
-    p.blocks_pre_retarget
-}
-
-public fun power_limit(p: &Params): u256 {
-    p.power_limit
-}
-
-public fun target_timespan(p: &Params): u64 {
-    p.target_timespan
-}
-
-public fun pow_no_retargeting(p: &Params): bool {
-    p.pow_no_retargeting
-}
-
-public fun reduce_min_difficulty(p: &Params): bool {
-    p.reduce_min_difficulty
-}
-
-public fun min_diff_reduction_time(p: &Params): u32 {
-    p.min_diff_reduction_time
-}
 /*
  * Light Client
  */
@@ -154,9 +89,9 @@ public fun new_light_client(
     network: u8, start_height: u64, start_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext
 )  {
     let params = match (network) {
-        0 => mainnet_params(),
-        1 => testnet_params(),
-        _ => regtest_params()
+        0 => params::mainnet(),
+        1 => params::testnet(),
+        _ => params::regtest()
     };
     let lc = new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
 
