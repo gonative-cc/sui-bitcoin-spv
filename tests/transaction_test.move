@@ -71,7 +71,19 @@ fun verify_output_test() {
 }
 
 #[test]
-fun output_tests() {
+fun pkh_script_tests() {
+    let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
+    assert!(output.is_pk_hash_script() == true);
+    assert!(output.p2pkh_address() == x"55ae51684c43435da751ac8d2173b2652eb64105");
     let output = &parse_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
     assert!(output.is_pk_hash_script() == false);
+}
+
+#[test]
+fun op_return_script_tests() {
+    let output = &parse_output(100, x"6a0b68656c6c6f20776f726c64");
+    assert!(output.is_op_return() == true);
+    assert!(output.op_return_message() == x"68656c6c6f20776f726c64");
+    let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
+    assert!(output.is_op_return() == false);
 }
