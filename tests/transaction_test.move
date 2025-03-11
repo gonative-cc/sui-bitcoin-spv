@@ -84,6 +84,8 @@ fun op_return_script_tests() {
     let output = &parse_output(100, x"6a0b68656c6c6f20776f726c64");
     assert!(output.is_op_return() == true);
     assert!(output.op_return_message() == x"68656c6c6f20776f726c64");
+    let output = &parse_output(100, x"6a");
+    assert!(output.op_return_message() == vector[]);
     let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
     assert!(output.is_op_return() == false);
 }

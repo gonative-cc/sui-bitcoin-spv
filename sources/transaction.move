@@ -124,19 +124,20 @@ public fun op_return_message(output: &Output): vector<u8> {
     // This must pass basic conditions for OP_RETURN opcode.
     // This why we only return the message without check size message.
     let script = output.script_pubkey;
+
+    if (script.length() == 1) {
+        return vector[]
+    };
     if (script[1] <= OP_DATA_75) {
         // script = op_return OP_DATA_<len> DATA. len(DATA) = <len>
         return slice(script, 2, script.length())
     };
-
     if (script[1] == OP_PUSHDATA1) {
         return slice(script, 3, script.length())
     };
-
     if (script[1] == OP_PUSHDATA2) {
         return slice(script, 4, script.length())
     };
-
     // OP_PUSHDATA4
     slice(script, 6, script.length())
 }
