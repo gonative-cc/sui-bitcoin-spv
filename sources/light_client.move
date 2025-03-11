@@ -216,7 +216,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
         return params.power_limit_bits()
     };
 
-    // if this block not start a new retarget cycle
+    // if this block does not start a new retarget cycle
     if ((last_block.height() + 1) % blocks_pre_retarget != 0) {
 
         if (params.reduce_min_difficulty()) {
