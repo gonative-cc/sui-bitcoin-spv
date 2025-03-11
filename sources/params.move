@@ -1,7 +1,9 @@
 module bitcoin_spv::params;
+use bitcoin_spv::btc_math::target_to_bits;
 
 public struct Params has store{
     power_limit: u256,
+    power_limit_bits: u32,
     blocks_pre_retarget: u64,
     /// time in seconds when we update the target
     target_timespan: u64,
@@ -14,6 +16,7 @@ public struct Params has store{
 public fun mainnet(): Params {
     Params {
         power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        power_limit_bits: 0x1d00ffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
@@ -26,6 +29,7 @@ public fun mainnet(): Params {
 public fun testnet(): Params {
     Params {
         power_limit: 0x00000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        power_limit_bits: 0x1d00ffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
@@ -39,6 +43,7 @@ public fun testnet(): Params {
 public fun regtest(): Params {
     Params {
         power_limit: 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        power_limit_bits: 0x207fffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
         pow_no_retargeting: true,
@@ -53,6 +58,10 @@ public fun blocks_pre_retarget(p: &Params) : u64 {
 
 public fun power_limit(p: &Params): u256 {
     p.power_limit
+}
+
+public fun power_limit_bits(p: &Params): u32 {
+    p.power_limit_bits
 }
 
 public fun target_timespan(p: &Params): u64 {
