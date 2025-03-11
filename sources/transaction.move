@@ -2,20 +2,22 @@ module bitcoin_spv::transaction;
 use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size, to_number, compact_size};
 use bitcoin_spv::utils::slice;
 
-// === BTC script opcode ===
-const OP_DUP: u8= 0x76;
+const EInvalidNullScript: u64 = 0;
+
+
+// === BTC script opcodes ===
+const OP_DUP: u8 = 0x76;
 const OP_HASH160: u8 = 0xa9;
 const OP_DATA_20: u8 = 0x14;
 const OP_EQUALVERIFY: u8  = 0x88;
 const OP_CHECKSIG: u8 = 0xac;
+const OP_RETURN: u8 = 0x6a;
+const OP_PUSHDATA4: u8 = 0x4e;
+const OP_PUSHDATA2: u8 = 0x4d;
+const OP_PUSHDATA1: u8 = 0x4c;
+const OP_DATA_75: u8 = 0x4b;
 
-// public struct Input has copy, drop {
-//     tx_id: vector<u8>,
-//     vout: vector<u8>,
-//     script_size: u256,
-//     script_sig: vector<u8>,
-//     sequece: vector<u8>,
-// }
+
 /// Represents a Bitcoin transaction output
 public struct Output has copy, drop {
     amount: u256,
@@ -86,10 +88,11 @@ public fun outputs(tx: &Transaction): vector<Output> {
     tx.outputs
 }
 
-public fun p2pkh_address(output: &Output): vector<u8> {
-    // TODO: we support P2PKH and P2PWKH now.
-    // We will and more script after.
-    // and the script must return error if we don't support standard script
+public fun amount(output: &Output): u256 {
+    output.amount
+}
+
+public fun is_pk_hash_script(output: &Output): bool {
     let script = output.script_pubkey;
     if (
         script.length() == 25 &&
@@ -99,13 +102,44 @@ public fun p2pkh_address(output: &Output): vector<u8> {
 		script[23] == OP_EQUALVERIFY &&
 		script[24] == OP_CHECKSIG
     ) {
-		return slice(script, 3, 23)
+		return true
 	};
-    vector[]
+    false
 }
 
-public fun amount(output: &Output): u256 {
-    output.amount
+public fun is_op_return(output: &Output): bool {
+    let script = output.script_pubkey;
+    return script.length() > 0 && script[0] == OP_RETURN
+}
+
+public fun p2pkh_address(output: &Output): vector<u8> {
+    // TODO: we support P2PKH and P2PWKH now.
+    // We will and more script after.
+    // and the script must return error if we don't support standard script
+    let script = output.script_pubkey;
+	return slice(script, 3, 23)
+}
+
+public fun op_return_message(output: &Output): vector<u8> {
+    let script = output.script_pubkey;
+    if (script[1] <= OP_DATA_75) {
+        // script = op_return OP_DATA_<len> DATA. len(DATA) = <len>
+        return slice(script, 2, script.length())
+    };
+
+    if (script[1] == OP_PUSHDATA1) {
+        return slice(script, 3, script.length())
+    };
+
+    if (script[1] == OP_PUSHDATA2) {
+        return slice(script, 4, script.length())
+    };
+
+    if (script[1] == OP_PUSHDATA4) {
+        return slice(script, 6, script.length())
+    };
+
+    abort EInvalidNullScript
 }
 
 // TODO: create readbytes APIs

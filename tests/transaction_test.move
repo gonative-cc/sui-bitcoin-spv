@@ -73,5 +73,5 @@ fun verify_output_test() {
 #[test]
 fun output_tests() {
     let output = &parse_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
-    assert!(output.p2pkh_address() == vector[]);
+    assert!(output.is_pk_hash_script() == false);
 }
