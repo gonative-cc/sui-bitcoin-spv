@@ -2,9 +2,6 @@ module bitcoin_spv::transaction;
 use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size, to_number, compact_size};
 use bitcoin_spv::utils::slice;
 
-const EInvalidNullScript: u64 = 0;
-
-
 // === BTC script opcodes ===
 const OP_DUP: u8 = 0x76;
 const OP_HASH160: u8 = 0xa9;
@@ -116,11 +113,16 @@ public fun p2pkh_address(output: &Output): vector<u8> {
     // TODO: we support P2PKH and P2PWKH now.
     // We will and more script after.
     // and the script must return error if we don't support standard script
+
     let script = output.script_pubkey;
 	return slice(script, 3, 23)
 }
 
+/// Return message after OP_RETURN
 public fun op_return_message(output: &Output): vector<u8> {
+    // If transaction mined to BTC.
+    // This must pass basic conditions for OP_RETURN opcode.
+    // This why we only return the message without check size message.
     let script = output.script_pubkey;
     if (script[1] <= OP_DATA_75) {
         // script = op_return OP_DATA_<len> DATA. len(DATA) = <len>
@@ -135,11 +137,8 @@ public fun op_return_message(output: &Output): vector<u8> {
         return slice(script, 4, script.length())
     };
 
-    if (script[1] == OP_PUSHDATA4) {
-        return slice(script, 6, script.length())
-    };
-
-    abort EInvalidNullScript
+    // OP_PUSHDATA4
+    slice(script, 6, script.length())
 }
 
 // TODO: create readbytes APIs
