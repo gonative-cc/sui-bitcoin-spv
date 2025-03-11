@@ -213,8 +213,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
     let blocks_pre_retarget = params.blocks_pre_retarget();
 
     if (params.pow_no_retargeting() || last_block.height() == 0) {
-        let power_limit = params.power_limit();
-        return target_to_bits(power_limit)
+        return params.power_limit_bits()
     };
 
     // if this block not start a new retarget cycle
@@ -224,13 +223,10 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
             let reduction_time = params.min_diff_reduction_time();
             let allow_min_time = last_block.header().timestamp() + reduction_time;
             if (new_block_time > allow_min_time) {
-                // TODO: add power limit bits to params
-                let power_limit = params.power_limit();
-                return target_to_bits(power_limit)
+                return params.power_limit_bits()
             };
 
             return find_prev_testnet_difficulty(c, last_block)
-
         };
 
         // Return previous block difficulty
@@ -252,15 +248,15 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
 
 public(package) fun find_prev_testnet_difficulty(c: &LightClient, start_node: &LightBlock): u32 {
     let mut iter_block = start_node;
-    let p = c.params();
-    let power_limit_bits = target_to_bits(p.power_limit());
+    let blocks_pre_retarget = c.params().blocks_pre_retarget();
+    let power_limit_bits = c.params().power_limit_bits();
 
     let mut height = iter_block.height();
     let mut bits = iter_block.header().bits();
 
     while (
         height != 0 &&
-        height % p.blocks_pre_retarget() != 0 &&
+        height % blocks_pre_retarget != 0 &&
         bits == power_limit_bits
     ){
         iter_block = c.relative_ancestor(iter_block, 1); // parent_block

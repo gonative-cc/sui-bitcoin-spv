@@ -63,7 +63,7 @@ fun test_difficulty_computation_mainnet() {
     let block_hash = lc.get_block_hash_by_height(0);
 
     // The next difficulty at genesis block is equal power of limit.
-    assert!(calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(block_hash), 0) == target_to_bits(lc.params().power_limit()));
+    assert!(calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(block_hash), 0) == lc.params().power_limit_bits());
 
     let header = new_block_header(x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca");
     let last_block = new_light_block(
@@ -106,7 +106,7 @@ fun test_difficulty_computation_regtest() {
 
     let block = lc.get_light_block_by_height(10);
     let new_bits = calc_next_required_difficulty(&lc, block, 0);
-    assert!(new_bits == target_to_bits(lc.params().power_limit()));
+    assert!(new_bits == lc.params().power_limit_bits());
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -194,7 +194,7 @@ fun test_find_prev_testnet_difficulty() {
     lc.add_light_block(genesis_block);
 
     // return power limit when genesis block
-    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(0)) == target_to_bits(lc.params().power_limit()));
+    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(0)) == lc.params().power_limit_bits());
     sui::test_utils::destroy(lc);
     scenario.end();
 }
