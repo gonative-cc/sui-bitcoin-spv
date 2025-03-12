@@ -150,7 +150,7 @@ public fun op_return(output: &Output): vector<u8> {
         //          |      4 bytes                  |  the rest |
         return slice(script, 4, script.length())
     };
-    // script = OP_RETURN OP_PUSHDATA2 <4-bytes> DATA
+    // script = OP_RETURN OP_PUSHDATA4 <4-bytes> DATA
     //          |      6 bytes                  |  the rest |
     slice(script, 6, script.length())
 }

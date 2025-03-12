@@ -81,11 +81,29 @@ fun pkh_script_tests() {
 
 #[test]
 fun op_return_script_tests() {
-    let output = &parse_output(100, x"6a0b68656c6c6f20776f726c64");
-    assert!(output.is_op_return() == true);
-    assert!(output.op_return() == x"68656c6c6f20776f726c64");
-    let output = &parse_output(100, x"6a");
-    assert!(output.op_return() == vector[]);
+    let data = vector[
+        x"6a0b68656c6c6f20776f726c64",
+        x"6a",
+        x"6a4c0401020304",
+        x"6a4d0300010203",
+        x"6a4e03000000010203"
+    ];
+    let expected_result = vector[
+        x"68656c6c6f20776f726c64",
+        x"",
+        x"01020304",
+        x"010203",
+        x"010203",
+    ];
+
+    let mut i = 0;
+    while(i < data.length()) {
+        let o = &parse_output(0,  data[i]);
+        assert!(o.is_op_return() == true);
+        assert!(o.op_return() == expected_result[i]);
+        i = i + 1;
+    };
+
     let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
     assert!(output.is_op_return() == false);
 }
