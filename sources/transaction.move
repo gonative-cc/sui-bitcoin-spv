@@ -101,17 +101,13 @@ public fun amount(output: &Output): u256 {
 
 public fun is_pk_hash_script(output: &Output): bool {
     let script = output.script_pubkey;
-    if (
-        script.length() == 25 &&
+
+    return script.length() == 25 &&
 		script[0] == OP_DUP &&
 		script[1] == OP_HASH160 &&
 		script[2] == OP_DATA_20 &&
 		script[23] == OP_EQUALVERIFY &&
 		script[24] == OP_CHECKSIG
-    ) {
-		return true
-	};
-    false
 }
 
 public fun is_op_return(output: &Output): bool {
@@ -129,7 +125,7 @@ public fun p2pkh_address(output: &Output): vector<u8> {
 }
 
 /// Return message after OP_RETURN
-public fun op_return_message(output: &Output): vector<u8> {
+public fun op_return(output: &Output): vector<u8> {
     // If transaction mined to BTC.
     // This must pass basic conditions for OP_RETURN opcode.
     // This why we only return the message without check size message.
