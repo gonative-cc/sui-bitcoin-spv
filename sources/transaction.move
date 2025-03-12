@@ -125,26 +125,33 @@ public fun p2pkh_address(output: &Output): vector<u8> {
 }
 
 /// Return message after OP_RETURN
+/// If transaction mined to BTC, then this must pass basic conditions
+/// include the conditions for OP_RETURN script.
+/// This why we only return the message without check size message.
 public fun op_return(output: &Output): vector<u8> {
-    // If transaction mined to BTC.
-    // This must pass basic conditions for OP_RETURN opcode.
-    // This why we only return the message without check size message.
     let script = output.script_pubkey;
 
     if (script.length() == 1) {
         return vector[]
     };
+
     if (script[1] <= OP_DATA_75) {
-        // script = op_return OP_DATA_<len> DATA. len(DATA) = <len>
+        // script = OP_RETURN OP_DATA_<len> DATA
+        //          |      2 bytes         |  the rest |
         return slice(script, 2, script.length())
     };
     if (script[1] == OP_PUSHDATA1) {
+        // script = OP_RETURN OP_PUSHDATA1 <1 bytes>    DATA
+        //          |      4 bytes                  |  the rest |
         return slice(script, 3, script.length())
     };
     if (script[1] == OP_PUSHDATA2) {
+        // script = OP_RETURN OP_PUSHDATA2 <2 bytes>   DATA
+        //          |      4 bytes                  |  the rest |
         return slice(script, 4, script.length())
     };
-    // OP_PUSHDATA4
+    // script = OP_RETURN OP_PUSHDATA2 <4-bytes> DATA
+    //          |      6 bytes                  |  the rest |
     slice(script, 6, script.length())
 }
 
