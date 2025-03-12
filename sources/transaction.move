@@ -124,7 +124,7 @@ public fun p2pkh_address(output: &Output): vector<u8> {
 	return slice(script, 3, 23)
 }
 
-/// Extract the message OP_RETURN write to BTC.
+/// Extracts the data payload from an OP_RETURN output in a transaction.
 /// script = OP_RETURN <data>.
 /// If transaction mined to BTC, then this must pass basic conditions
 /// include the conditions for OP_RETURN script.
