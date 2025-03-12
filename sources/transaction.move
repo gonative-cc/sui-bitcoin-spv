@@ -3,15 +3,25 @@ use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size, to_number, compact
 use bitcoin_spv::utils::slice;
 
 // === BTC script opcodes ===
+/// Duplicates the top stack item
 const OP_DUP: u8 = 0x76;
+/// Pop the top stack item and push its RIPEMD(SHA256(top item)) hash
 const OP_HASH160: u8 = 0xa9;
+/// Push the next 20 bytes as an array onto the stack
 const OP_DATA_20: u8 = 0x14;
+/// Returns success if the inputs are exactly equal, failure otherwise
 const OP_EQUALVERIFY: u8  = 0x88;
+/// https://en.bitcoin.it/wiki/OP_CHECKSIG pushing 1/0 for success/failure
 const OP_CHECKSIG: u8 = 0xac;
+/// nulldata script
 const OP_RETURN: u8 = 0x6a;
+/// Read the next 4 bytes as N. Push the next N bytes as an array onto the stack.
 const OP_PUSHDATA4: u8 = 0x4e;
+/// Read the next 2 bytes as N. Push the next N bytes as an array onto the stack.
 const OP_PUSHDATA2: u8 = 0x4d;
+/// Read the next byte as N. Push the next N bytes as an array onto the stack.
 const OP_PUSHDATA1: u8 = 0x4c;
+/// Push the next 75 bytes onto the stack.
 const OP_DATA_75: u8 = 0x4b;
 
 
