@@ -29,3 +29,25 @@ fun verify_merkle_proof_with_multiple_node_test() {
     let tx_index = 0;
     assert!(verify_merkle_proof(root, proof, tx_id, tx_index));
 }
+
+
+#[test]
+fun verify_merkle_proof_with_invalid_proof_test() {
+    // port from summa-tx
+    let root = x"48e5a1a0e616d8fd92b4ef228c424e0c816799a256c6a90892195ccfc53300d6";
+    let tx_id = x"48e5a1a0e616d8fd92b4ef228c424e0c816799a256c6a90892195ccfc53300d6";
+    let proof = vector[
+        x"e35a0d6de94b656694589964a252957e4673a9fb1d2f8b4a92e3f0a7bb654fdd",
+        x"b94e5a1e6d7f7f499fd1be5dd30a73bf5584bf137da5fdd77cc21aeb95b9e357",
+        x"88894be019284bd4fbed6dd6118ac2cb6d26bc4be4e423f55a3a48f2874d8d02",
+        x"a65d9c87d07de21d4dfe7b0a9f4a23cc9a58373e9e6931fefdb5afade5df54c9",
+        x"1104048df1ee999240617984e18b6f931e2373673d0195b8c6987d7ff7650d5c",
+        x"e53bcec46e13ab4f2da1146a7fc621ee672f62bc22742486392d75e55e67b099",
+        x"60c3386a0b49e75f1723d6ab28ac9a2028a0c72866e2111d79d4817b88e17c82",
+        x"1937847768d92837bae3832bb8e5a4ab4434b97e00a6c10182f211f592409068",
+        x"d6f5652400d9a3d1cc150a7fb692e874cc42d76bdafc842f2fe0f835a7c24d2d",
+        x"60c109b187d64571efbaa8047be85821f8e67e0e85f2f5894bc63d00c2ed9d64"
+    ];
+    let tx_index = 0;
+    assert!(verify_merkle_proof(root, proof, tx_id, tx_index) == false);
+}
