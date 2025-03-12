@@ -31,7 +31,19 @@ fun decoded_transaction_tests() {
     assert!(outputs[1].amount() == 7466184);
 }
 
+#[test]
+fun decode_transaction_from_summa_test() {
+    let tx = &parse_transaction(
+        x"01000000",
+        1,
+        x"1746bd867400f3494b8f44c24b83e1aa58c4f0ff25b4a61cffeffd4bc0f9ba300000000000ffffffff",
+        2,
+        x"4897070000000000220020a4333e5612ab1a1043b25755c89b16d55184a42f81799e623e6bc39db8539c180000000000000000166a14edb1b5c2f39af0fec151732585b1049b07895211",
+        x"00000000",
+    );
 
+    assert!(tx.tx_id() == x"48e5a1a0e616d8fd92b4ef228c424e0c816799a256c6a90892195ccfc53300d6");
+}
 
 #[test]
 fun verify_output_test() {
