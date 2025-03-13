@@ -29,10 +29,10 @@ fun decoded_transaction_tests() {
     assert!(outputs[0].amount() == 500000);
     assert!(outputs[1].p2pkh_address() == x"51e6b602f387b4c5bb8a4d8cdf1b059c826374e3");
     assert!(outputs[1].amount() == 7466184);
-}
 
-#[test]
-fun decode_transaction_from_summa_test() {
+    // ported from summa-tx/bitcoin-spv
+    // https://github.com/summa-tx/bitcoin-spv/blob/master/solidity/test/ViewSPV.test.js#L56
+    // https://github.com/summa-tx/bitcoin-spv/blob/master/testVectors.json#L1124
     let tx = &parse_transaction(
         x"01000000",
         1,
@@ -44,6 +44,8 @@ fun decode_transaction_from_summa_test() {
 
     assert!(tx.tx_id() == x"48e5a1a0e616d8fd92b4ef228c424e0c816799a256c6a90892195ccfc53300d6");
 }
+
+
 
 #[test]
 fun verify_output_test() {

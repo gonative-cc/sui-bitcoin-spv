@@ -33,7 +33,9 @@ fun verify_merkle_proof_with_multiple_node_test() {
 
 #[test]
 fun verify_merkle_proof_with_invalid_proof_test() {
-    // port from summa-tx
+    // ported from summa-tx
+    // https://github.com/summa-tx/bitcoin-spv/blob/master/solidity/test/ViewSPV.test.js#L44
+    // https://github.com/summa-tx/bitcoin-spv/blob/master/testVectors.json#L1114
     let root = x"48e5a1a0e616d8fd92b4ef228c424e0c816799a256c6a90892195ccfc53300d6";
     let tx_id = x"48e5a1a0e616d8fd92b4ef228c424e0c816799a256c6a90892195ccfc53300d6";
     let proof = vector[
