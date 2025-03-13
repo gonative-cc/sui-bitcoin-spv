@@ -7,7 +7,8 @@ use std::u64::do;
 const EInvalidLength: u64 = 0;
 const EInvalidCompactSizeDecode: u64 = 1;
 const EInvalidCompactSizeEncode: u64 = 2;
-/// convert 4 bytes in little endian format to u32 number
+
+/// Converts 4 bytes in little endian format to u32 number
 public fun to_u32(v: vector<u8>): u32 {
     assert!(v.length() == 4, EInvalidLength);
     let mut ans = 0u32;
@@ -20,7 +21,7 @@ public fun to_u32(v: vector<u8>): u32 {
     ans
 }
 
-/// convert 32 bytes in little endian format to u256 number.
+/// Converts 32 bytes in little endian format to u256 number.
 public fun to_u256(v: vector<u8>): u256 {
     assert!(v.length() == 32, EInvalidLength);
     let mut ans = 0u256;
@@ -32,11 +33,11 @@ public fun to_u256(v: vector<u8>): u256 {
     ans
 }
 
-/// double hash of value
+/// Double hashes the value
 public fun btc_hash(data: vector<u8>): vector<u8> {
     let first_hash = hash::sha2_256(data);
     let second_hash = hash::sha2_256(first_hash);
-    return second_hash
+    second_hash
 }
 
 /// Calculates offset for decoding a Bitcoin compact size integer.
@@ -51,7 +52,7 @@ fun compact_size_offset(start_byte: u8): u64 {
         return 4
     };
     // 0xff
-    return 8
+    8
 }
 
 
@@ -91,9 +92,9 @@ fun bytes_of(number: u256) : u8 {
 }
 
 
-/// get last 32 bits of number
+/// Returns last 32 bits of a number.
 fun get_last_32_bits(number: u256): u32 {
-    return (number & 0xffffffff) as u32
+    (number & 0xffffffff) as u32
 }
 
 /// target => bits conversion function.
@@ -137,7 +138,7 @@ public fun target_to_bits(target: u256): u32 {
     compact
 }
 
-/// converts bits to target. See documentation to the function above for more details.
+/// Converts bits to target. See documentation to the function above for more details.
 public fun bits_to_target(bits: u32): u256 {
     let exponent = bits >> 3*8;
 
@@ -151,7 +152,7 @@ public fun bits_to_target(bits: u32): u256 {
         let bits_shift = (8 * (exponent - 3)) as u8;
         target = target << bits_shift;
     };
-    return target
+    target
 }
 
 
@@ -182,7 +183,7 @@ public fun covert_to_compact_size(number: u256): vector<u8> {
         abort EInvalidCompactSizeEncode
     };
 
-    return ans
+    ans
 }
 
 // internal test

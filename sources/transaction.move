@@ -88,7 +88,7 @@ public fun parse_output(amount: u256, script_pubkey: vector<u8>): Output {
 }
 
 public fun tx_id(tx: &Transaction): vector<u8> {
-    return tx.tx_id
+    tx.tx_id
 }
 
 public fun outputs(tx: &Transaction): vector<Output> {
@@ -102,7 +102,7 @@ public fun amount(output: &Output): u256 {
 public fun is_pk_hash_script(output: &Output): bool {
     let script = output.script_pubkey;
 
-    return script.length() == 25 &&
+    script.length() == 25 &&
 		script[0] == OP_DUP &&
 		script[1] == OP_HASH160 &&
 		script[2] == OP_DATA_20 &&
@@ -112,7 +112,7 @@ public fun is_pk_hash_script(output: &Output): bool {
 
 public fun is_op_return(output: &Output): bool {
     let script = output.script_pubkey;
-    return script.length() > 0 && script[0] == OP_RETURN
+    script.length() > 0 && script[0] == OP_RETURN
 }
 
 public fun p2pkh_address(output: &Output): vector<u8> {
@@ -121,7 +121,7 @@ public fun p2pkh_address(output: &Output): vector<u8> {
     // and the script must return error if we don't support standard script
 
     let script = output.script_pubkey;
-	return slice(script, 3, 23)
+    slice(script, 3, 23)
 }
 
 /// Extracts the data payload from an OP_RETURN output in a transaction.

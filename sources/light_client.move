@@ -79,7 +79,7 @@ public(package) fun new_light_client_with_params(params: Params, start_height: u
         lc.finalized_height = height - 1;
     };
 
-    return lc
+    lc
 }
 
 
@@ -156,7 +156,7 @@ public(package) fun rollback(c: &mut LightClient, checkpoint_hash: vector<u8>, h
 // === Views function ===
 
 public fun latest_height(c: &LightClient): u64 {
-    return c.finalized_height
+    c.finalized_height
 }
 
 public fun latest_block(c: &LightClient): &LightBlock {
@@ -187,21 +187,21 @@ public fun verify_tx(
 }
 
 public fun params(c: &LightClient): &Params{
-    return &c.params
+    &c.params
 }
 
 public fun client_id(c: &LightClient): &UID {
-    return &c.id
+    &c.id
 }
 
 public fun client_id_mut(c: &mut LightClient): &mut UID {
-    return &mut c.id
+    &mut c.id
 }
 
 public fun relative_ancestor(c: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
     let ancestor_height = lb.height() - distance;
     let ancestor_block_hash = c.get_block_hash_by_height(ancestor_height);
-    return c.get_light_block_by_hash(ancestor_block_hash)
+    c.get_light_block_by_hash(ancestor_block_hash)
 }
 
 // last_block is a new block that we are adding. The function calculates the required difficulty for the block
@@ -243,7 +243,7 @@ public fun calc_next_required_difficulty(c: &LightClient, last_block: &LightBloc
 
     let new_target = retarget_algorithm(c.params(), previous_target, first_timestamp as u64, last_timestamp as u64);
     let new_bits = target_to_bits(new_target);
-    return new_bits
+    new_bits
 }
 
 public(package) fun find_prev_testnet_difficulty(c: &LightClient, start_node: &LightBlock): u32 {
@@ -268,7 +268,7 @@ public(package) fun find_prev_testnet_difficulty(c: &LightClient, start_node: &L
         return bits
     };
 
-    return power_limit_bits
+    power_limit_bits
 }
 
 /// compute new target
