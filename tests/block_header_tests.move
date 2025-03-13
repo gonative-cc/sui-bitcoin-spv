@@ -2,6 +2,7 @@
 module bitcoin_spv::block_header_tests;
 use bitcoin_spv::block_header::{new_block_header, EPoW};
 use bitcoin_spv::btc_math::to_u32;
+use bitcoin_spv::utils::slice;
 
 #[test]
 fun block_header_test() {
@@ -28,6 +29,20 @@ fun block_header_test() {
     assert!(header.calc_work() == 220053167595535890616746);
 }
 
+#[test]
+fun block_header_summar() {
+    let raw_headers = x"0000002073bd2184edd9c4fc76642ea6754ee40136970efc10c4190000000000000000000296ef123ea96da5cf695f22bf7d94be87d49db1ad7ac371ac43c4da4161c8c216349c5ba11928170d38782b00000020fe70e48339d6b17fbbf1340d245338f57336e97767cc240000000000000000005af53b865c27c6e9b5e5db4c3ea8e024f8329178a79ddb39f7727ea2fe6e6825d1349c5ba1192817e2d9515900000020baaea6746f4c16ccb7cd961655b636d39b5fe1519b8f15000000000000000000c63a8848a448a43c9e4402bd893f701cd11856e14cbbe026699e8fdc445b35a8d93c9c5ba1192817b945dc6c00000020f402c0b551b944665332466753f1eebb846a64ef24c71700000000000000000033fc68e070964e908d961cd11033896fa6c9b8b76f64a2db7ea928afa7e304257d3f9c5ba11928176164145d0000ff3f63d40efa46403afd71a254b54f2b495b7b0164991c2d22000000000000000000f046dc1b71560b7d0786cfbdb25ae320bd9644c98d5c7c77bf9df05cbe96212758419c5ba1192817a2bb2caa00000020e2d4f0edd5edd80bdcb880535443747c6b22b48fb6200d0000000000000000001d3799aa3eb8d18916f46bf2cf807cb89a9b1b4c56c3f2693711bf1064d9a32435429c5ba1192817752e49ae0000002022dba41dff28b337ee3463bf1ab1acf0e57443e0f7ab1d000000000000000000c3aadcc8def003ecbd1ba514592a18baddddcd3a287ccf74f584b04c5c10044e97479c5ba1192817c341f595";
+
+    let mut i = 0;
+    let mut cal_work = 0;
+    while (i < raw_headers.length()) {
+        let raw_header = slice(raw_headers, i, i + 80);
+        let header = new_block_header(raw_header);
+        cal_work = cal_work + header.calc_work();
+        i = i + 80;
+    };
+    assert!(cal_work == 49134394618239);
+}
 #[test]
 fun pow_check_happy_test() {
     // https://learnmeabitcoin.com/explorer/block/00000000f01df1dbc52bce6d8d31167a8fef76f1a8eb67897469cf92205e806b
