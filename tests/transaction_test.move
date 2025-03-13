@@ -83,7 +83,40 @@ fun verify_output_test() {
 }
 
 #[test]
-fun output_tests() {
+fun pkh_script_tests() {
+    let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
+    assert!(output.is_pk_hash_script() == true);
+    assert!(output.p2pkh_address() == x"55ae51684c43435da751ac8d2173b2652eb64105");
     let output = &parse_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
-    assert!(output.p2pkh_address() == vector[]);
+    assert!(output.is_pk_hash_script() == false);
+}
+
+#[test]
+fun op_return_script_tests() {
+    let data = vector[
+        x"6a0b68656c6c6f20776f726c64",
+        x"6a",
+        x"6a4c0401020304",
+        x"6a4d0300010203",
+        x"6a4e03000000010203"
+    ];
+    let expected_result = vector[
+        x"68656c6c6f20776f726c64",
+        x"",
+        x"01020304",
+        x"010203",
+        x"010203",
+    ];
+
+    let mut i = 0;
+    while(i < data.length()) {
+        let o = &parse_output(0,  data[i]);
+        // this return error code at test index fails
+        assert!(o.is_op_return(), i);
+        assert!(o.op_return() == expected_result[i], i);
+        i = i + 1;
+    };
+
+    let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
+    assert!(output.is_op_return() == false);
 }

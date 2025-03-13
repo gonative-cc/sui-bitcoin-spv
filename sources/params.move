@@ -1,7 +1,6 @@
 module bitcoin_spv::params;
-use bitcoin_spv::btc_math::target_to_bits;
 
-public struct Params has store{
+public struct Params has store {
     power_limit: u256,
     power_limit_bits: u32,
     blocks_pre_retarget: u64,

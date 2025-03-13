@@ -2,20 +2,29 @@ module bitcoin_spv::transaction;
 use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size, to_number, compact_size};
 use bitcoin_spv::utils::slice;
 
-// === BTC script opcode ===
-const OP_DUP: u8= 0x76;
+// === BTC script opcodes ===
+/// Duplicates the top stack item
+const OP_DUP: u8 = 0x76;
+/// Pop the top stack item and push its RIPEMD(SHA256(top item)) hash
 const OP_HASH160: u8 = 0xa9;
+/// Push the next 20 bytes as an array onto the stack
 const OP_DATA_20: u8 = 0x14;
+/// Returns success if the inputs are exactly equal, failure otherwise
 const OP_EQUALVERIFY: u8  = 0x88;
+/// https://en.bitcoin.it/wiki/OP_CHECKSIG pushing 1/0 for success/failure
 const OP_CHECKSIG: u8 = 0xac;
+/// nulldata script
+const OP_RETURN: u8 = 0x6a;
+/// Read the next 4 bytes as N. Push the next N bytes as an array onto the stack.
+const OP_PUSHDATA4: u8 = 0x4e;
+/// Read the next 2 bytes as N. Push the next N bytes as an array onto the stack.
+const OP_PUSHDATA2: u8 = 0x4d;
+/// Read the next byte as N. Push the next N bytes as an array onto the stack.
+const OP_PUSHDATA1: u8 = 0x4c;
+/// Push the next 75 bytes onto the stack.
+const OP_DATA_75: u8 = 0x4b;
 
-// public struct Input has copy, drop {
-//     tx_id: vector<u8>,
-//     vout: vector<u8>,
-//     script_size: u256,
-//     script_sig: vector<u8>,
-//     sequece: vector<u8>,
-// }
+
 /// Represents a Bitcoin transaction output
 public struct Output has copy, drop {
     amount: u256,
@@ -86,26 +95,65 @@ public fun outputs(tx: &Transaction): vector<Output> {
     tx.outputs
 }
 
-public fun p2pkh_address(output: &Output): vector<u8> {
-    // TODO: we support P2PKH and P2PWKH now.
-    // We will and more script after.
-    // and the script must return error if we don't support standard script
+public fun amount(output: &Output): u256 {
+    output.amount
+}
+
+public fun is_pk_hash_script(output: &Output): bool {
     let script = output.script_pubkey;
-    if (
-        script.length() == 25 &&
+
+    return script.length() == 25 &&
 		script[0] == OP_DUP &&
 		script[1] == OP_HASH160 &&
 		script[2] == OP_DATA_20 &&
 		script[23] == OP_EQUALVERIFY &&
 		script[24] == OP_CHECKSIG
-    ) {
-		return slice(script, 3, 23)
-	};
-    vector[]
 }
 
-public fun amount(output: &Output): u256 {
-    output.amount
+public fun is_op_return(output: &Output): bool {
+    let script = output.script_pubkey;
+    return script.length() > 0 && script[0] == OP_RETURN
+}
+
+public fun p2pkh_address(output: &Output): vector<u8> {
+    // TODO: we support P2PKH and P2PWKH now.
+    // We will and more script after.
+    // and the script must return error if we don't support standard script
+
+    let script = output.script_pubkey;
+	return slice(script, 3, 23)
+}
+
+/// Extracts the data payload from an OP_RETURN output in a transaction.
+/// script = OP_RETURN <data>.
+/// If transaction mined to BTC, then this must pass basic conditions
+/// include the conditions for OP_RETURN script.
+/// This why we only return the message without check size message.
+public fun op_return(output: &Output): vector<u8> {
+    let script = output.script_pubkey;
+
+    if (script.length() == 1) {
+        return vector[]
+    };
+
+    if (script[1] <= OP_DATA_75) {
+        // script = OP_RETURN OP_DATA_<len> DATA
+        //          |      2 bytes         |  the rest |
+        return slice(script, 2, script.length())
+    };
+    if (script[1] == OP_PUSHDATA1) {
+        // script = OP_RETURN OP_PUSHDATA1 <1 bytes>    DATA
+        //          |      4 bytes                  |  the rest |
+        return slice(script, 3, script.length())
+    };
+    if (script[1] == OP_PUSHDATA2) {
+        // script = OP_RETURN OP_PUSHDATA2 <2 bytes>   DATA
+        //          |      4 bytes                  |  the rest |
+        return slice(script, 4, script.length())
+    };
+    // script = OP_RETURN OP_PUSHDATA4 <4-bytes> DATA
+    //          |      6 bytes                  |  the rest |
+    slice(script, 6, script.length())
 }
 
 // TODO: create readbytes APIs
