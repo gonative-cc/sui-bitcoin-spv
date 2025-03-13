@@ -99,8 +99,9 @@ fun op_return_script_tests() {
     let mut i = 0;
     while(i < data.length()) {
         let o = &parse_output(0,  data[i]);
-        assert!(o.is_op_return() == true);
-        assert!(o.op_return() == expected_result[i]);
+        // this return error code at test index fails
+        assert!(o.is_op_return(), i);
+        assert!(o.op_return() == expected_result[i], i);
         i = i + 1;
     };
 
