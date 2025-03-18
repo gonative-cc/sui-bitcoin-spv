@@ -6,8 +6,7 @@ use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
 use bitcoin_spv::transaction::make_transaction;
-use bitcoin_spv::params::{Params};
-use bitcoin_spv::params;
+use bitcoin_spv::params::{Params, Self};
 
 
 use sui::dynamic_field as df;
@@ -313,7 +312,6 @@ public fun relative_ancestor(lc: &LightClient, lb: &LightBlock, distance: u64): 
 /// * `new_block`: a new block that we are adding
 public fun calc_next_required_difficulty(lc: &LightClient, new_block: &LightBlock, new_block_time: u32) : u32 {
     // reference from https://github.com/btcsuite/btcd/blob/master/blockchain/difficulty.go#L136
-    // TODO: handle lastHeader is nil or genesis block
     let params = lc.params();
     let blocks_pre_retarget = params.blocks_pre_retarget();
 
