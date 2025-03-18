@@ -21,7 +21,6 @@ const EForkChainWorkTooSmall: u64 = 6;
 const ETxNotInBlock: u64 = 7;
 
 public struct NewLightClientEvent has copy, drop {
-    network: u8,
     light_client_id: ID
 }
 
@@ -55,7 +54,7 @@ fun init(_ctx: &mut TxContext) {
 ///
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
+public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -77,7 +76,11 @@ public fun new_light_client_with_params(params: Params, start_height: u64, trust
         lc.finalized_height = height - 1;
     };
 
-    lc
+    transfer::share_object(lc);
+
+    event::emit(NewLightClientEvent {
+        light_client_id: object::id(&lc)
+    });
 }
 
 
@@ -91,14 +94,7 @@ public fun new_light_client(
         1 => params::testnet(),
         _ => params::regtest()
     };
-    let lc = new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
-
-    event::emit(NewLightClientEvent {
-        network,
-        light_client_id: object::id(&lc)
-    });
-
-    transfer::share_object(lc);
+    new_light_client_with_params(params, start_height, start_headers, start_chain_work, ctx);
 }
 
 
