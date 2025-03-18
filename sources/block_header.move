@@ -73,8 +73,8 @@ public fun calc_work(header: &BlockHeader): u256 {
     (n255 - 1 - target + n255) / (target + 1) + 1
 }
 
-// fails if block hash doesn't meet target requirement
-public fun pow_check(header:BlockHeader) {
+/// checks if the block headers meet PoW target requirements. Panics otherewise.
+public fun pow_check(header: BlockHeader) {
     let work = header.block_hash();
     let target = header.target();
     assert!(target >= to_u256(work), EPoW);

@@ -3,7 +3,7 @@ module bitcoin_spv::transaction_tests;
 
 use bitcoin_spv::params;
 use bitcoin_spv::light_client::{new_light_client_with_params};
-use bitcoin_spv::transaction::{parse_transaction, parse_output};
+use bitcoin_spv::transaction::{make_transaction, parse_output};
 use sui::test_scenario;
 
 
@@ -12,7 +12,7 @@ fun decoded_transaction_tests() {
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
 
-    let tx = &parse_transaction(
+    let tx = &make_transaction(
         x"01000000",
         1,
         x"c08ce0edcedc47becf03f923479bec4c184cda060452959f59d47ae8923da032010000006b483045022100cfdcc3fc354c8d2bbf22d708723e1c3836629c0ed6ef9485004d674ca06e0c6102204dee8d1180a309d22aa66e83554d992b751298208bc1b1e0d60f74fe834634330121036b4468fc9f4dc283365c70f7989b944586a260fca5358a91dfc50bf13c071b1effffffff",
@@ -33,7 +33,7 @@ fun decoded_transaction_tests() {
     // ported from summa-tx/bitcoin-spv
     // https://github.com/summa-tx/bitcoin-spv/blob/master/solidity/test/ViewSPV.test.js#L56
     // https://github.com/summa-tx/bitcoin-spv/blob/master/testVectors.json#L1124
-    let tx = &parse_transaction(
+    let tx = &make_transaction(
         x"01000000",
         1,
         x"1746bd867400f3494b8f44c24b83e1aa58c4f0ff25b4a61cffeffd4bc0f9ba300000000000ffffffff",

@@ -5,7 +5,7 @@ use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
-use bitcoin_spv::transaction::parse_transaction;
+use bitcoin_spv::transaction::make_transaction;
 use bitcoin_spv::params::{Params};
 use bitcoin_spv::params;
 
@@ -258,7 +258,7 @@ public fun verify_output(
     outputs: vector<u8>,
     lock_time: vector<u8>
 ): (vector<vector<u8>>, vector<u256>) {
-    let tx = parse_transaction(version, input_count, inputs, output_count, outputs, lock_time);
+    let tx = make_transaction(version, input_count, inputs, output_count, outputs, lock_time);
     assert!(lc.verify_tx(height, tx.tx_id(), proof, tx_index), ETxNotInBlock);
 
     let outputs = tx.outputs();
