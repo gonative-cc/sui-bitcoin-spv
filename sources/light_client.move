@@ -27,7 +27,8 @@ public struct NewLightClientEvent has copy, drop {
 public struct InsertedHeadersEvent has copy, drop {
     chain_work: u256,
     is_forked: bool,
-    best_block_hash: vector<u8>,
+    /// block hash of the blockchain head
+    head: vector<u8>,
     height: u64,
 }
 
@@ -113,28 +114,30 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
     let first_header = new_block_header(raw_headers[0]);
+    let parent_hash = first_header.prev_block();
     let latest_block = lc.latest_block();
 
     let mut is_forked = false;
-    if (first_header.prev_block() == latest_block.header().block_hash()) {
+    if (parent_hash == latest_block.header().block_hash()) {
         // extend current fork
-        lc.extend_chain(first_header.prev_block(), raw_headers);
+        lc.extend_chain(raw_headers);
     } else {
         // handle a fork choice
-        assert!(lc.exist(first_header.prev_block()), EBlockNotFound);
+        assert!(lc.exist(parent_hash), EBlockNotFound);
         let current_chain_work = latest_block.chain_work();
         let current_block_hash = latest_block.header().block_hash();
 
-        let candidate_fork_head_hash = lc.extend_chain(first_header.prev_block(), raw_headers);
-        let candidate_head = lc.get_light_block_by_hash(candidate_fork_head_hash);
-        let candidate_chain_work = candidate_head.chain_work();
+        lc.extend_chain(raw_headers);
+        let fork_head_hash = new_block_header(raw_headers[raw_headers.length()-1]).block_hash();
+        let fork_head = lc.get_light_block_by_hash(fork_head_hash);
+        let fork_chain_work = fork_head.chain_work();
 
-        assert!(current_chain_work < candidate_chain_work, EForkChainWorkTooSmall);
+        assert!(current_chain_work < fork_chain_work, EForkChainWorkTooSmall);
         // If transaction not abort. This is the current chain is less power than
         // the fork. We will update the fork to main chain and remove the old fork
         // notes: current_block_hash is hash of the old fork/chain in this case.
         // TODO(vu): Make it more simple.
-        lc.rollback(first_header.prev_block(), current_block_hash);
+        lc.rollback(parent_hash, current_block_hash);
         is_forked = true;
     };
 
@@ -142,7 +145,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     event::emit(InsertedHeadersEvent{
         chain_work: b.chain_work(),
         is_forked,
-        best_block_hash: b.header().block_hash(),
+        head: b.header().block_hash(),
         height: b.height(),
     });
 }
@@ -173,39 +176,37 @@ public(package) fun set_latest_block(lc: &mut LightClient, light_block: LightBlo
 /// * `parent`: hash of the parent block, must be already recorded in the light client.
 /// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be
 /// only called internally.
-public(package) fun insert_header(lc: &mut LightClient, parent_block_hash: vector<u8>, next_header: BlockHeader): vector<u8> {
-    let parent_block = lc.get_light_block_by_hash(parent_block_hash);
+public(package) fun insert_header(lc: &mut LightClient, header: BlockHeader) {
+    let parent = header.prev_block();
+    let parent_block = lc.get_light_block_by_hash(parent);
     let parent_header = parent_block.header();
 
     // verify new header
-    assert!(parent_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(lc, parent_block, next_header.timestamp());
-    assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
+    assert!(parent_header.block_hash() == header.prev_block(), EBlockHashNotMatch);
+    let next_block_difficulty = calc_next_required_difficulty(lc, parent_block, header.timestamp());
+    assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
 
 
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
     // https://learnmeabitcoin.com/technical/block/time
     let median_time = lc.calc_past_median_time(parent_block);
-    assert!(next_header.timestamp() > median_time, ETimeTooOld);
-    next_header.pow_check();
+    assert!(header.timestamp() > median_time, ETimeTooOld);
+    header.pow_check();
 
     // update new header
     let next_height = parent_block.height() + 1;
-    let next_chain_work = parent_block.chain_work() + next_header.calc_work();
-    let next_light_block = new_light_block(next_height, next_header, next_chain_work);
+    let next_chain_work = parent_block.chain_work() + header.calc_work();
+    let next_light_block = new_light_block(next_height, header, next_chain_work);
 
     lc.set_latest_block(next_light_block);
-    next_header.block_hash()
 }
 
-fun extend_chain(lc: &mut LightClient, parent_block_hash: vector<u8>, raw_headers: vector<vector<u8>>): vector<u8> {
-    let mut previous_block_hash = parent_block_hash;
+fun extend_chain(lc: &mut LightClient, raw_headers: vector<vector<u8>>) {
     raw_headers.do!(|raw_header| {
         let header = new_block_header(raw_header);
-        previous_block_hash = lc.insert_header(previous_block_hash, header);
+        lc.insert_header(header);
     });
-    previous_block_hash
 }
 
 
