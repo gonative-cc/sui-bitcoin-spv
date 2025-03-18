@@ -45,16 +45,8 @@ fun init(_ctx: &mut TxContext) {
     // LC creation is permissionless and it's done through new new_btc_light_client.
 }
 
-
-/// Initializes Bitcoin light client by providing a trusted snapshot height and header
-/// params: Mainnet, Testnet or Regtest
-/// start_height: the height of first trust block
-/// trusted_header: The list of trusted header in hex encode.
-/// strart_chain_work: the chain_work at first trusted block.
-///
-/// Encode header reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
+/// internal funciton to create a light client
+public(package) fun new_light_client_with_params_int(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -76,13 +68,25 @@ public fun new_light_client_with_params(params: Params, start_height: u64, trust
         lc.finalized_height = height - 1;
     };
 
-    transfer::share_object(lc);
+    return lc
+}
 
+
+/// Initializes Bitcoin light client by providing a trusted snapshot height and header
+/// params: Mainnet, Testnet or Regtest
+/// start_height: the height of first trust block
+/// trusted_header: The list of trusted header in hex encode.
+/// strart_chain_work: the chain_work at first trusted block.
+///
+/// Encode header reference:
+/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
+public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
+    let lc = new_light_client_with_params_int(params, start_height, trusted_headers, start_chain_work, ctx);
     event::emit(NewLightClientEvent {
         light_client_id: object::id(&lc)
     });
+    transfer::share_object(lc);
 }
-
 
 /// Helper function to initialize new light client.
 /// network: 0 = mainnet, 1 = testnet
