@@ -179,7 +179,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent_block_hash: vecto
 
     // verify new header
     assert!(parent_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(c, parent_block, next_header.timestamp());
+    let next_block_difficulty = calc_next_required_difficulty(lc, parent_block, next_header.timestamp());
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
 
@@ -307,42 +307,40 @@ public fun relative_ancestor(lc: &LightClient, lb: &LightBlock, distance: u64): 
     lc.get_light_block_by_hash(ancestor_block_hash)
 }
 
-/// The function calculates the required difficulty for the block after passing `new_block`.
-/// Parameters:
-/// * `new_block`: a new block that we are adding
-public fun calc_next_required_difficulty(lc: &LightClient, new_block: &LightBlock, new_block_time: u32) : u32 {
+/// The function calculates the required difficulty for a block that we want to add after
+/// (potentially fork) after the parent_block.
+public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightBlock, new_block_time: u32) : u32 {
     // reference from https://github.com/btcsuite/btcd/blob/master/blockchain/difficulty.go#L136
     let params = lc.params();
     let blocks_pre_retarget = params.blocks_pre_retarget();
 
-    if (params.pow_no_retargeting() || new_block.height() == 0) {
+    if (params.pow_no_retargeting() || parent_block.height() == 0) {
         return params.power_limit_bits()
     };
 
     // if this block does not start a new retarget cycle
-    if ((new_block.height() + 1) % blocks_pre_retarget != 0) {
-
+    if ((parent_block.height() + 1) % blocks_pre_retarget != 0) {
         if (params.reduce_min_difficulty()) {
             let reduction_time = params.min_diff_reduction_time();
-            let allow_min_time = new_block.header().timestamp() + reduction_time;
+            let allow_min_time = parent_block.header().timestamp() + reduction_time;
             if (new_block_time > allow_min_time) {
                 return params.power_limit_bits()
             };
 
-            return find_prev_testnet_difficulty(lc, new_block)
+            return find_prev_testnet_difficulty(lc, parent_block)
         };
 
         // Return previous block difficulty
-        return new_block.header().bits()
+        return parent_block.header().bits()
     };
 
     // we compute a new difficulty for the new target cycle.
     // this target applies at block  height + 1
-    let first_block = lc.relative_ancestor(new_block, blocks_pre_retarget - 1);
+    let first_block = lc.relative_ancestor(parent_block, blocks_pre_retarget - 1);
     let first_header = first_block.header();
     let previous_target = first_header.target();
     let first_timestamp = first_header.timestamp() as u64;
-    let last_timestamp = new_block.header().timestamp() as u64;
+    let last_timestamp = parent_block.header().timestamp() as u64;
 
     let new_target = retarget_algorithm(params, previous_target, first_timestamp, last_timestamp);
     let new_bits = target_to_bits(new_target);
