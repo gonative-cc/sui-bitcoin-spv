@@ -20,6 +20,8 @@ const EBlockNotFound: u64 = 5;
 const EForkChainWorkTooSmall: u64 = 6;
 const ETxNotInBlock: u64 = 7;
 
+const FINALITY_CONF: u8 = 8;
+
 public struct NewLightClientEvent has copy, drop {
     light_client_id: ID
 }
@@ -35,7 +37,8 @@ public struct InsertedHeadersEvent has copy, drop {
 public struct LightClient has key, store {
     id: UID,
     params: Params,
-    finalized_height: u64
+    head_height: u64,
+    head_hash: vector<u8>,
 }
 
 
@@ -50,7 +53,8 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
-        finalized_height: 0,
+        head_height: 0,
+        head_hash: vector[],
     };
 
     let mut current_chain_work = start_chain_work;
@@ -60,12 +64,12 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
             let header = new_block_header(raw_header);
             let light_block = new_light_block(height, header, current_chain_work);
             lc.set_block_hash_by_height(height, header.block_hash());
-            lc.add_light_block(light_block);
+            lc.insert_light_block(light_block);
             height = height + 1;
             current_chain_work = current_chain_work + light_block.header().calc_work();
         });
 
-        lc.finalized_height = height - 1;
+        lc.head_height = height - 1;
     };
 
     return lc
@@ -113,17 +117,17 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
     let first_header = new_block_header(raw_headers[0]);
-    let latest_block = lc.latest_block();
+    let head = lc.head();
 
     let mut is_forked = false;
-    if (first_header.prev_block() == latest_block.header().block_hash()) {
+    if (first_header.prev_block() == head.header().block_hash()) {
         // extend current fork
         lc.extend_chain(first_header.prev_block(), raw_headers);
     } else {
         // handle a fork choice
         assert!(lc.exist(first_header.prev_block()), EBlockNotFound);
-        let current_chain_work = latest_block.chain_work();
-        let current_block_hash = latest_block.header().block_hash();
+        let current_chain_work = head.chain_work();
+        let current_block_hash = head.header().block_hash();
 
         let candidate_fork_head_hash = lc.extend_chain(first_header.prev_block(), raw_headers);
         let candidate_head = lc.get_light_block_by_hash(candidate_fork_head_hash);
@@ -138,7 +142,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         is_forked = true;
     };
 
-    let b = lc.latest_block();
+    let b = lc.head();
     event::emit(InsertedHeadersEvent{
         chain_work: b.chain_work(),
         is_forked,
@@ -148,7 +152,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
 }
 
 
-public(package) fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
+public(package) fun insert_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
     df::add(&mut lc.id, block_hash, lb);
 }
@@ -163,10 +167,13 @@ public(package) fun set_block_hash_by_height(lc: &mut LightClient, height: u64, 
     df::add(id, height, block_hash);
 }
 
-public(package) fun set_latest_block(lc: &mut LightClient, light_block: LightBlock) {
-    lc.add_light_block(light_block);
+/// Appends light block to the current branch and overwrites the current blockchain head.
+/// Must only be called when we know that we extend the current branch or if we control
+/// the rollback.
+public(package) fun append_block(lc: &mut LightClient, light_block: LightBlock) {
+    lc.insert_light_block(light_block);
     lc.set_block_hash_by_height(light_block.height(), light_block.header().block_hash()) ;
-    lc.finalized_height = light_block.height();
+    lc.head_height = light_block.height();
 }
 
 /// Insert new header to bitcoin spv
@@ -195,7 +202,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent_block_hash: vecto
     let next_chain_work = parent_block.chain_work() + next_header.calc_work();
     let next_light_block = new_light_block(next_height, next_header, next_chain_work);
 
-    lc.set_latest_block(next_light_block);
+    lc.append_block(next_light_block);
     next_header.block_hash()
 }
 
@@ -223,13 +230,19 @@ public(package) fun rollback(lc: &mut LightClient, checkpoint_hash: vector<u8>, 
  * Views function
  */
 
-public fun latest_height(lc: &LightClient): u64 {
-    lc.finalized_height
+/// Returns height of the blockchain head (latest, not confirmed block).
+public fun head_height(lc: &LightClient): u64 {
+    lc.head_height
 }
 
+/// Returns height of the blockchain head (latest, not confirmed block).
+public fun head_hash(lc: &LightClient): vector<u8> {
+    lc.head_hash
+}
 
-public fun latest_block(lc: &LightClient): &LightBlock {
-    let block_hash = lc.get_block_hash_by_height(lc.latest_height());
+/// Returns blockchain head light block (latest, not confirmed block).
+public fun head(lc: &LightClient): &LightBlock {
+    let block_hash = lc.get_block_hash_by_height(lc.head_height);
     lc.get_light_block_by_hash(block_hash)
 }
 

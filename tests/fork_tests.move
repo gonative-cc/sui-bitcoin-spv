@@ -71,8 +71,8 @@ fun insert_headers_switch_fork_tests() {
         insert_point = insert_point + 1;
     });
 
-    assert!(lc.latest_block().height() == insert_point - 1);
-    assert!(lc.latest_block().header() == last_header);
+    assert!(lc.head().height() == insert_point - 1);
+    assert!(lc.head().header() == last_header);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -123,9 +123,10 @@ fun rollback_tests() {
     let (mut lc, headers) =  new_lc_for_test(ctx);
 
     let checkpoint = headers[5].block_hash();
-    let latest_block = lc.latest_block().header().block_hash();
+    // TODO: head().header().block_hash()
+    let head = lc.head().header().block_hash();
 
-    lc.rollback(checkpoint, latest_block);
+    lc.rollback(checkpoint, head);
 
     let height = lc.get_light_block_by_hash(checkpoint).height();
     let mut i = 0u64;

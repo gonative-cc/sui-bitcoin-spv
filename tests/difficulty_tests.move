@@ -74,11 +74,11 @@ fun test_difficulty_computation_mainnet() {
 
     let last_block_hash = last_block.header().block_hash();
     lc.set_block_hash_by_height(last_block.height(), last_block_hash);
-    lc.add_light_block(last_block);
+    lc.append_block(last_block);
     let header = new_block_header(x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a");
     let first_block = new_light_block(858816,   header, 0);
     lc.set_block_hash_by_height(first_block.height(), first_block.header().block_hash());
-    lc.add_light_block(first_block);
+    lc.append_block(first_block);
 
 
     let new_bits = calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(last_block_hash), 0);
@@ -191,7 +191,7 @@ fun test_find_prev_testnet_difficulty() {
     );
 
     lc.set_block_hash_by_height(0, genesis_block.header().block_hash());
-    lc.add_light_block(genesis_block);
+    lc.append_block(genesis_block);
 
     // return power limit when genesis block
     assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(0)) == lc.params().power_limit_bits());
