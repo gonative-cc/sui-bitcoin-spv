@@ -247,10 +247,7 @@ public fun head_hash(lc: &LightClient): vector<u8> {
 
 /// Returns blockchain head light block (latest, not confirmed block).
 public fun head(lc: &LightClient): &LightBlock {
-    let block_hash = lc.get_block_hash_by_height(lc.head_height);
-    lc.get_light_block_by_hash(block_hash)
-    // TODO: find why this doesn't work
-    // lc.get_light_block_by_hash(lc.head_hash)
+    lc.get_light_block_by_hash(lc.head_hash)
 }
 
 
