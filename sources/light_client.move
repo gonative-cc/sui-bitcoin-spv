@@ -29,8 +29,8 @@ public struct NewLightClientEvent has copy, drop {
 public struct InsertedHeadersEvent has copy, drop {
     chain_work: u256,
     is_forked: bool,
-    best_block_hash: vector<u8>,
-    height: u64,
+    head_hash: vector<u8>,
+    head_height: u64,
 }
 
 
@@ -60,16 +60,19 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
     let mut current_chain_work = start_chain_work;
     if (!trusted_headers.is_empty()) {
         let mut height = start_height;
+        let mut head_hash = vector[];
         trusted_headers.do!(|raw_header| {
             let header = new_block_header(raw_header);
+            head_hash = header.block_hash();
             let light_block = new_light_block(height, header, current_chain_work);
-            lc.set_block_hash_by_height(height, header.block_hash());
+            lc.set_block_hash_by_height(height, head_hash);
             lc.insert_light_block(light_block);
             height = height + 1;
-            current_chain_work = current_chain_work + light_block.header().calc_work();
+            current_chain_work = current_chain_work + header.calc_work();
         });
 
         lc.head_height = height - 1;
+        lc.head_hash = head_hash;
     };
 
     return lc
@@ -146,8 +149,8 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     event::emit(InsertedHeadersEvent{
         chain_work: b.chain_work(),
         is_forked,
-        best_block_hash: b.header().block_hash(),
-        height: b.height(),
+        head_hash: lc.head_hash,
+        head_height: lc.head_height,
     });
 }
 
@@ -171,9 +174,11 @@ public(package) fun set_block_hash_by_height(lc: &mut LightClient, height: u64, 
 /// Must only be called when we know that we extend the current branch or if we control
 /// the rollback.
 public(package) fun append_block(lc: &mut LightClient, light_block: LightBlock) {
+    let head_hash = light_block.header().block_hash();
     lc.insert_light_block(light_block);
-    lc.set_block_hash_by_height(light_block.height(), light_block.header().block_hash()) ;
+    lc.set_block_hash_by_height(light_block.height(), head_hash);
     lc.head_height = light_block.height();
+    lc.head_hash = head_hash;
 }
 
 /// Insert new header to bitcoin spv
@@ -244,6 +249,8 @@ public fun head_hash(lc: &LightClient): vector<u8> {
 public fun head(lc: &LightClient): &LightBlock {
     let block_hash = lc.get_block_hash_by_height(lc.head_height);
     lc.get_light_block_by_hash(block_hash)
+    // TODO: find why this doesn't work
+    // lc.get_light_block_by_hash(lc.head_hash)
 }
 
 
