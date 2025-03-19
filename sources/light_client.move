@@ -19,8 +19,9 @@ const EHeaderListIsEmpty: u64 = 4;
 const EBlockNotFound: u64 = 5;
 const EForkChainWorkTooSmall: u64 = 6;
 const ETxNotInBlock: u64 = 7;
+const EExtendBeyondFinal: u64 = 8;
 
-const FINALITY_CONF: u64 = 8;
+const FINALITY: u64 = 8;
 
 public struct NewLightClientEvent has copy, drop {
     light_client_id: ID
@@ -128,7 +129,14 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         lc.extend_chain(first_header.prev_block(), raw_headers);
     } else {
         // handle a fork choice
-        assert!(lc.exist(first_header.prev_block()), EBlockNotFound);
+        let parent_id = first_header.prev_block();
+        assert!(lc.exist(parent_id), EBlockNotFound);
+        let parent = lc.get_light_block_by_hash(parent_id);
+        // TODO: check if we need to block extending beyond finality
+        // * pro: we protect against double mint for nBTC etc...
+        // * cons: we can have a deadlock... probably we should remove
+        assert!(lc.head_height - parent.height() <= FINALITY, EExtendBeyondFinal);
+
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
 
@@ -252,7 +260,7 @@ public fun head(lc: &LightClient): &LightBlock {
 
 /// Returns latest finalized_block height
 public fun finalized_height(lc: &LightClient): u64 {
-    lc.head_height - FINALITY_CONF
+    lc.head_height - FINALITY
 }
 
 /// verify output transaction
