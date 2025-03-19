@@ -70,11 +70,10 @@ fun test_insert_header_happy_cases() {
         x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351"
     ];
     lc.insert_headers(raw_headers);
-    let latest_hash = lc.head_hash();
-    let latest_block = lc.get_light_block_by_hash(latest_hash).header();
+    let head_block = lc.get_light_block_by_hash(lc.head_hash()).header();
 
-    assert!(latest_block == new_block_header(raw_headers[0]));
-    assert!(latest_block == lc.head().header());
+    assert!(head_block == new_block_header(raw_headers[0]));
+    assert!(head_block == lc.head().header());
 
     let last_block_header = new_block_header(x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca");
     let last_block = new_light_block(
@@ -102,8 +101,8 @@ fun test_insert_header_failed_block_hash_not_match() {
     let mut lc = new_lc_for_test(scenario.ctx());
     // we changed the block hash to make new header previous hash not match with last hash
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000001530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351");
-    let current_block_hash = lc.head().header().block_hash();
-    lc.insert_header(current_block_hash, new_header);
+    let head_hash = lc.head_hash();
+    lc.insert_header(head_hash, new_header);
 
     sui::test_utils::destroy(lc);
     scenario.end();
@@ -118,8 +117,8 @@ fun test_insert_header_failed_difficulty_not_match() {
 
     // we changed the block hash to make new header previous hash not match with last hash
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031880f1e351");
-    let current_block_hash = lc.head().header().block_hash();
-    lc.insert_header(current_block_hash, new_header);
+    let head_hash = lc.head_hash();
+    lc.insert_header(head_hash, new_header);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -133,8 +132,8 @@ fun test_insert_header_failed_timestamp_too_old() {
 
     // we changed timestamp from 1c35cf66 to 0c35cf46
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f600c35cf465b25031780f1e351");
-    let current_block_hash = lc.head().header().block_hash();
-    lc.insert_header(current_block_hash, new_header);
+    let head_hash = lc.head_hash();
+    lc.insert_header(head_hash, new_header);
     sui::test_utils::destroy(lc);
     scenario.end();
 }

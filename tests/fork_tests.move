@@ -123,10 +123,8 @@ fun rollback_tests() {
     let (mut lc, headers) =  new_lc_for_test(ctx);
 
     let checkpoint = headers[5].block_hash();
-    // TODO: head().header().block_hash()
-    let head = lc.head().header().block_hash();
-
-    lc.rollback(checkpoint, head);
+    let head_hash = lc.head_hash();
+    lc.rollback(checkpoint, head_hash);
 
     let height = lc.get_light_block_by_hash(checkpoint).height();
     let mut i = 0u64;
