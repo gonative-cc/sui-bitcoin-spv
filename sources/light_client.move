@@ -20,7 +20,7 @@ const EBlockNotFound: u64 = 5;
 const EForkChainWorkTooSmall: u64 = 6;
 const ETxNotInBlock: u64 = 7;
 
-const FINALITY_CONF: u8 = 8;
+const FINALITY_CONF: u64 = 8;
 
 public struct NewLightClientEvent has copy, drop {
     light_client_id: ID
@@ -250,6 +250,10 @@ public fun head(lc: &LightClient): &LightBlock {
     lc.get_light_block_by_hash(lc.head_hash)
 }
 
+/// Returns latest finalized_block height
+public fun finalized_height(lc: &LightClient): u64 {
+    lc.head_height - FINALITY_CONF
+}
 
 /// verify output transaction
 /// * `height`: block heigh transacion belong
