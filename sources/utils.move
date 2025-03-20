@@ -1,6 +1,7 @@
 module bitcoin_spv::utils;
 
 /// === Errors ===
+#[error]
 const EOutBoundIndex: vector<u8> = b"The index 'n' is out of bounds for the vector";
 
 

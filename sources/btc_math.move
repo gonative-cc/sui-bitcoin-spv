@@ -4,9 +4,6 @@ use std::hash;
 use std::u64::do;
 
 /// === Errors ===
-const EInvalidLength: u64 = 0;
-const EInvalidCompactSizeDecode: u64 = 1;
-const EInvalidCompactSizeEncode: u64 = 2;
 #[error]
 const EInvalidLength: vector<u8> = b"The input vector has an invalid length";
 #[error]
