@@ -19,37 +19,38 @@ public struct BlockHeader has copy, drop, store {
 /// New block header
 public fun new_block_header(raw_block_header: vector<u8>): BlockHeader {
     assert!(raw_block_header.length() == BLOCK_HEADER_SIZE, EInvalidBlockHeaderSize);
-    return BlockHeader {
+    BlockHeader {
         internal: raw_block_header,
     }
 }
 
 public fun block_hash(header: &BlockHeader): vector<u8> {
-    return btc_hash(header.internal)
+    btc_hash(header.internal)
 }
 
 public fun version(header: &BlockHeader): u32 {
-    return to_u32(header.slice(0, 4))
+    to_u32(header.slice(0, 4))
 }
 
+/// return parent block ID (hash)
 public fun prev_block(header: &BlockHeader): vector<u8> {
-    return header.slice(4, 36)
+    header.slice(4, 36)
 }
 
 public fun merkle_root(header: &BlockHeader): vector<u8> {
-    return header.slice(36, 68)
+    header.slice(36, 68)
 }
 
 public fun timestamp(header: &BlockHeader): u32 {
-    return to_u32(header.slice(68, 72))
+    to_u32(header.slice(68, 72))
 }
 
 public fun bits(header: &BlockHeader): u32 {
-    return to_u32(header.slice(72, 76))
+    to_u32(header.slice(72, 76))
 }
 
 public fun nonce(header: &BlockHeader): u32 {
-    return to_u32(header.slice(76, 80))
+    to_u32(header.slice(76, 80))
 }
 
 public fun target(header: &BlockHeader): u256 {
@@ -70,11 +71,11 @@ public fun calc_work(header: &BlockHeader): u256 {
     // so we have formula bellow:
     let target = header.target();
     let n255 = 1 << 255;
-    return (n255 - 1 - target + n255) / (target + 1) + 1
+    (n255 - 1 - target + n255) / (target + 1) + 1
 }
 
-// fails if block hash doesn't meet target requirement
-public fun pow_check(header:BlockHeader) {
+/// checks if the block headers meet PoW target requirements. Panics otherewise.
+public fun pow_check(header: BlockHeader) {
     let work = header.block_hash();
     let target = header.target();
     assert!(target >= to_u256(work), EPoW);

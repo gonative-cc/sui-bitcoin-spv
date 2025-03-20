@@ -43,29 +43,29 @@ function insert_headers_fork_potential() {
 }
 
 # Get last block
-function latest_block() {
+function head() {
     LC_ID=$1
-    sui client call --function latest_block --module light_client --package $PACKAGE_ID --gas-budget 10000000 --args $LC_ID --dev-inspect
+    sui client call --function head --module light_client --package $PACKAGE_ID --gas-budget 10000000 --args $LC_ID --dev-inspect
 }
 
 case "$1" in
-    create_lc)
-	create_light_client
-	;;
-    insert_headers)
-	insert_headers $2
-	;;
-    insert_headers_fork)
-	insert_headers_fork_potential $2
-	;;
-    latest_block)
-	latest_block $2
-	;;
-    lc_object)
-	client_object $2
-	;;
-    *)
-	echo "Invalid option."
-	exit 1
-	;;
+create_lc)
+    create_light_client
+    ;;
+insert_headers)
+    insert_headers $2
+    ;;
+insert_headers_fork)
+    insert_headers_fork_potential $2
+    ;;
+head)
+    head $2
+    ;;
+lc_object)
+    client_object $2
+    ;;
+*)
+    echo "Invalid option."
+    exit 1
+    ;;
 esac
