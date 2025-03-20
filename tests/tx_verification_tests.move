@@ -13,7 +13,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
     let headers = vector[
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a"
     ];
-    let lc = new_light_client_with_params_int(params::mainnet(), start_block, headers, 0,  ctx);
+    let lc = new_light_client_with_params_int(params::mainnet(), start_block, headers, 0, 8, ctx);
     return lc
 }
 

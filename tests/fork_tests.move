@@ -32,7 +32,7 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
         x"0000003040ce8b407650044a4294fd43c6d78cbb4f78ac98527f858f3950dad92fc5982ddebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d23239c5b167ffff7f2002000000"
     ];
 
-    let lc = new_light_client_with_params_int(params::regtest(), 0, headers, 0, ctx);
+    let lc = new_light_client_with_params_int(params::regtest(), 0, headers, 0, 8, ctx);
 
     let block_headers = headers.map!(|h| new_block_header(h));
     (lc, block_headers)

@@ -20,8 +20,6 @@ const EBlockNotFound: u64 = 5;
 const EForkChainWorkTooSmall: u64 = 6;
 const ETxNotInBlock: u64 = 7;
 
-const FINALITY: u64 = 8;
-
 public struct NewLightClientEvent has copy, drop {
     light_client_id: ID
 }
@@ -45,6 +43,7 @@ public struct LightClient has key, store {
     params: Params,
     head_height: u64,
     head_hash: vector<u8>,
+    finality: u64,
 }
 
 
@@ -55,12 +54,13 @@ fun init(_ctx: &mut TxContext) {
 }
 
 /// internal funciton to create a light client
-public(package) fun new_light_client_with_params_int(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
+public(package) fun new_light_client_with_params_int(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, finality: u64, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
         head_height: 0,
         head_hash: vector[],
+        finality: finality,
     };
 
     let mut current_chain_work = start_chain_work;
@@ -94,7 +94,8 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
-    let lc = new_light_client_with_params_int(params, start_height, trusted_headers, start_chain_work, ctx);
+    let lc = new_light_client_with_params_int(params,
+        start_height, trusted_headers, start_chain_work, 8, ctx);
     event::emit(NewLightClientEvent {
         light_client_id: object::id(&lc)
     });
@@ -142,7 +143,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         // We decide to not to do it to protect from deadlock:
         // * pro: we protect against double mint for nBTC etc...
         // * cons: we can have a deadlock
-        if (lc.head_height - parent.height() > FINALITY) {
+        if (lc.head_height - parent.height() > lc.finality) {
             event::emit(ForkBeyondFinality{
                 parent_hash: parent_id,
                 parent_height: parent.height(),
