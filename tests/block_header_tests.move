@@ -1,6 +1,6 @@
 #[test_only]
 module bitcoin_spv::block_header_tests;
-use bitcoin_spv::block_header::{new_block_header, EPoW};
+use bitcoin_spv::block_header::{new_block_header, EPoW, EInvalidBlockHeaderSize};
 use bitcoin_spv::btc_math::to_u32;
 
 #[test]
@@ -51,4 +51,18 @@ fun pow_check_failure_test() {
         x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d00000000",
     );
     header.pow_check();
+}
+
+#[test]
+#[expected_failure(abort_code = EInvalidBlockHeaderSize)]
+fun fails_by_invalid_block_header_size_too_short_test() {
+    new_block_header(x"0123456789abcdef");
+
+}
+
+#[test]
+#[expected_failure(abort_code = EInvalidBlockHeaderSize)]
+fun fails_by_invalid_block_header_size__too_long_test() {
+    new_block_header(x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d00000000ffff");
+
 }

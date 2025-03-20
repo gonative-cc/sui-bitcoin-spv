@@ -30,7 +30,8 @@ public struct Output has copy, drop {
     amount: u256,
     script_pubkey: vector<u8>
 }
-// Represents a Bitcoin transaction
+
+/// Represents a Bitcoin transaction
 public struct Transaction has copy, drop {
     version: vector<u8>,
     input_count: u256,
@@ -42,9 +43,8 @@ public struct Transaction has copy, drop {
 }
 
 
-// TODO: better name for this.
-// we don't create any new transaction
-public fun parse_transaction(
+/// Bitcoin transaction constructor
+public fun make_transaction(
     version: vector<u8>,
     input_count: u256,
     inputs: vector<u8>,
@@ -67,7 +67,7 @@ public fun parse_transaction(
 
     let tx_id = btc_hash(tx_data);
 
-    let outputs_decoded = decode_outputs(output_count, outputs);
+    let outputs_decoded = make_outputs(output_count, outputs);
 
     Transaction {
         version,
@@ -88,7 +88,7 @@ public fun parse_output(amount: u256, script_pubkey: vector<u8>): Output {
 }
 
 public fun tx_id(tx: &Transaction): vector<u8> {
-    return tx.tx_id
+    tx.tx_id
 }
 
 public fun outputs(tx: &Transaction): vector<Output> {
@@ -102,7 +102,7 @@ public fun amount(output: &Output): u256 {
 public fun is_pk_hash_script(output: &Output): bool {
     let script = output.script_pubkey;
 
-    return script.length() == 25 &&
+    script.length() == 25 &&
 		script[0] == OP_DUP &&
 		script[1] == OP_HASH160 &&
 		script[2] == OP_DATA_20 &&
@@ -112,16 +112,15 @@ public fun is_pk_hash_script(output: &Output): bool {
 
 public fun is_op_return(output: &Output): bool {
     let script = output.script_pubkey;
-    return script.length() > 0 && script[0] == OP_RETURN
+    script.length() > 0 && script[0] == OP_RETURN
 }
 
+// TODO: add support script addresses.
+// TODO: check and verify the address to make sure we support it. Return error otherwise
+/// decodes address (p2pkh or p2pwkh) from the output
 public fun p2pkh_address(output: &Output): vector<u8> {
-    // TODO: we support P2PKH and P2PWKH now.
-    // We will and more script after.
-    // and the script must return error if we don't support standard script
-
     let script = output.script_pubkey;
-	return slice(script, 3, 23)
+    slice(script, 3, 23)
 }
 
 /// Extracts the data payload from an OP_RETURN output in a transaction.
@@ -157,7 +156,7 @@ public fun op_return(output: &Output): vector<u8> {
 }
 
 // TODO: create readbytes APIs
-public(package) fun decode_outputs(number_input: u256, inputs_bytes: vector<u8>): vector<Output> {
+public(package) fun make_outputs(number_input: u256, inputs_bytes: vector<u8>): vector<Output> {
     let mut outputs = vector[];
     let mut start = 0u64;
     let mut script_pubkey_size;

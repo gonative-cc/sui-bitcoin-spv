@@ -21,11 +21,11 @@ public fun new_light_block(height: u64, header: BlockHeader, chain_work: u256): 
  */
 
 public fun height(lb: &LightBlock): u64 {
-    return lb.height
+    lb.height
 }
 
 public fun header(lb: &LightBlock): &BlockHeader {
-    return &lb.header
+    &lb.header
 }
 
 public fun chain_work(lb: &LightBlock): u256 {

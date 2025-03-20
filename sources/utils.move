@@ -15,7 +15,7 @@ public fun slice(v: vector<u8>, start: u64, end: u64): vector<u8> {
         i = i + 1;
     };
 
-    return ans
+    ans
 }
 
 
