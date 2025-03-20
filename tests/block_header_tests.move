@@ -14,7 +14,7 @@ fun block_header_test() {
     // verify data extract from header
     assert!(header.version() == to_u32(x"00008020"));
     assert!(
-        header.prev_block() == x"0e102b98a160f4416c8ff0198db9b177523525c9de8a00000000000000000000",
+        header.parent() == x"0e102b98a160f4416c8ff0198db9b177523525c9de8a00000000000000000000",
     );
     assert!(
         header.merkle_root() == x"3b9b941003024e1afa90199732fdb1366a122ab0a5cacd3f7bcb8cb8815a811b",

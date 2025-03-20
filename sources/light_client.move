@@ -144,12 +144,12 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     let head = lc.head();
 
     let mut is_forked = false;
-    if (first_header.prev_block() == head.header().block_hash()) {
+    if (first_header.parent() == head.header().block_hash()) {
         // extend current fork
-        lc.extend_chain(first_header.prev_block(), raw_headers);
+        lc.extend_chain(first_header.parent(), raw_headers);
     } else {
         // handle a fork choice
-        let parent_id = first_header.prev_block();
+        let parent_id = first_header.parent();
         assert!(lc.exist(parent_id), EBlockNotFound);
         let parent = lc.get_light_block_by_hash(parent_id);
         // NOTE: we can check here if the diff between current head and the parent of
@@ -167,7 +167,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
 
-        let candidate_fork_head_hash = lc.extend_chain(first_header.prev_block(), raw_headers);
+        let candidate_fork_head_hash = lc.extend_chain(first_header.parent(), raw_headers);
         let candidate_head = lc.get_light_block_by_hash(candidate_fork_head_hash);
         let candidate_chain_work = candidate_head.chain_work();
 
@@ -176,7 +176,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         // the fork. We will update the fork to main chain and remove the old fork
         // notes: current_block_hash is hash of the old fork/chain in this case.
         // TODO(vu): Make it more simple.
-        lc.rollback(first_header.prev_block(), current_block_hash);
+        lc.rollback(first_header.parent(), current_block_hash);
         is_forked = true;
     };
 
@@ -225,7 +225,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent_block_hash: vecto
     let parent_header = parent_block.header();
 
     // verify new header
-    assert!(parent_header.block_hash() == next_header.prev_block(), EBlockHashNotMatch);
+    assert!(parent_header.block_hash() == next_header.parent(), EBlockHashNotMatch);
     let next_block_difficulty = calc_next_required_difficulty(lc, parent_block, next_header.timestamp());
     assert!(next_block_difficulty == next_header.bits(), EDifficultyNotMatch);
 
@@ -260,7 +260,7 @@ fun extend_chain(lc: &mut LightClient, parent_block_hash: vector<u8>, raw_header
 public(package) fun rollback(lc: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
-        let previous_block_hash = lc.get_light_block_by_hash(block_hash).header().prev_block();
+        let previous_block_hash = lc.get_light_block_by_hash(block_hash).header().parent();
         lc.remove_light_block(block_hash);
         block_hash = previous_block_hash;
     }
@@ -439,7 +439,7 @@ fun calc_past_median_time(lc: &LightClient, lb: &LightBlock): u32 {
     let mut prev_lb = lb;
     while (i < median_time_blocks) {
         timestamps.push_back(prev_lb.header().timestamp());
-        if (!lc.exist(prev_lb.header().prev_block())) {
+        if (!lc.exist(prev_lb.header().parent())) {
             break
         };
         prev_lb = lc.relative_ancestor(prev_lb, 1);

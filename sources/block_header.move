@@ -36,7 +36,7 @@ public fun version(header: &BlockHeader): u32 {
 }
 
 /// return parent block ID (hash)
-public fun prev_block(header: &BlockHeader): vector<u8> {
+public fun parent(header: &BlockHeader): vector<u8> {
     header.slice(4, 36)
 }
 
