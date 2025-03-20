@@ -7,8 +7,11 @@ use bitcoin_spv::utils;
 const BLOCK_HEADER_SIZE: u64 = 80;
 
 // === Errors ===
-const EInvalidBlockHeaderSize: u64 = 1;
-const EPoW: u64 = 2;
+#[error]
+const EInvalidBlockHeaderSize: vector<u8> = b"The block header must be exactly 80 bytes long";
+#[error]
+const EPoW: vector<u8> = b"The block hash does not meet the target difficulty (Proof-of-Work check failed)";
+
 
 public struct BlockHeader has copy, drop, store {
     internal: vector<u8>,

@@ -13,13 +13,21 @@ use bitcoin_spv::params;
 use sui::dynamic_field as df;
 use sui::event;
 
-const EBlockHashNotMatch: u64 = 1;
-const EDifficultyNotMatch: u64 = 2;
-const ETimeTooOld: u64 = 3;
-const EHeaderListIsEmpty: u64 = 4;
-const EBlockNotFound: u64 = 5;
-const EForkChainWorkTooSmall: u64 = 6;
-const ETxNotInBlock: u64 = 7;
+/// === Errors ===
+#[error]
+const EBlockHashNotMatch: vector<u8> = b"The provided block hash does not match the expected hash";
+#[error]
+const EDifficultyNotMatch: vector<u8> = b"The difficulty bits in the header do not match the calculated difficulty";
+#[error]
+const ETimeTooOld: vector<u8> = b"The timestamp of the block is older than the median of the last 11 blocks";
+#[error]
+const EHeaderListIsEmpty: vector<u8> = b"The provided list of headers is empty";
+#[error]
+const EBlockNotFound: vector<u8> = b"The specified block could not be found in the light client";
+#[error]
+const EForkChainWorkTooSmall: vector<u8> = b"The proposed fork has less work than the current chain";
+#[error]
+const ETxNotInBlock: vector<u8> = b"The transaction is not included in the block according to the Merkle proof";
 
 public struct NewLightClientEvent has copy, drop {
     network: u8,

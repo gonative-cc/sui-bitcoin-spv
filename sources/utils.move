@@ -1,6 +1,7 @@
 module bitcoin_spv::utils;
 
-const EOutBoundIndex: u64 = 1;
+/// === Errors ===
+const EOutBoundIndex: vector<u8> = b"The index 'n' is out of bounds for the vector";
 
 
 /// slice() extracts up to but not including end.
