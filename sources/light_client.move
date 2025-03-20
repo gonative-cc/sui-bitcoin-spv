@@ -19,7 +19,6 @@ const EHeaderListIsEmpty: u64 = 4;
 const EBlockNotFound: u64 = 5;
 const EForkChainWorkTooSmall: u64 = 6;
 const ETxNotInBlock: u64 = 7;
-const EExtendBeyondFinal: u64 = 8;
 
 const FINALITY: u64 = 8;
 
@@ -132,10 +131,12 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         let parent_id = first_header.prev_block();
         assert!(lc.exist(parent_id), EBlockNotFound);
         let parent = lc.get_light_block_by_hash(parent_id);
-        // TODO: check if we need to block extending beyond finality
+        // NOTE: we can check here if the diff between current head and the parent of
+        // the proposed blockcheck is not bigger than the required finality:
+        //    lc.head_height - parent.height() <= FINALITY
+        // We decide to not to do it to protect from deadlock:
         // * pro: we protect against double mint for nBTC etc...
-        // * cons: we can have a deadlock... probably we should remove
-        assert!(lc.head_height - parent.height() <= FINALITY, EExtendBeyondFinal);
+        // * cons: we can have a deadlock
 
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
