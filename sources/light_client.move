@@ -33,6 +33,12 @@ public struct InsertedHeadersEvent has copy, drop {
     head_height: u64,
 }
 
+public struct ForkBeyondFinality has copy, drop {
+    parent_hash: vector<u8>,
+    parent_height: u64,
+}
+
+
 
 public struct LightClient has key, store {
     id: UID,
@@ -132,11 +138,16 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         assert!(lc.exist(parent_id), EBlockNotFound);
         let parent = lc.get_light_block_by_hash(parent_id);
         // NOTE: we can check here if the diff between current head and the parent of
-        // the proposed blockcheck is not bigger than the required finality:
-        //    lc.head_height - parent.height() <= FINALITY
+        // the proposed blockcheck is not bigger than the required finality.
         // We decide to not to do it to protect from deadlock:
         // * pro: we protect against double mint for nBTC etc...
         // * cons: we can have a deadlock
+        if (lc.head_height - parent.height() > FINALITY) {
+            event::emit(ForkBeyondFinality{
+                parent_hash: parent_id,
+                parent_height: parent.height(),
+            });
+        };
 
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
