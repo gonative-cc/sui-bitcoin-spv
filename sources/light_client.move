@@ -141,12 +141,12 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
     let first_header = new_block_header(raw_headers[0]);
-    let head = lc.head();
+    let head = *lc.head();
 
     let mut is_forked = false;
     if (first_header.prev_block() == head.header().block_hash()) {
         // extend current chain
-        lc.extend_chain(*head, raw_headers);
+        lc.extend_chain(&head, raw_headers);
     } else {
         // handle a new fork
         let parent_id = first_header.prev_block();
@@ -167,7 +167,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
 
-        let fork_head = lc.extend_chain(*parent, raw_headers);
+        let fork_head = lc.extend_chain(parent, raw_headers);
         let fork_chain_work = fork_head.chain_work();
 
         assert!(current_chain_work < fork_chain_work, EForkChainWorkTooSmall);
@@ -220,7 +220,7 @@ public(package) fun append_block(lc: &mut LightClient, light_block: LightBlock) 
 /// * `parent`: hash of the parent block, must be already recorded in the light client.
 /// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be
 /// only called internally.
-public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, header: BlockHeader): LightBlock {
+public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, header: BlockHeader): &LightBlock {
     let parent_header = parent.header();
 
     // verify new header
@@ -242,7 +242,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     let next_light_block = new_light_block(next_height, header, next_chain_work);
 
     lc.append_block(next_light_block);
-    next_light_block
+    &next_light_block
 }
 
 
@@ -260,11 +260,16 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
 ///    X-Y-Z-A
 ///        \-A
 ///        \-A
-fun extend_chain(lc: &mut LightClient, parent: LightBlock, raw_headers: vector<vector<u8>>): LightBlock {
+fun extend_chain(lc: &mut LightClient, parent: &LightBlock, raw_headers: vector<vector<u8>>): &LightBlock {
+    // raw_headers.fold!(parent, |p, raw_header| {
+    //     let header = new_block_header(raw_header);
+    //     lc.insert_header(p, header)
+    // } )
+
     let mut parent = parent;
     raw_headers.do!(|raw_header| {
         let header = new_block_header(raw_header);
-        parent = lc.insert_header(&parent, header);
+        parent = lc.insert_header(parent, header);
     });
     parent
 }
