@@ -60,7 +60,7 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
         params: params,
         head_height: 0,
         head_hash: vector[],
-        finality: finality,
+        finality,
     };
 
     let mut current_chain_work = start_chain_work;
@@ -94,8 +94,14 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
-    let lc = new_light_client_with_params_int(params,
-        start_height, trusted_headers, start_chain_work, 8, ctx);
+    let lc = new_light_client_with_params_int(
+            params,
+            start_height,
+            trusted_headers,
+            start_chain_work, 
+            8, 
+            ctx
+        );
     event::emit(NewLightClientEvent {
         light_client_id: object::id(&lc)
     });
