@@ -32,7 +32,7 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
         x"0000003040ce8b407650044a4294fd43c6d78cbb4f78ac98527f858f3950dad92fc5982ddebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d23239c5b167ffff7f2002000000"
     ];
 
-    let lc = new_light_client_with_params_int(params::regtest(), 0, headers, 0, ctx);
+    let lc = new_light_client_with_params_int(params::regtest(), 0, headers, 0, 8, ctx);
 
     let block_headers = headers.map!(|h| new_block_header(h));
     (lc, block_headers)
@@ -71,8 +71,8 @@ fun insert_headers_switch_fork_tests() {
         insert_point = insert_point + 1;
     });
 
-    assert!(lc.latest_block().height() == insert_point - 1);
-    assert!(lc.latest_block().header() == last_header);
+    assert!(lc.head().height() == insert_point - 1);
+    assert!(lc.head().header() == last_header);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -123,9 +123,8 @@ fun rollback_tests() {
     let (mut lc, headers) =  new_lc_for_test(ctx);
 
     let checkpoint = headers[5].block_hash();
-    let latest_block = lc.latest_block().header().block_hash();
-
-    lc.rollback(checkpoint, latest_block);
+    let head_hash = lc.head_hash();
+    lc.rollback(checkpoint, head_hash);
 
     let height = lc.get_light_block_by_hash(checkpoint).height();
     let mut i = 0u64;

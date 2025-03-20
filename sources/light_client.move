@@ -12,13 +12,21 @@ use bitcoin_spv::params::{Params, Self};
 use sui::dynamic_field as df;
 use sui::event;
 
-const EBlockHashNotMatch: u64 = 1;
-const EDifficultyNotMatch: u64 = 2;
-const ETimeTooOld: u64 = 3;
-const EHeaderListIsEmpty: u64 = 4;
-const EBlockNotFound: u64 = 5;
-const EForkChainWorkTooSmall: u64 = 6;
-const ETxNotInBlock: u64 = 7;
+/// === Errors ===
+#[error]
+const EBlockHashNotMatch: vector<u8> = b"The provided block hash does not match the expected hash";
+#[error]
+const EDifficultyNotMatch: vector<u8> = b"The difficulty bits in the header do not match the calculated difficulty";
+#[error]
+const ETimeTooOld: vector<u8> = b"The timestamp of the block is older than the median of the last 11 blocks";
+#[error]
+const EHeaderListIsEmpty: vector<u8> = b"The provided list of headers is empty";
+#[error]
+const EBlockNotFound: vector<u8> = b"The specified block could not be found in the light client";
+#[error]
+const EForkChainWorkTooSmall: vector<u8> = b"The proposed fork has less work than the current chain";
+#[error]
+const ETxNotInBlock: vector<u8> = b"The transaction is not included in the block according to the Merkle proof";
 
 public struct NewLightClientEvent has copy, drop {
     light_client_id: ID
@@ -27,16 +35,23 @@ public struct NewLightClientEvent has copy, drop {
 public struct InsertedHeadersEvent has copy, drop {
     chain_work: u256,
     is_forked: bool,
-    /// block hash of the blockchain head
-    head: vector<u8>,
-    height: u64,
+    head_hash: vector<u8>,
+    head_height: u64,
 }
+
+public struct ForkBeyondFinality has copy, drop {
+    parent_hash: vector<u8>,
+    parent_height: u64,
+}
+
 
 
 public struct LightClient has key, store {
     id: UID,
     params: Params,
-    finalized_height: u64
+    head_height: u64,
+    head_hash: vector<u8>,
+    finality: u64,
 }
 
 
@@ -47,29 +62,34 @@ fun init(_ctx: &mut TxContext) {
 }
 
 /// internal funciton to create a light client
-public(package) fun new_light_client_with_params_int(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext): LightClient {
+public(package) fun new_light_client_with_params_int(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, finality: u64, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
-        finalized_height: 0,
+        head_height: 0,
+        head_hash: vector[],
+        finality,
     };
 
     let mut current_chain_work = start_chain_work;
     if (!trusted_headers.is_empty()) {
         let mut height = start_height;
+        let mut head_hash = vector[];
         trusted_headers.do!(|raw_header| {
             let header = new_block_header(raw_header);
+            head_hash = header.block_hash();
             let light_block = new_light_block(height, header, current_chain_work);
-            lc.set_block_hash_by_height(height, header.block_hash());
-            lc.add_light_block(light_block);
+            lc.set_block_hash_by_height(height, head_hash);
+            lc.insert_light_block(light_block);
             height = height + 1;
-            current_chain_work = current_chain_work + light_block.header().calc_work();
+            current_chain_work = current_chain_work + header.calc_work();
         });
 
-        lc.finalized_height = height - 1;
+        lc.head_height = height - 1;
+        lc.head_hash = head_hash;
     };
 
-    return lc
+    lc
 }
 
 
@@ -82,7 +102,14 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
-    let lc = new_light_client_with_params_int(params, start_height, trusted_headers, start_chain_work, ctx);
+    let lc = new_light_client_with_params_int(
+            params,
+            start_height,
+            trusted_headers,
+            start_chain_work, 
+            8, 
+            ctx
+        );
     event::emit(NewLightClientEvent {
         light_client_id: object::id(&lc)
     });
@@ -114,18 +141,31 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
     let first_header = new_block_header(raw_headers[0]);
-    let parent_hash = first_header.prev_block();
-    let latest_block = lc.latest_block();
+    let head = lc.head();
 
     let mut is_forked = false;
-    if (parent_hash == latest_block.header().block_hash()) {
+    if (first_header.prev_block() == head.header().block_hash()) {
         // extend current fork
         lc.extend_chain(raw_headers);
     } else {
         // handle a fork choice
-        assert!(lc.exist(parent_hash), EBlockNotFound);
-        let current_chain_work = latest_block.chain_work();
-        let current_block_hash = latest_block.header().block_hash();
+        let parent_id = first_header.parent();  // TODO: prev_block?
+        assert!(lc.exist(parent_id), EBlockNotFound);
+        let parent = lc.get_light_block_by_hash(parent_id);
+        // NOTE: we can check here if the diff between current head and the parent of
+        // the proposed blockcheck is not bigger than the required finality.
+        // We decide to not to do it to protect from deadlock:
+        // * pro: we protect against double mint for nBTC etc...
+        // * cons: we can have a deadlock
+        if (lc.head_height - parent.height() > lc.finality) {
+            event::emit(ForkBeyondFinality{
+                parent_hash: parent_id,
+                parent_height: parent.height(),
+            });
+        };
+
+        let current_chain_work = head.chain_work();
+        let current_block_hash = head.header().block_hash();
 
         lc.extend_chain(raw_headers);
         let fork_head_hash = new_block_header(raw_headers[raw_headers.length()-1]).block_hash();
@@ -141,17 +181,17 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         is_forked = true;
     };
 
-    let b = lc.latest_block();
+    let b = lc.head();
     event::emit(InsertedHeadersEvent{
         chain_work: b.chain_work(),
         is_forked,
-        head: b.header().block_hash(),
-        height: b.height(),
+        head_hash: lc.head_hash,
+        head_height: lc.head_height,
     });
 }
 
 
-public(package) fun add_light_block(lc: &mut LightClient, lb: LightBlock) {
+public(package) fun insert_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
     df::add(&mut lc.id, block_hash, lb);
 }
@@ -166,10 +206,15 @@ public(package) fun set_block_hash_by_height(lc: &mut LightClient, height: u64, 
     df::add(id, height, block_hash);
 }
 
-public(package) fun set_latest_block(lc: &mut LightClient, light_block: LightBlock) {
-    lc.add_light_block(light_block);
-    lc.set_block_hash_by_height(light_block.height(), light_block.header().block_hash()) ;
-    lc.finalized_height = light_block.height();
+/// Appends light block to the current branch and overwrites the current blockchain head.
+/// Must only be called when we know that we extend the current branch or if we control
+/// the rollback.
+public(package) fun append_block(lc: &mut LightClient, light_block: LightBlock) {
+    let head_hash = light_block.header().block_hash();
+    lc.insert_light_block(light_block);
+    lc.set_block_hash_by_height(light_block.height(), head_hash);
+    lc.head_height = light_block.height();
+    lc.head_hash = head_hash;
 }
 
 /// Insert new header to bitcoin spv
@@ -199,7 +244,8 @@ public(package) fun insert_header(lc: &mut LightClient, header: BlockHeader) {
     let next_chain_work = parent_block.chain_work() + header.calc_work();
     let next_light_block = new_light_block(next_height, header, next_chain_work);
 
-    lc.set_latest_block(next_light_block);
+    lc.append_block(next_light_block);
+    // TODO: next_header.block_hash()
 }
 
 fun extend_chain(lc: &mut LightClient, raw_headers: vector<vector<u8>>) {
@@ -224,16 +270,25 @@ public(package) fun rollback(lc: &mut LightClient, checkpoint_hash: vector<u8>, 
  * Views function
  */
 
-public fun latest_height(lc: &LightClient): u64 {
-    lc.finalized_height
+/// Returns height of the blockchain head (latest, not confirmed block).
+public fun head_height(lc: &LightClient): u64 {
+    lc.head_height
 }
 
-
-public fun latest_block(lc: &LightClient): &LightBlock {
-    let block_hash = lc.get_block_hash_by_height(lc.latest_height());
-    lc.get_light_block_by_hash(block_hash)
+/// Returns height of the blockchain head (latest, not confirmed block).
+public fun head_hash(lc: &LightClient): vector<u8> {
+    lc.head_hash
 }
 
+/// Returns blockchain head light block (latest, not confirmed block).
+public fun head(lc: &LightClient): &LightBlock {
+    lc.get_light_block_by_hash(lc.head_hash)
+}
+
+/// Returns latest finalized_block height
+public fun finalized_height(lc: &LightClient): u64 {
+    lc.head_height - lc.finality
+}
 
 /// verify output transaction
 /// * `height`: block heigh transacion belong

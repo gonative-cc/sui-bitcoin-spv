@@ -56,7 +56,7 @@ fun verify_output_test() {
         x"02000000754bc32ac75a72d7937826fd285d3379f161f9e2b070dc270000000000000000ec39407a570b08b466f4427ad2f6006a044bcf86879ef18fc4d2ccb0d529d63425828b5342286918e5beaa62"
     ];
     let ctx = scenario.ctx();
-    let lc = new_light_client_with_params_int(params::mainnet(), start_block_height, headers, 0, ctx);
+    let lc = new_light_client_with_params_int(params::mainnet(), start_block_height, headers, 0, 8, ctx);
 
     // merkle proof of transaction id gen by proof.py in scripts folder.
     let proof = vector[x"1e895c00deb4d813d30be9e23a8ac3c2d3901848325a5b96f7a2d3c1b73e958c", x"3a84d14f294ccc02d86de520b5dd8f7da813f821f758c2e2163a9ddd9af6a60c", x"14fa91db83d517c8777a6d00081fa3e4f099eb27a1530c95c5e9c145ea0ed4b8", x"6d3df44f27ffa2de91ccb44a37a1ab5be183570e5c8fbf472fdd61cfc19260d7", x"dce5989b43fa75ec7bd131aa4a0d491ecc5e999a85e76561f2ac6f7077f2a1bd", x"7f1d7d3220d678b442b754b8e53976010866e94a727394fa524b704a434ae656", x"3ffea66faa79bd1044de8f9777c0ef45f126695892d070b12dce9f618c4881cb", x"3696323672a8c3db7fbc200bf64acfd3b336b105d298122d434579f646b6d5d5", x"86d7d18398c5de2c55e541bedbc78b2e8bf95637812ee0748c523c387d0f4ec8", x"537b0c8be17320ce64a35426d44614bd13e6b067c2d3d02f0159ce0046356c0b"];

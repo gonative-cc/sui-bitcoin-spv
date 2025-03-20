@@ -58,7 +58,7 @@ fun test_difficulty_computation_mainnet() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
-    let mut lc = new_light_client_with_params_int(params::mainnet(), 0, vector[x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c"], 0, scenario.ctx());
+    let mut lc = new_light_client_with_params_int(params::mainnet(), 0, vector[x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c"], 0, 8, scenario.ctx());
 
     let block_hash = lc.get_block_hash_by_height(0);
 
@@ -74,11 +74,11 @@ fun test_difficulty_computation_mainnet() {
 
     let last_block_hash = last_block.header().block_hash();
     lc.set_block_hash_by_height(last_block.height(), last_block_hash);
-    lc.add_light_block(last_block);
+    lc.append_block(last_block);
     let header = new_block_header(x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a");
     let first_block = new_light_block(858816,   header, 0);
     lc.set_block_hash_by_height(first_block.height(), first_block.header().block_hash());
-    lc.add_light_block(first_block);
+    lc.append_block(first_block);
 
 
     let new_bits = calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(last_block_hash), 0);
@@ -101,6 +101,7 @@ fun test_difficulty_computation_regtest() {
         // this is power_limit.
         vector[x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca"],
         0,
+        8,
         scenario.ctx()
     );
 
@@ -122,6 +123,7 @@ fun test_testnet_reset_dificulty() {
         // This header is random, we only care about timestamp in this case.
         vector[x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058c440041806bc3f79"],
         0,
+        8,
         scenario.ctx()
     );
 
@@ -145,6 +147,7 @@ fun test_testnet_use_previous_difficulty() {
         // This header is random, we only care about timestamp in this case.
         vector[x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058c440041806bc3f79"],
         0,
+        8,
         scenario.ctx()
     );
     let last_block = lc.get_light_block_by_height(10);
@@ -171,6 +174,7 @@ fun test_find_prev_testnet_difficulty() {
         x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd00587856341206bc3f79"
     ],
         0,
+        8,
         scenario.ctx()
     );
 
@@ -191,7 +195,7 @@ fun test_find_prev_testnet_difficulty() {
     );
 
     lc.set_block_hash_by_height(0, genesis_block.header().block_hash());
-    lc.add_light_block(genesis_block);
+    lc.append_block(genesis_block);
 
     // return power limit when genesis block
     assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(0)) == lc.params().power_limit_bits());

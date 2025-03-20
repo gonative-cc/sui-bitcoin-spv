@@ -4,9 +4,14 @@ use std::hash;
 use std::u64::do;
 
 /// === Errors ===
-const EInvalidLength: u64 = 0;
-const EInvalidCompactSizeDecode: u64 = 1;
-const EInvalidCompactSizeEncode: u64 = 2;
+#[error]
+const EInvalidLength: vector<u8> = b"The input vector has an invalid length";
+#[error]
+const EInvalidCompactSizeDecode: vector<u8> = b"Invalid compact size encoding during decoding";
+#[error]
+const EInvalidCompactSizeEncode: vector<u8> = b"Invalid compact size encoding during encoding";
+#[error]
+const EInvalidNumberSize : vector<u8> = b"Input vector size does not match with expected size";
 
 /// Converts 4 bytes in little endian format to u32 number
 public fun to_u32(v: vector<u8>): u32 {
@@ -69,7 +74,7 @@ public fun compact_size(v: vector<u8>, start: u64): (u256, u64) {
 /// TODO: replace to_u256 and to_u32
 public fun to_number(v: vector<u8>, start: u64, end: u64): u256 {
     let size = end - start;
-    assert!(size <= 32, EInvalidLength);
+    assert!(size <= 32, EInvalidNumberSize);
     let mut ans = 0;
     let mut i = start;
     let mut j = 0;
