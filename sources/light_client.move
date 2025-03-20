@@ -89,7 +89,7 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
         lc.head_hash = head_hash;
     };
 
-    return lc
+    lc
 }
 
 
