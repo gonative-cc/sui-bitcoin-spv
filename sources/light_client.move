@@ -279,7 +279,7 @@ public fun head(lc: &LightClient): &LightBlock {
 
 /// Returns latest finalized_block height
 public fun finalized_height(lc: &LightClient): u64 {
-    lc.head_height - FINALITY
+    lc.head_height - lc.finality
 }
 
 /// verify output transaction
