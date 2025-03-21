@@ -175,7 +175,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         // the fork. We will update the fork to main chain and remove the old fork
         // notes: current_block_hash is hash of the old fork/chain in this case.
         // TODO(vu): Make it more simple.
-        lc.rollback(parent_id, current_block_hash);
+        lc.cleanup(parent_id, current_block_hash);
         is_forked = true;
     };
 
@@ -206,7 +206,7 @@ public(package) fun set_block_hash_by_height(lc: &mut LightClient, height: u64, 
 
 /// Appends light block to the current branch and overwrites the current blockchain head.
 /// Must only be called when we know that we extend the current branch or if we control
-/// the rollback.
+/// the cleanup.
 public(package) fun append_block(lc: &mut LightClient, light_block: LightBlock) {
     let head_hash = light_block.header().block_hash();
     lc.insert_light_block(light_block);
@@ -272,7 +272,7 @@ fun extend_chain(lc: &mut LightClient, parent: LightBlock, raw_headers: vector<v
 }
 
 /// Delete all blocks between head_hash to checkpoint_hash
-public(package) fun rollback(lc: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
+public(package) fun cleanup(lc: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
         let previous_block_hash = lc.get_light_block_by_hash(block_hash).header().prev_block();
