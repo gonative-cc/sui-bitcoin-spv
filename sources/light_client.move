@@ -265,17 +265,10 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
 ///        |-A
 ///
 fun extend_chain(lc: &mut LightClient, parent: LightBlock, raw_headers: vector<vector<u8>>): LightBlock {
-    // raw_headers.fold!(parent, |p, raw_header| {
-    //     let header = new_block_header(raw_header);
-    //     lc.insert_header(p, header)
-    // } )
-
-    let mut p = parent;
-    raw_headers.do!(|raw_header| {
+    raw_headers.fold!(parent, |p, raw_header| {
         let header = new_block_header(raw_header);
-        p = lc.insert_header(&p, header);
-    });
-    p
+        lc.insert_header(&p, header)
+    } )
 }
 
 /// Delete all blocks between head_hash to checkpoint_hash
