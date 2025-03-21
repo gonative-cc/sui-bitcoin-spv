@@ -275,7 +275,7 @@ fun extend_chain(lc: &mut LightClient, parent: LightBlock, raw_headers: vector<v
         let header = new_block_header(raw_header);
         p = lc.insert_header(&p, header);
     });
-    parent
+    p
 }
 
 /// Delete all blocks between head_hash to checkpoint_hash
