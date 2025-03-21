@@ -146,7 +146,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     let mut is_forked = false;
     if (first_header.prev_block() == head.header().block_hash()) {
         // extend current chain
-        lc.extend_chain(&head, raw_headers);
+        lc.extend_chain(head, raw_headers);
     } else {
         // handle a new fork
         let parent_id = first_header.prev_block();
@@ -167,7 +167,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
 
-        let fork_head = lc.extend_chain(parent, raw_headers);
+        let fork_head = lc.extend_chain(*parent, raw_headers);
         let fork_chain_work = fork_head.chain_work();
 
         assert!(current_chain_work < fork_chain_work, EForkChainWorkTooSmall);
@@ -220,10 +220,12 @@ public(package) fun append_block(lc: &mut LightClient, light_block: LightBlock) 
 /// * `parent`: hash of the parent block, must be already recorded in the light client.
 /// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be
 /// only called internally.
-public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, header: BlockHeader): &LightBlock {
+public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, header: BlockHeader): LightBlock {
     let parent_header = parent.header();
 
     // verify new header
+    // NOTE: we must provide `parent` to the function, to assure we have a chain - subsequent
+    // headers must be connected.
     assert!(parent_header.block_hash() == header.prev_block(), EBlockHashNotMatch);
     let next_block_difficulty = calc_next_required_difficulty(lc, parent, header.timestamp());
     assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
@@ -242,10 +244,11 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     let next_light_block = new_light_block(next_height, header, next_chain_work);
 
     lc.append_block(next_light_block);
-    &next_light_block
+    next_light_block
 }
 
 
+// TODO: check if we can use reference for parent
 /// Extends chain from the given `parent` by inserting new block headers.
 /// Returns ID of the last inserted block header.
 /// NOTE: we need to pass `parent` block to assure we are creating a chain. Consider the
@@ -258,22 +261,22 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
 /// the insert would try to insert A multiple times:
 ///
 ///    X-Y-Z-A
-///        \-A
-///        \-A
-fun extend_chain(lc: &mut LightClient, parent: &LightBlock, raw_headers: vector<vector<u8>>): &LightBlock {
+///        |-A
+///        |-A
+///
+fun extend_chain(lc: &mut LightClient, parent: LightBlock, raw_headers: vector<vector<u8>>): LightBlock {
     // raw_headers.fold!(parent, |p, raw_header| {
     //     let header = new_block_header(raw_header);
     //     lc.insert_header(p, header)
     // } )
 
-    let mut parent = parent;
+    let mut p = parent;
     raw_headers.do!(|raw_header| {
         let header = new_block_header(raw_header);
-        parent = lc.insert_header(parent, header);
+        p = lc.insert_header(&p, header);
     });
     parent
 }
-
 
 /// Delete all blocks between head_hash to checkpoint_hash
 public(package) fun rollback(lc: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
