@@ -57,7 +57,7 @@ fun insert_headers_switch_fork_tests() {
 
     let first_header = new_block_header(headers[0]);
     let last_header = new_block_header(headers[headers.length() - 1]);
-    let mut insert_point = lc.get_light_block_by_hash(first_header.prev_block()).height() + 1;
+    let mut insert_point = lc.get_light_block_by_hash(first_header.parent()).height() + 1;
 
     lc.insert_headers(headers);
 

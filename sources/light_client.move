@@ -144,12 +144,12 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     let head = *lc.head();
 
     let mut is_forked = false;
-    if (first_header.prev_block() == head.header().block_hash()) {
+    if (first_header.parent() == head.header().block_hash()) {
         // extend current chain
         lc.extend_chain(head, raw_headers);
     } else {
         // handle a new fork
-        let parent_id = first_header.prev_block();
+        let parent_id = first_header.parent();
         assert!(lc.exist(parent_id), EBlockNotFound);
         let parent = lc.get_light_block_by_hash(parent_id);
         // NOTE: we can check here if the diff between current head and the parent of
@@ -226,7 +226,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     // verify new header
     // NOTE: we must provide `parent` to the function, to assure we have a chain - subsequent
     // headers must be connected.
-    assert!(parent_header.block_hash() == header.prev_block(), EBlockHashNotMatch);
+    assert!(parent_header.block_hash() == header.parent(), EBlockHashNotMatch);
     let next_block_difficulty = lc.calc_next_required_difficulty(parent, header.timestamp());
     assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
 
@@ -275,7 +275,7 @@ fun extend_chain(lc: &mut LightClient, parent: LightBlock, raw_headers: vector<v
 public(package) fun cleanup(lc: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
-        let previous_block_hash = lc.get_light_block_by_hash(block_hash).header().prev_block();
+        let previous_block_hash = lc.get_light_block_by_hash(block_hash).header().parent();
         lc.remove_light_block(block_hash);
         block_hash = previous_block_hash;
     }
@@ -454,7 +454,7 @@ fun calc_past_median_time(lc: &LightClient, lb: &LightBlock): u32 {
     let mut prev_lb = lb;
     while (i < median_time_blocks) {
         timestamps.push_back(prev_lb.header().timestamp());
-        if (!lc.exist(prev_lb.header().prev_block())) {
+        if (!lc.exist(prev_lb.header().parent())) {
             break
         };
         prev_lb = lc.relative_ancestor(prev_lb, 1);
