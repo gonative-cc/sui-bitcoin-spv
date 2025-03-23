@@ -14,7 +14,7 @@ use sui::event;
 
 /// === Errors ===
 #[error]
-const EBlockHashNotMatch: vector<u8> = b"The provided block hash does not match the expected hash";
+const EWrongParentBlock: vector<u8> = b"New parent of the new header parent doesn't match the expected parent block hash";
 #[error]
 const EDifficultyNotMatch: vector<u8> = b"The difficulty bits in the header do not match the calculated difficulty";
 #[error]
@@ -226,7 +226,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     // verify new header
     // NOTE: we must provide `parent` to the function, to assure we have a chain - subsequent
     // headers must be connected.
-    assert!(parent_header.block_hash() == header.parent(), EBlockHashNotMatch);
+    assert!(parent_header.block_hash() == header.parent(), EWrongParentBlock);
     let next_block_difficulty = lc.calc_next_required_difficulty(parent, header.timestamp());
     assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
 

@@ -1,7 +1,7 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
-use bitcoin_spv::light_client::{insert_header, new_light_client_with_params_int, LightClient, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
+use bitcoin_spv::light_client::{insert_header, new_light_client_with_params_int, LightClient, EWrongParentBlock, EDifficultyNotMatch, ETimeTooOld};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::params;
@@ -99,7 +99,7 @@ fun test_insert_header_happy_cases() {
 // X-Y-Z-A
 //     \-A
 #[test]
-#[expected_failure(abort_code = EBlockHashNotMatch)]
+#[expected_failure(abort_code = EWrongParentBlock)]
 fun test_insert_headers_that_dont_form_a_chain() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -118,7 +118,7 @@ fun test_insert_headers_that_dont_form_a_chain() {
 
 
 #[test]
-#[expected_failure(abort_code = EBlockHashNotMatch)]
+#[expected_failure(abort_code = EWrongParentBlock)]
 fun test_insert_header_failed_block_hash_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
