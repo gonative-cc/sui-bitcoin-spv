@@ -93,6 +93,30 @@ fun test_insert_header_happy_cases() {
     scenario.end();
 }
 
+
+// Test case: chain=[X, Y, Z], inserting [A, A], where A.parent()=Z. It should fail, because it
+// doesn't create a chain, but a tree under node Z:
+// X-Y-Z-A
+//     \-A
+#[test]
+#[expected_failure(abort_code = EBlockHashNotMatch)]
+fun test_insert_headers_that_dont_form_a_chain() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+
+    let ctx = scenario.ctx();
+    let mut lc = new_lc_for_test(ctx);
+
+    let h = x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351";
+    let raw_headers = vector[h, h];
+    lc.insert_headers(raw_headers);
+
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+
+
+
 #[test]
 #[expected_failure(abort_code = EBlockHashNotMatch)]
 fun test_insert_header_failed_block_hash_not_match() {

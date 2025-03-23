@@ -230,7 +230,6 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     let next_block_difficulty = lc.calc_next_required_difficulty(parent, header.timestamp());
     assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
 
-
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
     // https://learnmeabitcoin.com/technical/block/time
