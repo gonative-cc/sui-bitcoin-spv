@@ -227,7 +227,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     // NOTE: we must provide `parent` to the function, to assure we have a chain - subsequent
     // headers must be connected.
     assert!(parent_header.block_hash() == header.prev_block(), EBlockHashNotMatch);
-    let next_block_difficulty = calc_next_required_difficulty(lc, parent, header.timestamp());
+    let next_block_difficulty = lc.calc_next_required_difficulty(parent, header.timestamp());
     assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
 
 
