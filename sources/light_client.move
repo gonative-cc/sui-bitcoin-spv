@@ -65,10 +65,6 @@ fun init(_ctx: &mut TxContext) {
 
 /// internal funciton to create a light client
 public(package) fun new_light_client_with_params_int(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, finality: u64, ctx: &mut TxContext): LightClient {
-    if (params.blocks_pre_retarget() != 0 && start_height % params.blocks_pre_retarget() != 0) {
-        abort EInvalidStartHeight
-    };
-
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -108,6 +104,10 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
+    if (params.blocks_pre_retarget() != 0 && start_height % params.blocks_pre_retarget() != 0) {
+        abort EInvalidStartHeight
+    };
+
     let lc = new_light_client_with_params_int(
             params,
             start_height,
