@@ -1,7 +1,7 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
-use bitcoin_spv::light_client::{insert_header, new_light_client_with_params_int, LightClient, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld};
+use bitcoin_spv::light_client::{insert_header, new_light_client_with_params_int, new_light_client_with_params, LightClient, EBlockHashNotMatch, EDifficultyNotMatch, ETimeTooOld, EInvalidStartHeight};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::params;
@@ -27,6 +27,33 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
     ];
     let lc = new_light_client_with_params_int(params::mainnet(), start_block, headers, 0, 8, ctx);
     return lc
+}
+
+#[test]
+#[expected_failure(abort_code = EInvalidStartHeight)]
+fun test_new_light_client_with_params_wrong_start_height() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let ctx = scenario.ctx();
+    let headers = vector[
+        x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
+        x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213"
+    ];
+    new_light_client_with_params(params::mainnet(), 2, headers, 8, ctx);
+    scenario.end();
+}
+
+#[test]
+fun test_new_light_client_with_params() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let ctx = scenario.ctx();
+    let headers = vector[
+        x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
+        x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213"
+    ];
+    new_light_client_with_params(params::mainnet(), 2016, headers, 8, ctx);
+    scenario.end();
 }
 
 
