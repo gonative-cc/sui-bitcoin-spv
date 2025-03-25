@@ -104,7 +104,7 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
-    assert!(is_correct_init_height(&params, start_height), EInvalidStartHeight);
+    assert!(params.is_correct_init_height(start_height), EInvalidStartHeight);
     let lc = new_light_client_with_params_int(
             params,
             start_height,
