@@ -73,6 +73,7 @@ fun bits_to_target_tests() {
     assert!(target == 0x00ffff0000000000000000000000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
 
+   // https://learnmeabitcoin.com/explorer/block/0000000000519051eb5f3c5943cdbc176a0eff4e1fbc3e08287bdb76299b8e5c
     let bits = 0x1c0168fd;
     let target = bits_to_target(bits);
     assert!(target == 0x000000000168fd00000000000000000000000000000000000000000000000000);
