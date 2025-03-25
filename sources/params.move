@@ -78,3 +78,7 @@ public fun reduce_min_difficulty(p: &Params): bool {
 public fun min_diff_reduction_time(p: &Params): u32 {
     p.min_diff_reduction_time
 }
+
+public(package) fun is_correct_init_height(p: &Params, h: u64): bool {
+    p.blocks_pre_retarget() == 0 || h % p.blocks_pre_retarget() == 0
+}

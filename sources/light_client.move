@@ -6,7 +6,7 @@ use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
 use bitcoin_spv::transaction::make_transaction;
-use bitcoin_spv::params::{Params, Self};
+use bitcoin_spv::params::{Params, Self, is_correct_init_height};
 
 
 use sui::dynamic_field as df;
@@ -104,10 +104,7 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
 /// Encode header reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
-    if (params.blocks_pre_retarget() != 0 && start_height % params.blocks_pre_retarget() != 0) {
-        abort EInvalidStartHeight
-    };
-
+    assert!(is_correct_init_height(&params, start_height), EInvalidStartHeight);
     let lc = new_light_client_with_params_int(
             params,
             start_height,
