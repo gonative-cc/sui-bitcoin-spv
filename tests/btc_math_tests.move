@@ -72,6 +72,12 @@ fun bits_to_target_tests() {
     let target = bits_to_target(bits);
     assert!(target == 0x00ffff0000000000000000000000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
+
+    let bits = 0x1c0168fd;
+    let target = bits_to_target(bits);
+    assert!(target == 0x000000000168fd00000000000000000000000000000000000000000000000000);
+    assert!(bits == target_to_bits(target));
+
 }
 
 

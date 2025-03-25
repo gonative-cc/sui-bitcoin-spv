@@ -93,7 +93,7 @@ fun bytes_of(number: u256) : u8 {
         b = b - 1;
     };
     // Follow logic in bitcoin core
-    ((b as u32 + 7 ) / 8) as u8
+    ((b as u32) / 8  + 1) as u8
 }
 
 
@@ -195,7 +195,7 @@ public fun covert_to_compact_size(number: u256): vector<u8> {
 // TODO: Check best practice to improve test
 #[test]
 fun bytes_of_test() {
-    assert!(bytes_of(0) == 0);
+    assert!(bytes_of(1) == 1);
     assert!(bytes_of(7) == 1);
     assert!(bytes_of(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 32);
 }
