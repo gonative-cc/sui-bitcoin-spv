@@ -116,7 +116,7 @@ fun insert_headers_block_doesnot_exist() {
 }
 
 #[test]
-fun rollback_tests() {
+fun cleanup_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -124,7 +124,7 @@ fun rollback_tests() {
 
     let checkpoint = headers[5].block_hash();
     let head_hash = lc.head_hash();
-    lc.rollback(checkpoint, head_hash);
+    lc.cleanup(checkpoint, head_hash);
 
     let height = lc.get_light_block_by_hash(checkpoint).height();
     let mut i = 0u64;
