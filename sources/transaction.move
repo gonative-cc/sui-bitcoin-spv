@@ -34,9 +34,9 @@ public struct Output has copy, drop {
 /// Represents a Bitcoin transaction
 public struct Transaction has copy, drop {
     version: vector<u8>,
-    input_count: u256,
+    input_count: u32,
     inputs: vector<u8>,
-    output_count: u256,
+    output_count: u32,
     outputs: vector<Output>,
     tx_id: vector<u8>,
     lock_time: vector<u8>
@@ -50,16 +50,16 @@ public struct Transaction has copy, drop {
 /// * `outputs`: all tx outputs encoded as a single list of bytes.
 public fun make_transaction(
     version: vector<u8>,
-    input_count: u256,
+    input_count: u32,
     inputs: vector<u8>,
-    output_count: u256,
+    output_count: u32,
     outputs: vector<u8>,
     lock_time: vector<u8>,
 ): Transaction {
     assert!(version.length() == 4);
     assert!(lock_time.length() == 4);
-    let number_input_bytes = u256_to_compact(input_count);
-    let number_output_bytes = u256_to_compact(output_count);
+    let number_input_bytes = u256_to_compact(input_count as u256);
+    let number_output_bytes = u256_to_compact(output_count as u256);
 
     // compute TxID
     let mut tx_data = version;
@@ -162,7 +162,7 @@ public fun op_return(output: &Output): vector<u8> {
 // TODO: create readbytes APIs
 /// * `output_count`: number of output objects in outputs bytes
 /// * `outputs`: all tx outputs encoded as a single list of bytes.
-public(package) fun make_outputs(output_count: u256, outputs_bytes: vector<u8>): vector<Output> {
+public(package) fun make_outputs(output_count: u32, outputs_bytes: vector<u8>): vector<Output> {
     let mut outputs = vector[];
     let mut start = 0u64;
     let mut script_pubkey_size;

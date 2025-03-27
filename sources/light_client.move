@@ -321,9 +321,9 @@ public fun verify_output(
     proof: vector<vector<u8>>,
     tx_index: u64,
     version: vector<u8>,
-    input_count: u256,
+    input_count: u32,
     inputs: vector<u8>,
-    output_count: u256,
+    output_count: u32,
     outputs: vector<u8>,
     lock_time: vector<u8>
 ): (vector<vector<u8>>, vector<u256>) {
