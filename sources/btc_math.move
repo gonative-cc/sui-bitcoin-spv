@@ -161,7 +161,7 @@ public fun bits_to_target(bits: u32): u256 {
 }
 
 
-public fun covert_to_compact_size(number: u256): vector<u8> {
+public fun u256_to_compact(number: u256): vector<u8> {
     let mut ans = vector[];
     let mut n = number;
     if (n <= 252) {

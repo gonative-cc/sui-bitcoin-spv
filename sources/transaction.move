@@ -1,5 +1,5 @@
 module bitcoin_spv::transaction;
-use bitcoin_spv::btc_math::{btc_hash, covert_to_compact_size, to_number, compact_size};
+use bitcoin_spv::btc_math::{btc_hash, u256_to_compact, to_number, compact_size};
 use bitcoin_spv::utils::slice;
 
 // === BTC script opcodes ===
@@ -44,6 +44,10 @@ public struct Transaction has copy, drop {
 
 
 /// Bitcoin transaction constructor
+/// * `input_count`: number of input objects
+/// * `inputs`: all tx inputs encoded as a single list of bytes.
+/// * `output_count`: number of output objects
+/// * `outputs`: all tx outputs encoded as a single list of bytes.
 public fun make_transaction(
     version: vector<u8>,
     input_count: u256,
@@ -54,8 +58,8 @@ public fun make_transaction(
 ): Transaction {
     assert!(version.length() == 4);
     assert!(lock_time.length() == 4);
-    let number_input_bytes = covert_to_compact_size(input_count);
-    let number_output_bytes = covert_to_compact_size(output_count);
+    let number_input_bytes = u256_to_compact(input_count);
+    let number_output_bytes = u256_to_compact(output_count);
 
     // compute TxID
     let mut tx_data = version;
@@ -156,17 +160,19 @@ public fun op_return(output: &Output): vector<u8> {
 }
 
 // TODO: create readbytes APIs
-public(package) fun make_outputs(number_input: u256, inputs_bytes: vector<u8>): vector<Output> {
+/// * `output_count`: number of output objects in outputs bytes
+/// * `outputs`: all tx outputs encoded as a single list of bytes.
+public(package) fun make_outputs(output_count: u256, outputs_bytes: vector<u8>): vector<Output> {
     let mut outputs = vector[];
     let mut start = 0u64;
     let mut script_pubkey_size;
     let mut i = 0;
 
-    while (i < number_input) {
-        let amount = slice(inputs_bytes, start, start + 8); // 8 bytes of amount
+    while (i < output_count) {
+        let amount = slice(outputs_bytes, start, start + 8); // 8 bytes of amount
         start = start + 8;
-        (script_pubkey_size, start) = compact_size(inputs_bytes, start);
-        let script_pubkey = slice(inputs_bytes, start, (start + (script_pubkey_size as u64)));
+        (script_pubkey_size, start) = compact_size(outputs_bytes, start);
+        let script_pubkey = slice(outputs_bytes, start, (start + (script_pubkey_size as u64)));
         start = start + (script_pubkey_size as u64);
         let output = parse_output(to_number(amount, 0, 8), script_pubkey);
         outputs.push_back(output);
