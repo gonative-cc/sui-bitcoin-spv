@@ -5,7 +5,7 @@ use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::utils::nth_element;
-use bitcoin_spv::transaction::make_transaction;
+use bitcoin_spv::transaction::{make_transaction, Transaction};
 use bitcoin_spv::params::{Params, Self, is_correct_init_height};
 
 
@@ -109,8 +109,8 @@ public fun new_light_client_with_params(params: Params, start_height: u64, trust
             params,
             start_height,
             trusted_headers,
-            start_chain_work, 
-            8, 
+            start_chain_work,
+            8,
             ctx
         );
     event::emit(NewLightClientEvent {
@@ -190,7 +190,6 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         head_height: lc.head_height,
     });
 }
-
 
 public(package) fun insert_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
@@ -522,4 +521,36 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     };
 
     next_target
+}
+
+public fun prove_payment(
+    lc: &LightClient,
+    height: u64,
+    proof: vector<vector<u8>>,
+    tx_index: u64,
+    transaction: &Transaction,
+    receiver_address: vector<u8>
+) : (u256, vector<u8>, vector<u8>) {
+    let mut amount = 0;
+    let mut op_messages = vector[];
+    let tx_id = transaction.tx_id();
+    assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
+    let outputs = transaction.outputs();
+
+    let mut i = 0;
+
+    while (i < outputs.length()) {
+        let output = outputs[i];
+        if (output.is_pk_hash_script() && output.p2pkh_address() == receiver_address) {
+            amount = amount + output.amount();
+        };
+
+        if (output.is_op_return()) {
+            op_messages = output.op_return();
+        };
+
+        i = i + 1;
+    };
+
+    (amount, op_messages, tx_id)
 }
