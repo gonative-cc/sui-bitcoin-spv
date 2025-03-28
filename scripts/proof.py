@@ -68,7 +68,7 @@ def big_endian_to_little_endian(hex_str):
 
 
 def main():
-    with open('00000000000000002aca1fac9c6abadb7b8bd4a584c243f94def8f71d16020bc.txt') as file:
+    with open('0000000000000000006a446097f7b1eb970ac12dee4e5ced95ad1a3f38a67a46.txt') as file:
             data = json.load(file)
     tx_hashes =  data["tx"]
     tx_hashes = list(map(big_endian_to_little_endian, tx_hashes))
@@ -76,7 +76,7 @@ def main():
     merkle_root_hash = merkle_root(tx_hashes)
     print(f'Merkle root: {merkle_root_hash}')
 
-    tx_hash = tx_hashes[236];
+    tx_hash = tx_hashes[604];
     proof = merkle_proof(tx_hash, tx_hashes)
     # print(f"Merkle Proof for {tx_hash}: {proof}")
 
