@@ -524,7 +524,7 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 }
 
 
-/// Return the amount to `receiver_address` and the OP_RETURN message.
+/// Returns the amount of satoshi send to `receiver_address` and the `OP_RETURN` message.
 /// If OP_RETURN is not included in the transaction, return an empty vector.
 /// * `height`: block heigh transacion belong
 /// * `proof`: merkle tree proof, this is the vector of 32bytes
