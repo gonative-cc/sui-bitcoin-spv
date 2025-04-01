@@ -63,8 +63,8 @@ fun init(_ctx: &mut TxContext) {
     // LC creation is permissionless and it's done through new new_btc_light_client.
 }
 
-/// internal funciton to create a light client
-public(package) fun new_light_client_with_params_int(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, finality: u64, ctx: &mut TxContext): LightClient {
+/// function to create a light client
+public fun new_light_client_with_params_without_share(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, finality: u64, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -105,7 +105,7 @@ public(package) fun new_light_client_with_params_int(params: Params, start_heigh
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client_with_params(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, start_chain_work: u256, ctx: &mut TxContext) {
     assert!(params.is_correct_init_height(start_height), EInvalidStartHeight);
-    let lc = new_light_client_with_params_int(
+    let lc = new_light_client_with_params_without_share(
             params,
             start_height,
             trusted_headers,
