@@ -526,7 +526,7 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 
 /// Returns the amount of satoshi send to `receiver_address` and the `OP_RETURN` message.
 /// If OP_RETURN is not included in the transaction, return an empty vector.
-/// * `height`: block heigh transacion belong
+/// * `height`: block height the transaction belongs to
 /// * `proof`: merkle tree proof, this is the vector of 32bytes
 /// * `tx_index`: index of transaction in block
 /// * `transaction`: bitcoin transaction. Check transaction.move
@@ -541,13 +541,12 @@ public fun prove_payment(
     receiver_address: vector<u8>
 ) : (u256, vector<u8>, vector<u8>) {
     let mut amount = 0;
-    let mut op_messages = vector[];
+    let mut matched_outputs = vector[];
     let tx_id = transaction.tx_id();
     assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
     let outputs = transaction.outputs();
 
     let mut i = 0;
-
     while (i < outputs.length()) {
         let output = outputs[i];
         if (output.is_pk_hash_script() && output.p2pkh_address() == receiver_address) {

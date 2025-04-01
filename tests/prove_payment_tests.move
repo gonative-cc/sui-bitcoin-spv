@@ -8,7 +8,7 @@ use sui::test_scenario;
 
 
 #[test]
-fun prove_payment_test() {
+fun test_prove_payment() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
@@ -86,7 +86,7 @@ fun prove_payment_fails_test() {
         x"b95b666c9b6ae55cede0667f6de31430997eacdc264e9e50a0f93aef35d83104",
         x"6efa6c0e97e8d9cf95577e088f5bf27d0c5e08523944b15694b1e6681a323553",
         x"b88d2e3a29eb772ae27aec10f33e594c0a108db5d4cbb8ea6a383371cd2e346a",
-        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5aeffff" // <-- modify here, 83cb => ffff
+        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5aeffff" // <-- modified here, 83cb => ffff
     ];
 
     let tx_index = 604;
