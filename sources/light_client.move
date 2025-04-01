@@ -523,6 +523,15 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     next_target
 }
 
+
+/// Return the amount to `receiver_address` and the OP_RETURN message.
+/// If OP_RETURN is not included in the transaction, return an empty vector.
+/// * `height`: block heigh transacion belong
+/// * `proof`: merkle tree proof, this is the vector of 32bytes
+/// * `tx_index`: index of transaction in block
+/// * `transaction`: bitcoin transaction. Check transaction.move
+/// * `receiver_address`: address of receiver in p2pkh or p2wpkh
+/// @return address and amount for each output
 public fun prove_payment(
     lc: &LightClient,
     height: u64,
