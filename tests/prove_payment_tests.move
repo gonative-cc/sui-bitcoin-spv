@@ -3,7 +3,7 @@ module bitcoin_spv::prove_payment_tests;
 
 use bitcoin_spv::params;
 use bitcoin_spv::light_client::{new_light_client_with_params_int, ETxNotInBlock};
-use bitcoin_spv::transaction::{make_transaction, parse_output};
+use bitcoin_spv::transaction::{make_transaction};
 use sui::test_scenario;
 
 
@@ -63,7 +63,7 @@ fun test_prove_payment() {
 
 #[test]
 #[expected_failure(abort_code = ETxNotInBlock)]
-fun prove_payment_fails_test() {
+fun test_prove_payment_fails() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
@@ -101,7 +101,8 @@ fun prove_payment_fails_test() {
     );
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
-    let (amount, message, tx_id) = lc.prove_payment(
+    // should return error
+    lc.prove_payment(
         start_block_height,
         proof,
         tx_index,
@@ -109,9 +110,6 @@ fun prove_payment_fails_test() {
         x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845"
     );
 
-    assert!(tx_id == x"754e4a84a89272e24d8968a37222648ced57d533e4d8cf2b24980658dd16fb6d");
-    assert!(amount == 412133);
-    assert!(message == x"68656c6c6f20776f726c64");
     sui::test_utils::destroy(lc);
     scenario.end();
 }

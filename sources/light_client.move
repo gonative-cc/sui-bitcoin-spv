@@ -541,7 +541,7 @@ public fun prove_payment(
     receiver_address: vector<u8>
 ) : (u256, vector<u8>, vector<u8>) {
     let mut amount = 0;
-    let mut matched_outputs = vector[];
+    let mut op_message = vector[];
     let tx_id = transaction.tx_id();
     assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
     let outputs = transaction.outputs();
@@ -554,11 +554,11 @@ public fun prove_payment(
         };
 
         if (output.is_op_return()) {
-            op_messages = output.op_return();
+            op_message = output.op_return();
         };
 
         i = i + 1;
     };
 
-    (amount, op_messages, tx_id)
+    (amount, op_message, tx_id)
 }
