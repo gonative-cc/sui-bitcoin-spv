@@ -548,13 +548,13 @@ public fun prove_payment(
 
     let mut i = 0;
     while (i < outputs.length()) {
-        let output = outputs[i];
-        if (output.is_pk_hash_script() && output.p2pkh_address() == receiver_address) {
-            amount = amount + output.amount();
+        let o = outputs[i];
+        if (o.is_pk_hash_script() && o.p2pkh_address() == receiver_address) {
+            amount = amount + o.amount();
         };
 
-        if (output.is_op_return()) {
-            op_message = output.op_return();
+        if (o.is_op_return()) {
+            op_message = o.op_return();
         };
 
         i = i + 1;
