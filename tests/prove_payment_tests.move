@@ -1,5 +1,5 @@
 #[test_only]
-module bitcoin_spv::prove_payment_tests;
+module bitcoin_spv::verify_payment_tests;
 
 use bitcoin_spv::params;
 use bitcoin_spv::light_client::{new_light_client_with_params_without_share, ETxNotInBlock};
@@ -8,7 +8,7 @@ use sui::test_scenario;
 
 
 #[test]
-fun test_prove_payment() {
+fun test_verify_payment() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
@@ -45,7 +45,7 @@ fun test_prove_payment() {
     );
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
-    let (amount, message, tx_id) = lc.prove_payment(
+    let (amount, message, tx_id) = lc.verify_payment(
         start_block_height,
         proof,
         tx_index,
@@ -63,7 +63,7 @@ fun test_prove_payment() {
 
 #[test]
 #[expected_failure(abort_code = ETxNotInBlock)]
-fun test_prove_payment_fails() {
+fun test_verify_payment_fails() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
@@ -102,7 +102,7 @@ fun test_prove_payment_fails() {
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
     // should return error
-    lc.prove_payment(
+    lc.verify_payment(
         start_block_height,
         proof,
         tx_index,

@@ -524,15 +524,17 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 }
 
 
-/// Returns the amount of satoshi send to `receiver_address` and the `OP_RETURN` message.
+/// Verifies the transaction and parses outputs to calculates the payment to the receiver.
+/// Returns the the total amount of satoshi send to `receiver_address` from transaction outputs,
+/// the content of the `OP_RETURN` opcode output, and tx_id.
 /// If OP_RETURN is not included in the transaction, return an empty vector.
-/// * `height`: block height the transaction belongs to
-/// * `proof`: merkle tree proof, this is the vector of 32bytes
-/// * `tx_index`: index of transaction in block
-/// * `transaction`: bitcoin transaction. Check transaction.move
-/// * `receiver_address`: address of receiver in p2pkh or p2wpkh
-/// @return address and amount for each output
-public fun prove_payment(
+/// NOTE: output with OP_RETURN is invalid, and only one such output can be included in a TX.
+/// * `height`: block height the transaction belongs to.
+/// * `proof`: merkle tree proof, this is the vector of 32bytes.
+/// * `tx_index`: index of transaction in block.
+/// * `transaction`: bitcoin transaction. Check transaction.move.
+/// * `receiver_address`: address of receiver in p2pkh or p2wpkh.
+public fun verify_payment(
     lc: &LightClient,
     height: u64,
     proof: vector<vector<u8>>,
@@ -541,7 +543,7 @@ public fun prove_payment(
     receiver_address: vector<u8>
 ) : (u256, vector<u8>, vector<u8>) {
     let mut amount = 0;
-    let mut op_message = vector[];
+    let mut op_return_msg = vector[];
     let tx_id = transaction.tx_id();
     assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
     let outputs = transaction.outputs();
@@ -554,11 +556,11 @@ public fun prove_payment(
         };
 
         if (o.is_op_return()) {
-            op_message = o.op_return();
+            op_return_msg = o.op_return();
         };
 
         i = i + 1;
     };
 
-    (amount, op_message, tx_id)
+    (amount, op_return_msg, tx_id)
 }
