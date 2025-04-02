@@ -21,7 +21,8 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ### Features
 
-- #11: Create a basic entry for package
+- #70: `verify_payment` function
+- #70: making `new_light_client_with_params_without_share` function public.
 
 ### Breaking Changes
 
@@ -31,6 +32,4 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ### Features
 
-### Breaking Changes
-
-### Bug Fixes
+- #11: Create a basic entry for package

@@ -525,8 +525,10 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 
 
 /// Verifies the transaction and parses outputs to calculates the payment to the receiver.
+/// To if you only want to verify if the tx is included in the block, you can use
+/// `verify_tx` function.
 /// Returns the the total amount of satoshi send to `receiver_address` from transaction outputs,
-/// the content of the `OP_RETURN` opcode output, and tx_id.
+/// the content of the `OP_RETURN` opcode output, and tx_id (hash).
 /// If OP_RETURN is not included in the transaction, return an empty vector.
 /// NOTE: output with OP_RETURN is invalid, and only one such output can be included in a TX.
 /// * `height`: block height the transaction belongs to.
