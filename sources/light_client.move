@@ -389,7 +389,7 @@ public fun relative_ancestor(lc: &LightClient, lb: &LightBlock, distance: u64): 
 }
 
 /// The function calculates the required difficulty for a block that we want to add after
-/// (potentially fork) after the parent_block.
+/// the `parent_block` (potentially fork).
 public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightBlock) : u32 {
     // reference from https://github.com/btcsuite/btcd/blob/master/blockchain/difficulty.go#L136
     let params = lc.params();
