@@ -366,8 +366,10 @@ public fun verify_tx(
     proof: vector<vector<u8>>,
     tx_index: u64
 ): bool {
-    // TODO: update this when we have APIs for finalized block.
     // TODO: handle: light block/block_header not exist.
+    if (height > lc.finalized_height()) {
+        return false
+    };
     let block_hash = lc.get_block_hash_by_height(height);
     let header = lc.get_light_block_by_hash(block_hash).header();
     let merkle_root = header.merkle_root();
