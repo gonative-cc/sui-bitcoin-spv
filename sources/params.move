@@ -9,9 +9,14 @@ public struct Params has store {
     /// time in seconds when we update the target
     target_timespan: u64,
     pow_no_retargeting: bool,
-    reduce_min_difficulty: bool, // for Bitcoin testnet
+    difficulty_adjustment: u8, // for Bitcoin testnet
     min_diff_reduction_time: u32,  // time in seconds
 }
+
+const DifficultyAdjustment_Mainnet: u8 = 0; // mainnet
+const DifficultyAdjustment_V3: u8 = 1; // tesetnet v3
+const DifficultyAdjustment_Regtest: u8 = 2; // regtest
+
 
 // default params for bitcoin mainnet
 public fun mainnet(): Params {
@@ -21,7 +26,7 @@ public fun mainnet(): Params {
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
-        reduce_min_difficulty: false,
+        difficulty_adjustment: DifficultyAdjustment_Mainnet,
         min_diff_reduction_time: 0,
     }
 }
@@ -34,7 +39,7 @@ public fun testnet(): Params {
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
-        reduce_min_difficulty: true,
+        difficulty_adjustment: DifficultyAdjustment_V3,
         min_diff_reduction_time: 20 * 60, // 20 minutes
     }
 }
@@ -48,7 +53,7 @@ public fun regtest(): Params {
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
         pow_no_retargeting: true,
-        reduce_min_difficulty: false,
+        difficulty_adjustment: DifficultyAdjustment_Regtest,
         min_diff_reduction_time: 20 * 60, // 20 minutes
     }
 }
@@ -73,14 +78,21 @@ public fun pow_no_retargeting(p: &Params): bool {
     p.pow_no_retargeting
 }
 
-public fun reduce_min_difficulty(p: &Params): bool {
-    p.reduce_min_difficulty
-}
-
 public fun min_diff_reduction_time(p: &Params): u32 {
     p.min_diff_reduction_time
 }
 
 public(package) fun is_correct_init_height(p: &Params, h: u64): bool {
     p.blocks_pre_retarget() == 0 || h % p.blocks_pre_retarget() == 0
+}
+
+public fun adjust_difficulty(p: &Params): bool {
+    p.difficulty_adjustment == DifficultyAdjustment_Regtest
+}
+
+// Instruments the logic to not verify the difficulty check
+// NOTE: Bitcoin testnet v3 has difficulty adjustment, that may checks many blocks
+// in the past and go out of the loop limit. So we need to skip that computation.
+public fun skip_difficulty_check(p: &Params): bool {
+    p.difficulty_adjustment == DifficultyAdjustment_V3
 }

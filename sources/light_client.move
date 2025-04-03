@@ -235,8 +235,11 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     // NOTE: we must provide `parent` to the function, to assure we have a chain - subsequent
     // headers must be connected.
     assert!(parent_header.block_hash() == header.parent(), EWrongParentBlock);
-    let next_block_difficulty = lc.calc_next_required_difficulty(parent, header.timestamp());
-    assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
+    // NOTE: see comment in the skip_difficulty_check function
+    if (!lc.params().skip_difficulty_check()) {
+        let next_block_difficulty = lc.calc_next_required_difficulty(parent, header.timestamp());
+        assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
+    };
 
     // we only check the case "A timestamp greater than the median time of the last 11 blocks".
     // because  network adjusted time requires a miners local time.
@@ -398,7 +401,7 @@ public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightB
 
     // if this block does not start a new retarget cycle
     if ((parent_block.height() + 1) % blocks_pre_retarget != 0) {
-        if (params.reduce_min_difficulty()) {
+        if (params.adjust_difficulty()) {
             let reduction_time = params.min_diff_reduction_time();
             let allow_min_time = parent_block.header().timestamp() + reduction_time;
             if (new_block_time > allow_min_time) {
