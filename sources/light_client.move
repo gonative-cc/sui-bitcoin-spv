@@ -237,7 +237,7 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     assert!(parent_header.block_hash() == header.parent(), EWrongParentBlock);
     // NOTE: see comment in the skip_difficulty_check function
     if (!lc.params().skip_difficulty_check()) {
-        let next_block_difficulty = lc.calc_next_required_difficulty(parent, header.timestamp());
+        let next_block_difficulty = lc.calc_next_required_difficulty(parent);
         assert!(next_block_difficulty == header.bits(), EDifficultyNotMatch);
     };
 
@@ -390,7 +390,7 @@ public fun relative_ancestor(lc: &LightClient, lb: &LightBlock, distance: u64): 
 
 /// The function calculates the required difficulty for a block that we want to add after
 /// (potentially fork) after the parent_block.
-public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightBlock, new_block_time: u32) : u32 {
+public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightBlock) : u32 {
     // reference from https://github.com/btcsuite/btcd/blob/master/blockchain/difficulty.go#L136
     let params = lc.params();
     let blocks_pre_retarget = params.blocks_pre_retarget();
@@ -401,16 +401,6 @@ public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightB
 
     // if this block does not start a new retarget cycle
     if ((parent_block.height() + 1) % blocks_pre_retarget != 0) {
-        if (params.adjust_difficulty()) {
-            let reduction_time = params.min_diff_reduction_time();
-            let allow_min_time = parent_block.header().timestamp() + reduction_time;
-            if (new_block_time > allow_min_time) {
-                return params.power_limit_bits()
-            };
-
-            return find_prev_testnet_difficulty(lc, parent_block)
-        };
-
         // Return previous block difficulty
         return parent_block.header().bits()
     };
@@ -427,32 +417,6 @@ public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightB
     let new_bits = target_to_bits(new_target);
     new_bits
 }
-
-public(package) fun find_prev_testnet_difficulty(lc: &LightClient, start_node: &LightBlock): u32 {
-    let mut iter_block = start_node;
-    let blocks_pre_retarget = lc.params().blocks_pre_retarget();
-    let power_limit_bits = lc.params().power_limit_bits();
-
-    let mut height = iter_block.height();
-    let mut bits = iter_block.header().bits();
-
-    while (
-        height != 0 &&
-        height % blocks_pre_retarget != 0 &&
-        bits == power_limit_bits
-    ){
-        iter_block = lc.relative_ancestor(iter_block, 1); // parent_block
-        height = iter_block.height();
-        bits = iter_block.header().bits();
-    };
-
-    if (height != 0) {
-        return bits
-    };
-
-    power_limit_bits
-}
-
 
 fun calc_past_median_time(lc: &LightClient, lb: &LightBlock): u32 {
     // Follow implementation from btcsuite/btcd
