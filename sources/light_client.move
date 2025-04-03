@@ -337,7 +337,7 @@ public fun verify_output(
     output_count: u32,
     outputs: vector<u8>,
     lock_time: vector<u8>
-): (vector<vector<u8>>, vector<u256>) {
+): (vector<vector<u8>>, vector<u64>) {
     let tx = make_transaction(version, input_count, inputs, output_count, outputs, lock_time);
     assert!(lc.verify_tx(height, tx.tx_id(), proof, tx_index), ETxNotInBlock);
 
@@ -552,7 +552,7 @@ public fun verify_payment(
     tx_index: u64,
     transaction: &Transaction,
     receiver_address: vector<u8>
-) : (u256, vector<u8>, vector<u8>) {
+) : (u64, vector<u8>, vector<u8>) {
     let mut amount = 0;
     let mut op_return_msg = vector[];
     let tx_id = transaction.tx_id();

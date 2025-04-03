@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 module bitcoin_spv::transaction;
-use bitcoin_spv::btc_math::{btc_hash, u256_to_compact, to_number, compact_size};
+use bitcoin_spv::btc_math::{btc_hash, u256_to_compact, extract_u64, compact_size};
 use bitcoin_spv::utils::slice;
 
 // === BTC script opcodes ===
@@ -29,7 +29,7 @@ const OP_DATA_75: u8 = 0x4b;
 
 /// Represents a Bitcoin transaction output
 public struct Output has copy, drop {
-    amount: u256,
+    amount: u64,
     script_pubkey: vector<u8>
 }
 
@@ -86,7 +86,7 @@ public fun make_transaction(
     }
 }
 
-public fun parse_output(amount: u256, script_pubkey: vector<u8>): Output {
+public fun parse_output(amount: u64, script_pubkey: vector<u8>): Output {
     Output {
         amount,
         script_pubkey
@@ -101,7 +101,7 @@ public fun outputs(tx: &Transaction): vector<Output> {
     tx.outputs
 }
 
-public fun amount(output: &Output): u256 {
+public fun amount(output: &Output): u64 {
     output.amount
 }
 
@@ -176,7 +176,7 @@ public(package) fun make_outputs(output_count: u32, outputs_bytes: vector<u8>): 
         (script_pubkey_size, start) = compact_size(outputs_bytes, start);
         let script_pubkey = slice(outputs_bytes, start, (start + (script_pubkey_size as u64)));
         start = start + (script_pubkey_size as u64);
-        let output = parse_output(to_number(amount, 0, 8), script_pubkey);
+        let output = parse_output(extract_u64(amount, 0, 8), script_pubkey);
         outputs.push_back(output);
         i = i + 1;
     };
