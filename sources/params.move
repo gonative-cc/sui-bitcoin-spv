@@ -10,7 +10,6 @@ public struct Params has store {
     target_timespan: u64,
     pow_no_retargeting: bool,
     difficulty_adjustment: u8, // for Bitcoin testnet
-    min_diff_reduction_time: u32,  // time in seconds
 }
 
 const DifficultyAdjustment_Mainnet: u8 = 0; // mainnet
@@ -27,7 +26,6 @@ public fun mainnet(): Params {
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
         difficulty_adjustment: DifficultyAdjustment_Mainnet,
-        min_diff_reduction_time: 0,
     }
 }
 
@@ -39,8 +37,7 @@ public fun testnet(): Params {
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
         pow_no_retargeting: false,
-        difficulty_adjustment: DifficultyAdjustment_V3,
-        min_diff_reduction_time: 20 * 60, // 20 minutes
+        difficulty_adjustment: DifficultyAdjustment_V3
     }
 }
 
@@ -53,8 +50,7 @@ public fun regtest(): Params {
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
         pow_no_retargeting: true,
-        difficulty_adjustment: DifficultyAdjustment_Regtest,
-        min_diff_reduction_time: 20 * 60, // 20 minutes
+        difficulty_adjustment: DifficultyAdjustment_Regtest
     }
 }
 
@@ -78,16 +74,8 @@ public fun pow_no_retargeting(p: &Params): bool {
     p.pow_no_retargeting
 }
 
-public fun min_diff_reduction_time(p: &Params): u32 {
-    p.min_diff_reduction_time
-}
-
 public(package) fun is_correct_init_height(p: &Params, h: u64): bool {
     p.blocks_pre_retarget() == 0 || h % p.blocks_pre_retarget() == 0
-}
-
-public fun adjust_difficulty(p: &Params): bool {
-    p.difficulty_adjustment == DifficultyAdjustment_Regtest
 }
 
 // Instruments the logic to not verify the difficulty check
