@@ -12,7 +12,7 @@ HEADERS_FOR_FORK='[0x000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51
 
 BTC_NETWORK=1 # 0 = mainnet, 1 = testnet, otherwise = regtest
 
-PACKAGE_ID="0xbe3c901872ff6cc93d4310e8dde2fb4f6887f522bf13874fed021c1c23e9fd7f"
+PACKAGE_ID="0xdad42834a7c57148ac0565aaac98bb104f6fb0e8e271ec1b41573974ad136f15"
 
 # Create a new light client
 function create_light_client() {
