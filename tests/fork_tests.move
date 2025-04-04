@@ -27,6 +27,15 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
         x"00000030486697206d79c9f68c60c259e9ec913c117ac6da35f44bbc57d9e4362d1ea233ed34bda2c331cb007039d7d085b08977cf21b2aad1a50a788106302d25ff79f43e5b6167ffff7f2003000000",
         x"0000003085bbc10dc8694fe36144c87f7737c35f9e3e8e304c61427a7cbce8b1e97004153fb8582bc04a0abb67965f6c139445bdc5d173ddc80008aa219929ab7285278f3f5b6167ffff7f2000000000",
         x"00000030516567e505288fe41b2fc6be9b96318c406418c7d338168fe75a26111490eb2fec401c3902aa39842e53a0c641af518957ec3aa5984a44d32e2a9f7fee2fa67a3f5b6167ffff7f2004000000",
+        // {
+        //     "version": "00000030",
+        //     "previous_block_hash": "7306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d",
+        //     "merkle_root": "6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da1",
+        //     "timestamp": "39c5b167",
+        //     "difficulty_target": "ffff7f20",
+        //     "nonce": "00000000"
+        // }
+        // fork start at here.
         x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da139c5b167ffff7f2000000000",
         x"00000030e98bb046cd25a629c91f0c7623cc2ed0c12ef6db5e41956536c261eb673d0b0f813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f39c5b167ffff7f2004000000",
         x"000000304f58550f49b5c9dce6328bc8d7b8f5941823efcc51741a024c17d9745ba21111cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d452539c5b167ffff7f2004000000",
@@ -43,7 +52,16 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
 
 #[test]
 fun insert_headers_switch_fork_tests() {
-     let headers = vector[
+    let headers = vector[
+        //         {
+        //     "version": "00000030",
+        //     "previous_block_hash": "7306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d",
+        //     "merkle_root": "6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da1",
+        //     "timestamp": "9dc5b167",
+        //     "difficulty_target": "ffff7f20",
+        //     "nonce": "01000000"
+        // }
+        // fork start at block have previous_block_hash = 7306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d. Check data in new_lc_for_test
         x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
         x"000000302ba076eb907ec3c060954d36dfcf0e735c815c9531f6d44667aa32f5999f412d813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f9dc5b167ffff7f2001000000",
         x"00000030525bda2756ff6f9e440c91590490462ac33e0fedb05b1558cfd3f7ce90920d16cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d45259dc5b167ffff7f2002000000",
@@ -51,6 +69,7 @@ fun insert_headers_switch_fork_tests() {
         x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
         x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000"
     ];
+
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -83,6 +102,16 @@ fun insert_headers_switch_fork_tests() {
 #[expected_failure(abort_code = EForkChainWorkTooSmall)]
 fun insert_headers_fork_not_enought_power_tests() {
     let headers = vector[
+        // fork start at here
+        // but not enough chain power
+        // {
+        //     "version": "00000030",
+        //     "previous_block_hash": "7306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d",
+        //     "merkle_root": "6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da1",
+        //     "timestamp": "9dc5b167",
+        //     "difficulty_target": "ffff7f20",
+        //     "nonce": "01000000"
+        // }
         x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
         x"000000302ba076eb907ec3c060954d36dfcf0e735c815c9531f6d44667aa32f5999f412d813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f9dc5b167ffff7f2001000000",
         x"00000030525bda2756ff6f9e440c91590490462ac33e0fedb05b1558cfd3f7ce90920d16cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d45259dc5b167ffff7f2002000000",

@@ -125,11 +125,13 @@ fun test_init_light_client_wrong_start_height() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
+    // only height improtant in this case
+    let height = 2;
     let headers = vector[
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213"
     ];
-    init_light_client(params::mainnet(), 2, headers, 8, ctx);
+    init_light_client(params::mainnet(), height, headers, 8, ctx);
     scenario.end();
 }
 
@@ -138,11 +140,13 @@ fun test_init_light_client() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
+    let height = 2016;
+    // only height improtant in this case;
     let headers = vector[
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213"
     ];
-    init_light_client(params::mainnet(), 2016, headers, 8, ctx);
+    init_light_client(params::mainnet(), height, headers, 8, ctx);
     scenario.end();
 }
 
@@ -190,7 +194,14 @@ fun test_insert_header_happy_cases() {
 
     let ctx = scenario.ctx();
     let mut lc = new_lc_for_test(ctx);
-
+    // {
+    //     "version": "00801e31",
+    //     "previous_block_hash": "c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000",
+    //     "merkle_root": "530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f60",
+    //     "timestamp": "1c35cf66",
+    //     "difficulty_target": "5b250317",
+    //     "nonce": "80f1e351"
+    // }
     let raw_headers = vector[
         x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351"
     ];
@@ -200,6 +211,14 @@ fun test_insert_header_happy_cases() {
     assert!(head_block == new_block_header(raw_headers[0]));
     assert!(head_block == lc.head().header());
 
+    //     {
+    //     "version": "0040a320",
+    //     "previous_block_hash": "aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a01000000000000000000",
+    //     "merkle_root": "60a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4",
+    //     "timestamp": "b806e166",
+    //     "difficulty_target": "5b250317",
+    //     "nonce": "807427ca"
+    // }
     let last_block_header = new_block_header(x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca");
     let last_block = new_light_block(
         860831,
@@ -208,6 +227,14 @@ fun test_insert_header_happy_cases() {
     );
 
     lc.append_block(last_block);
+    // {
+    //     "version": "00608923",
+    //     "previous_block_hash": "9c7c45da6d872c93dc9e8389d52b04bdd0a824eb308002000000000000000000",
+    //     "merkle_root": "fb4c3ac894ebc99c7a7b76ded35ec1c719907320ab781689ba1dedca40c5a9d7",
+    //     "timestamp": "c50de166",
+    //     "difficulty_target": "8c090317",
+    //     "nonce": "16c80c0d"
+    // }
     let headers = vector[
         x"006089239c7c45da6d872c93dc9e8389d52b04bdd0a824eb308002000000000000000000fb4c3ac894ebc99c7a7b76ded35ec1c719907320ab781689ba1dedca40c5a9d7c50de1668c09031716c80c0d"
     ];
@@ -231,11 +258,18 @@ fun test_insert_headers_that_dont_form_a_chain() {
 
     let ctx = scenario.ctx();
     let mut lc = new_lc_for_test(ctx);
-
+    //     {
+    //     "version": "00801e31",
+    //     "previous_block_hash": "c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000",
+    //     "merkle_root": "530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f60",
+    //     "timestamp": "1c35cf66",
+    //     "difficulty_target": "5b250317",
+    //     "nonce": "80f1e351"
+    // }
     let h = x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351";
+    // we insert 2 identical headers.
     let raw_headers = vector[h, h];
     lc.insert_headers(raw_headers);
-
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -248,7 +282,9 @@ fun test_insert_header_failed_block_hash_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
-    // we changed the block hash to make new header previous hash not match with last hash
+    // we changed the previous block hash to make new header previous hash not match with last hash
+    // from: c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000
+    // to:   c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000001
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000001530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351");
     let h = *lc.head();
     lc.insert_header(&h, new_header);
@@ -263,8 +299,8 @@ fun test_insert_header_failed_difficulty_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
-
-    // we changed the block hash to make new header previous hash not match with last hash
+    // we changed the difficulty to make new header previous hash not match with last hash
+    // from 5b250317 to 5b250318
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031880f1e351");
     let h = *lc.head();
     lc.insert_header(&h, new_header);
@@ -278,7 +314,6 @@ fun test_insert_header_failed_timestamp_too_old() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
-
     // we changed timestamp from 1c35cf66 to 0c35cf46
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f600c35cf465b25031780f1e351");
     let h = *lc.head();

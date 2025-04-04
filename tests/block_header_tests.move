@@ -33,12 +33,28 @@ fun block_header_test() {
 #[test]
 fun pow_check_happy_test() {
     // https://learnmeabitcoin.com/explorer/block/00000000f01df1dbc52bce6d8d31167a8fef76f1a8eb67897469cf92205e806b
+    // {
+    //     "version": "01000000",
+    //     "previous_block_hash": "cb60e68ead74025dcfd4bf4673f3f71b1e678be9c6e6585f4544c79900000000",
+    //     "merkle_root": "c7f42be7f83eddf2005272412b01204352a5fddbca81942c115468c3c4ec2fff",
+    //     "timestamp": "827ad949",
+    //     "difficulty_target": "ffff001d",
+    //     "nonce": "21e05e45"
+    // }
     let header = new_block_header(
         x"01000000cb60e68ead74025dcfd4bf4673f3f71b1e678be9c6e6585f4544c79900000000c7f42be7f83eddf2005272412b01204352a5fddbca81942c115468c3c4ec2fff827ad949ffff001d21e05e45",
     );
     header.pow_check();
 
     // https://learnmeabitcoin.com/explorer/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
+    //     {
+    //     "version": "01000000",
+    //     "previous_block_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    //     "merkle_root": "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a",
+    //     "timestamp": "29ab5f49",
+    //     "difficulty_target": "ffff001d",
+    //     "nonce": "1dac2b7c"
+    // }
     let header = new_block_header(
         x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c",
     );
