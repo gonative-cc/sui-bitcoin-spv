@@ -35,7 +35,7 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
         //     "difficulty_target": "ffff7f20",
         //     "nonce": "00000000"
         // }
-        // fork start at here.
+        // fork starts here.
         x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da139c5b167ffff7f2000000000",
         x"00000030e98bb046cd25a629c91f0c7623cc2ed0c12ef6db5e41956536c261eb673d0b0f813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f39c5b167ffff7f2004000000",
         x"000000304f58550f49b5c9dce6328bc8d7b8f5941823efcc51741a024c17d9745ba21111cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d452539c5b167ffff7f2004000000",
@@ -61,7 +61,7 @@ fun insert_headers_switch_fork_tests() {
         //     "difficulty_target": "ffff7f20",
         //     "nonce": "01000000"
         // }
-        // fork start at block have previous_block_hash = 7306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d. Check data in new_lc_for_test
+        // fork starts at block with `previous_block_hash` = 7306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d. Check data in new_lc_for_test
         x"000000307306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d6be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
         x"000000302ba076eb907ec3c060954d36dfcf0e735c815c9531f6d44667aa32f5999f412d813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f9dc5b167ffff7f2001000000",
         x"00000030525bda2756ff6f9e440c91590490462ac33e0fedb05b1558cfd3f7ce90920d16cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d45259dc5b167ffff7f2002000000",
@@ -102,7 +102,7 @@ fun insert_headers_switch_fork_tests() {
 #[expected_failure(abort_code = EForkChainWorkTooSmall)]
 fun insert_headers_fork_not_enought_power_tests() {
     let headers = vector[
-        // fork start at here
+        // fork starts here
         // but not enough chain power
         // {
         //     "version": "00000030",

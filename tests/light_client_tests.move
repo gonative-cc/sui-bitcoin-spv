@@ -15,7 +15,7 @@ use sui::test_scenario;
 fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
     let start_block = 858806;
     let headers = vector[
-        //         {
+        // {
         //     "version": "00a0b434",
         //     "previous_block_hash": "e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000",
         //     "merkle_root": "fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e17",
@@ -33,7 +33,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "1746f213"
         // }
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213",
-        //         {
+        // {
         //     "version": "0000c723",
         //     "previous_block_hash": "67c8c7e8515c552d74707468a84d2fda2da63d65cbec01000000000000000000",
         //     "merkle_root": "ec9d236ac946e604e3272ab775a501ebe05e8b06a8ec70b8c51b7ccba38af21b",
@@ -42,7 +42,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "c3442435"
         // }
         x"0000c72367c8c7e8515c552d74707468a84d2fda2da63d65cbec01000000000000000000ec9d236ac946e604e3272ab775a501ebe05e8b06a8ec70b8c51b7ccba38af21b1c26cf66763d0317c3442435",
-        //         {
+        // {
         //     "version": "00c05725",
         //     "previous_block_hash": "1d6ff0cb1d8eb9452f6578fafd41c5435dbfae6dbd5a01000000000000000000",
         //     "merkle_root": "a8c4158d905a4fd766328c4717222737d4105220ee3aae80fbe57928689a7544",
@@ -51,7 +51,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "a29c9617"
         // }
         x"00c057251d6ff0cb1d8eb9452f6578fafd41c5435dbfae6dbd5a01000000000000000000a8c4158d905a4fd766328c4717222737d4105220ee3aae80fbe57928689a7544cb27cf66763d0317a29c9617",
-        //         {
+        // {
         //     "version": "00800a20",
         //     "previous_block_hash": "88931286b1c6af1e23730089387def8a89e248de2a6501000000000000000000",
         //     "merkle_root": "a6d9635ee5e71023ee76c5569e770d432302593757a0e2e343f083764cd8f315",
@@ -60,7 +60,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "5a15982c"
         // }
         x"00800a2088931286b1c6af1e23730089387def8a89e248de2a6501000000000000000000a6d9635ee5e71023ee76c5569e770d432302593757a0e2e343f083764cd8f3155328cf66763d03175a15982c",
-        //         {
+        // {
         //     "version": "00a06b23",
         //     "previous_block_hash": "d73ad1793c6b81cb331b00023a1c84611ae6fe46b08f00000000000000000000",
         //     "merkle_root": "dd4c22396df46efc796ebbdfd82cb74d4c3eaf5e8e18134b7fda9379e82ebd2a",
@@ -69,7 +69,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "66c189d5"
         // }
         x"00a06b23d73ad1793c6b81cb331b00023a1c84611ae6fe46b08f00000000000000000000dd4c22396df46efc796ebbdfd82cb74d4c3eaf5e8e18134b7fda9379e82ebd2a752bcf66763d031766c189d5",
-        //         {
+        // {
         //     "version": "00e06c2e",
         //     "previous_block_hash": "314994230081f451d0fba9016cea4be4afd3b4c20d4601000000000000000000",
         //     "merkle_root": "6e110e2bc3bb80af0fa41dada4829fe5bc8a7a6269b588fff5f708d551130d64",
@@ -78,7 +78,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "c530dcc8"
         // }
         x"00e06c2e314994230081f451d0fba9016cea4be4afd3b4c20d46010000000000000000006e110e2bc3bb80af0fa41dada4829fe5bc8a7a6269b588fff5f708d551130d649d2bcf66763d0317c530dcc8",
-        //         {
+        // {
         //     "version": "00000028",
         //     "previous_block_hash": "f1b88a82b706583e794319f23feb40ef6d9b42ee981702000000000000000000",
         //     "merkle_root": "3a899be6d63b05795d9b5da4d091fb9e37a5bf4783faaf1ae9e8aafa861462e7",
@@ -105,7 +105,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "bd91acc5"
         // }
         x"00800120451bed6d330bd942a708b0858fdbb7d265e5b7caa3c00000000000000000000025ba876f2efbd1522e36a7cd807879eeec843f95da8a01993556100e3226900b8d30cf66763d0317bd91acc5",
-        //         {
+        // {
         //     "version": "0060b032",
         //     "previous_block_hash": "9fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000",
         //     "merkle_root": "562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2c",
@@ -125,7 +125,7 @@ fun test_init_light_client_wrong_start_height() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    // only height improtant in this case
+    // only the height is important in this case.
     let height = 2;
     let headers = vector[
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
@@ -141,7 +141,7 @@ fun test_init_light_client() {
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
     let height = 2016;
-    // only height improtant in this case;
+    // only the height is important in this case.
     let headers = vector[
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213"
@@ -211,7 +211,7 @@ fun test_insert_header_happy_cases() {
     assert!(head_block == new_block_header(raw_headers[0]));
     assert!(head_block == lc.head().header());
 
-    //     {
+    // {
     //     "version": "0040a320",
     //     "previous_block_hash": "aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a01000000000000000000",
     //     "merkle_root": "60a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4",
@@ -258,7 +258,7 @@ fun test_insert_headers_that_dont_form_a_chain() {
 
     let ctx = scenario.ctx();
     let mut lc = new_lc_for_test(ctx);
-    //     {
+    // {
     //     "version": "00801e31",
     //     "previous_block_hash": "c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000",
     //     "merkle_root": "530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f60",
@@ -299,7 +299,7 @@ fun test_insert_header_failed_difficulty_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
-    // we changed the difficulty to make new header previous hash not match with last hash
+    // we changed the difficulty to make the new header's previous hash not match with last hash
     // from 5b250317 to 5b250318
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031880f1e351");
     let h = *lc.head();

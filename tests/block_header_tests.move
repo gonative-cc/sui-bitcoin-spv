@@ -47,7 +47,7 @@ fun pow_check_happy_test() {
     header.pow_check();
 
     // https://learnmeabitcoin.com/explorer/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f
-    //     {
+    // {
     //     "version": "01000000",
     //     "previous_block_hash": "0000000000000000000000000000000000000000000000000000000000000000",
     //     "merkle_root": "3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a",
