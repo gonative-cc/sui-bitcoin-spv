@@ -40,6 +40,22 @@ public fun to_u256(v: vector<u8>): u256 {
     ans
 }
 
+public fun extract_u64(v: vector<u8>, start: u64, end: u64): u64 {
+    let size = end - start;
+    assert!(size <= 8, EInvalidNumberSize);
+    assert!(end <= v.length(), EInvalidLength);
+    let mut ans = 0;
+    let mut i = start;
+    let mut j = 0;
+    while (i < end) {
+        ans = ans +  ((v[i] as u64)  << (j * 8 as u8));
+        i = i + 1;
+        j = j + 1;
+    };
+    ans
+}
+
+
 /// Double hashes the value
 public fun btc_hash(data: vector<u8>): vector<u8> {
     let first_hash = hash::sha2_256(data);
@@ -63,29 +79,15 @@ fun compact_size_offset(start_byte: u8): u64 {
 }
 
 
-/// Decodes a compact size integer from vector.
-public fun compact_size(v: vector<u8>, start: u64): (u256, u64) {
+/// Decodes a compact number - number of integer bytes, from the vector `v`.
+/// Returns the decoded number and the first index in `v` after the number.
+public fun compact_size(v: vector<u8>, start: u64): (u64, u64) {
     let offset = compact_size_offset(v[start]);
     assert!(start + offset < v.length(), EInvalidCompactSizeDecode);
     if (offset == 0) {
-        return (v[start] as u256, start + 1)
+        return (v[start] as u64, start + 1)
     };
-    (to_number(v, start + 1, start + offset + 1), start + offset + 1)
-}
-
-/// TODO: replace to_u256 and to_u32
-public fun to_number(v: vector<u8>, start: u64, end: u64): u256 {
-    let size = end - start;
-    assert!(size <= 32, EInvalidNumberSize);
-    let mut ans = 0;
-    let mut i = start;
-    let mut j = 0;
-    while (i < end) {
-        ans = ans +  ((v[i] as u256)  << (j * 8 as u8));
-        i = i + 1;
-        j = j + 1;
-    };
-    ans
+    (extract_u64(v, start + 1, start + offset + 1), start + offset + 1)
 }
 
 /// number of bytes to represent number.
@@ -95,7 +97,7 @@ fun bytes_of(number: u256) : u8 {
         b = b - 1;
     };
     // Follow logic in bitcoin core
-    ((b as u32) / 8  + 1) as u8
+    ((b as u32) / 8 + 1) as u8
 }
 
 
@@ -233,5 +235,4 @@ fun check_compact_size_format_test() {
         assert!(compact_size_offset(inputs[i]) == outputs[i]);
         i = i + 1;
     }
-
 }
