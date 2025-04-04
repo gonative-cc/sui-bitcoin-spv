@@ -16,7 +16,7 @@ PACKAGE_ID="0xdad42834a7c57148ac0565aaac98bb104f6fb0e8e271ec1b41573974ad136f15"
 
 # Create a new light client
 function create_light_client() {
-    sui client call --function init_light_client --module light_client --package $PACKAGE_ID --gas-budget 100000000 --args $BTC_NETWORK 66528 $INIT_HEADERS 0
+    sui client call --function init_light_client_network --module light_client --package $PACKAGE_ID --gas-budget 100000000 --args $BTC_NETWORK 66528 $INIT_HEADERS 0
 }
 
 # get object SPV
