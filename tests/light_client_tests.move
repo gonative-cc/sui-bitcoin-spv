@@ -24,7 +24,7 @@ fun new_lc_for_test(ctx: &mut TxContext) : LightClient {
         //     "nonce": "5c560dcc"
         // }
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
-        //         {
+        // {
         //     "version": "00205223",
         //     "previous_block_hash": "ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c03000000000000000000",
         //     "merkle_root": "3f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc",
