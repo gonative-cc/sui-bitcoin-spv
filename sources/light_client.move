@@ -28,7 +28,7 @@ const EBlockNotFound: vector<u8> = b"The specified block could not be found in t
 #[error]
 const EForkChainWorkTooSmall: vector<u8> = b"The proposed fork has less work than the current chain";
 #[error]
-const ETxNotInBlock: vector<u8> = b"The transaction is not included in the block according to the Merkle proof";
+const ETxNotInBlock: vector<u8> = b"The transaction is not included in a finalized block according to the Merkle proof";
 #[error]
 const EInvalidStartHeight: vector<u8> = b"The start height must be a multiple of the retarget period (e.g 2016 for mainnet)";
 
