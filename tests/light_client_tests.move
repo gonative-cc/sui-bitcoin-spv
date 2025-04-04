@@ -282,7 +282,7 @@ fun test_insert_header_failed_block_hash_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
-    // we changed the previous block hash to make new header previous hash not match with last hash
+    // we changed the previous block hash to make the new header's previous hash not match with last hash
     // from: c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000
     // to:   c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000001
     let new_header = new_block_header(x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000001530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351");
