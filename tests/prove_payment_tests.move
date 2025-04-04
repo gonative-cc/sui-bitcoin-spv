@@ -18,7 +18,8 @@ fun test_verify_payment() {
         x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000d7ee3bfa38399e87f302a41b388f33df29bf3ecb3552ed208a4869e17870a74d5c843a5473691f184c13685d"
     ];
     let ctx = scenario.ctx();
-    let lc = new_light_client(params::mainnet(), start_block_height, headers, 0, 8, ctx);
+    let finality = 4;
+    let lc = new_light_client(params::mainnet(), start_block_height, headers, 0, finality, ctx);
 
     // merkle proof of transaction id gen by proof.py in scripts folder.
     let proof = vector[

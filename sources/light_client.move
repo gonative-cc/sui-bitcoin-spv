@@ -166,7 +166,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         // We decide to not to do it to protect from deadlock:
         // * pro: we protect against double mint for nBTC etc...
         // * cons: we can have a deadlock
-        if (lc.head_height - parent.height() > lc.finality) {
+        if (parent.height() >= lc.finalized_height()) {
             event::emit(ForkBeyondFinality{
                 parent_hash: parent_id,
                 parent_height: parent.height(),
