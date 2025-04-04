@@ -97,7 +97,7 @@ fun bytes_of(number: u256) : u8 {
         b = b - 1;
     };
     // Follow logic in bitcoin core
-    ((b as u32) / 8  + 1) as u8
+    ((b as u32) / 8 + 1) as u8
 }
 
 

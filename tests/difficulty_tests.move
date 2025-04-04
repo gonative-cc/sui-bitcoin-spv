@@ -72,7 +72,7 @@ fun test_difficulty_computation_mainnet() {
 
     let block_hash = lc.get_block_hash_by_height(0);
     // The next difficulty at genesis block is equal power of limit.
-    assert!(calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(block_hash), 0) == lc.params().power_limit_bits());
+    assert!(calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(block_hash)) == lc.params().power_limit_bits());
 
     // check retarget difficulty
     // bits = 5b250317 # little endian
@@ -95,7 +95,7 @@ fun test_difficulty_computation_mainnet() {
     lc.append_block(first_block);
 
 
-    let new_bits = calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(last_block_hash), 0);
+    let new_bits = calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(last_block_hash));
 
     // 0x1703098c is bits of block 860832
     assert!(new_bits == 0x1703098c);
@@ -120,101 +120,8 @@ fun test_difficulty_computation_regtest() {
     );
 
     let block = lc.get_light_block_by_height(10);
-    let new_bits = calc_next_required_difficulty(&lc, block, 0);
+    let new_bits = lc.calc_next_required_difficulty(block);
     assert!(new_bits == lc.params().power_limit_bits());
-    sui::test_utils::destroy(lc);
-    scenario.end();
-}
-
-// TODO: update the test data to enable the test
-/* #[test]
-fun test_regtest_reset_dificulty() {
-    let sender = @0x01;
-    let mut scenario = test_scenario::begin(sender);
-
-    let lc = new_light_client(
-        params::regtest(),
-        10, // We use 10 because this not a block we adjust the target/difficulty. This is not random number!
-        // This header is random, we only care about timestamp in this case.
-        vector[x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058c440041806bc3f79"],
-        0,
-        8,
-        scenario.ctx()
-    );
-
-    let block = lc.get_light_block_by_height(10);
-    // auto reset difficulty/target after 20mins.
-    // params min_diff_reduction_time = 20mins in this case.
-    let new_bits = calc_next_required_difficulty(&lc, block, block.header().timestamp() + lc.params().min_diff_reduction_time() + 10);
-    assert!(new_bits == 0x1d00ffff);
-    sui::test_utils::destroy(lc);
-    scenario.end();
-}
-*/
-
-#[test]
-fun test_testnet_use_previous_difficulty() {
-    let sender = @0x01;
-    let mut scenario = test_scenario::begin(sender);
-
-    let lc = new_light_client(
-        params::testnet(),
-        10, // We use 10 because this not a block we adjust the target/difficulty. This is not random number!
-        // This header is random, we only care about timestamp in this case.
-        vector[x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058c440041806bc3f79"],
-        0,
-        8,
-        scenario.ctx()
-    );
-    let last_block = lc.get_light_block_by_height(10);
-    // testnet auto reset difficulty/target after 20mins.
-    // testnet params min_diff_reduction_time = 20mins in this case.
-    let new_bits = calc_next_required_difficulty(&lc, last_block, last_block.header().timestamp() + lc.params().min_diff_reduction_time() - 10);
-    assert!(new_bits == 0x180440c4);
-    sui::test_utils::destroy(lc);
-    scenario.end();
-}
-
-#[test]
-fun test_find_prev_testnet_difficulty() {
-    let sender = @0x01;
-    let mut scenario = test_scenario::begin(sender);
-
-    let mut lc = new_light_client(
-        params::testnet(),
-        2016,
-        // This header is random, we only care about timestamp and bits
-         vector[
-        x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058c440041806bc3f79",
-        x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd0058ffff001d06bc3f79",
-        x"000000207e50e267813c0b5849307d9a604a3250d122e5b25080950200000000000000007243a2960f9c5db0623a4b3c77a57bbe262d906e8d94dc837f032269bcaf8eeb77fd00587856341206bc3f79"
-    ],
-        0,
-        8,
-        scenario.ctx()
-    );
-
-
-    // the case last_block bits not equal powert limit
-    // we return bits of this block.
-    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(2018)) == 0x12345678);
-    // The case last_block bits equal power limit, return first block not equal power limit
-    // or the nearest retarget block (height % 2016 == 0);
-    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(2017)) == 0x180440c4);
-
-    let genesis_block = new_light_block(
-        0,
-        new_block_header(
-            x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c"
-        ),
-        0
-    );
-
-    lc.set_block_hash_by_height(0, genesis_block.header().block_hash());
-    lc.append_block(genesis_block);
-
-    // return power limit when genesis block
-    assert!(lc.find_prev_testnet_difficulty(lc.get_light_block_by_height(0)) == lc.params().power_limit_bits());
     sui::test_utils::destroy(lc);
     scenario.end();
 }
