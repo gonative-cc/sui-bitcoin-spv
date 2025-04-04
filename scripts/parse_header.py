@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: MPL-2.0
+
 import json
 import argparse
 
@@ -21,12 +23,6 @@ def parse_block_header(block_header):
 
     return json.dumps(block_header_json, indent=4)
 
-
-block_header = bytes.fromhex("00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc")
-
-# # Read and print the block header in JSON format
-# header_json = parse_block_header(block_header)
-# print(header_json)
 
 def main():
     parser = argparse.ArgumentParser(description="read raw header string")
