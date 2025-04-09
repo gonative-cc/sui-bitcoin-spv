@@ -5,6 +5,8 @@ use bitcoin_spv::btc_math::{btc_hash, u256_to_compact, extract_u64, compact_size
 use bitcoin_spv::utils::slice;
 
 // === BTC script opcodes ===
+/// An empty array of bytes is pushed onto the stack. (This is not a no-op: an item is added to the stack.)
+const OP_0: u8 = 0x00;
 /// Duplicates the top stack item
 const OP_DUP: u8 = 0x76;
 /// Pop the top stack item and push its RIPEMD(SHA256(top item)) hash
@@ -105,7 +107,7 @@ public fun amount(output: &Output): u64 {
     output.amount
 }
 
-public fun is_pk_hash_script(output: &Output): bool {
+public fun is_P2PHK(output: &Output): bool {
     let script = output.script_pubkey;
 
     script.length() == 25 &&
@@ -121,13 +123,28 @@ public fun is_op_return(output: &Output): bool {
     script.length() > 0 && script[0] == OP_RETURN
 }
 
+public fun is_P2WPHK(output: &Output): bool {
+    let script = output.script_pubkey;
+    script.length() == 22 &&
+        script[0] == OP_0 &&
+        script[1] == OP_DATA_20
+}
+
 // TODO: add support script addresses.
 // TODO: check and verify the address to make sure we support it. Return error otherwise
-/// decodes address (p2pkh or p2pwkh) from the output
-public fun p2pkh_address(output: &Output): vector<u8> {
+/// extract pkh from the output in P2PHK or P2WPKH
+/// return empty if the cannot extract public key hash
+public fun extract_public_key_hash(output: &Output): vector<u8> {
     let script = output.script_pubkey;
-    slice(script, 3, 23)
+    if (output.is_P2PHK()) {
+        return  slice(script, 3, 23)
+    } else if (output.is_P2WPHK()) {
+        return slice(script, 2, 22)
+    };
+    vector[]
 }
+
+
 
 /// Extracts the data payload from an OP_RETURN output in a transaction.
 /// script = OP_RETURN <data>.

@@ -12,6 +12,15 @@
 
 Bitcoin Light Client for [Native](https://gonative.cc) on [Sui](https://sui.io/).
 
+## Deployed packages
+
+### Native Alpha
+
+
+- Version: [#1652f63](https://github.com/gonative-cc/move-bitcoin-spv/tree/1652f63b2368e45fe26151eeb86b8aab47b5799a) (branch: `release/alpha`)
+- Package ID: `0xdad42834a7c57148ac0565aaac98bb104f6fb0e8e271ec1b41573974ad136f15`
+- SPV Object ID: `0x8ebf2b57228565cab7be6aa03579c18a467032f7ca72c514fe7bd9a0d316606d`
+
 ## Contributing
 
 Participating in open source is often a highly collaborative experience. We’re encouraged to create in public view, and we’re incentivized to welcome contributions of all kinds from people around the world.
