@@ -50,7 +50,8 @@ fun test_verify_payment() {
         x"10270000000000001976a914303962c3ad29f08d13d98218ceeb7057e9bc184888ac10270000000000001976a914c6a3b95415d3fe9a9161c4b5100c1b6f2ad1e90c88ac00000000000000000d6a0b68656c6c6f20776f726c64e5490600000000001976a914e6228f7a5ee6b15c7cccfd9f9cb7e8699261084588ac",
         x"00000000"
     );
-    // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
+
+    // Tx: 6dfb16dd580698242bcfd8e433d557ed8c642272a368894de27292a8844a4e75 (Height 303,699)
     // from mainnet
     let (amount, message, tx_id) = lc.verify_payment(
         start_block_height,
@@ -67,6 +68,53 @@ fun test_verify_payment() {
     scenario.end();
 }
 
+
+
+#[test]
+fun test_verify_payment_with_P2WPHK_output() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let start_block_height = 0;
+    let headers = vector[
+        // only one transaction
+        x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000df88e4ad22477438db0a80979cf3dea033aa968c97fe06270f8864941a30649b5c843a5473691f184c13685d"
+    ];
+
+    let ctx = scenario.ctx();
+    let finality = 0;
+    let lc = new_light_client(params::mainnet(), start_block_height, headers, 0, finality, ctx);
+
+    // empty because only one transaction
+    let proof = vector[];
+
+    let tx_index = 604;
+    let transaction = make_transaction(
+        x"01000000",
+        1,
+        x"8c0bfefccb5755874ea0872a17b0d682c84981eed93fccd3ef86556f51f21522010000006a47304402204bbbefdc49e7289b0f36fe8c7623e93ff7ff751664d63caf49c1d9d8a4cbefd402200582f12a9490bdf8e6980025c08f83c43c50bc472706e3a38e7f1a972404bc4d0121035533036f3a7e9dc4c76e9d3697eb9d573aa76844baaadda347893a793797b639ffffffff",
+        4,
+        // we modify the last output to P2WPHK
+        // 14e6228f7a5ee6b15c7cccfd9f9cb7e86992610845 = OP_0 OP_PUSHBYTES_20 e6228f7a5ee6b15c7cccfd9f9cb7e86992610845
+        x"10270000000000001976a914303962c3ad29f08d13d98218ceeb7057e9bc184888ac10270000000000001976a914c6a3b95415d3fe9a9161c4b5100c1b6f2ad1e90c88ac00000000000000000d6a0b68656c6c6f20776f726c64e549060000000000160014e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
+        x"00000000"
+    );
+
+    let (amount, message, tx_id) = lc.verify_payment(
+        start_block_height,
+        proof,
+        tx_index,
+        &transaction,
+        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845"
+    );
+
+
+
+    assert!(tx_id == x"df88e4ad22477438db0a80979cf3dea033aa968c97fe06270f8864941a30649b");
+    assert!(amount == 412133);
+    assert!(message == x"68656c6c6f20776f726c64");
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
 
 #[test]
 #[expected_failure(abort_code = ETxNotInBlock)]
