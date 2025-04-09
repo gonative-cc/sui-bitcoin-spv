@@ -27,9 +27,9 @@ fun decoded_transaction_tests() {
 
     let outputs = tx.outputs();
 
-    assert!(outputs[0].p2pkh_address() == x"0fef69f3ac0d9d0473a318ae508875ad0eae3dcc");
+    assert!(outputs[0].extract_public_key_hash() == x"0fef69f3ac0d9d0473a318ae508875ad0eae3dcc");
     assert!(outputs[0].amount() == 500000);
-    assert!(outputs[1].p2pkh_address() == x"51e6b602f387b4c5bb8a4d8cdf1b059c826374e3");
+    assert!(outputs[1].extract_public_key_hash() == x"51e6b602f387b4c5bb8a4d8cdf1b059c826374e3");
     assert!(outputs[1].amount() == 7466184);
 
     // ported from summa-tx/bitcoin-spv
@@ -90,10 +90,17 @@ fun verify_output_test() {
 #[test]
 fun pkh_script_tests() {
     let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
-    assert!(output.is_pk_hash_script() == true);
-    assert!(output.p2pkh_address() == x"55ae51684c43435da751ac8d2173b2652eb64105");
+    assert!(output.is_P2PHK() == true);
+    assert!(output.extract_public_key_hash() == x"55ae51684c43435da751ac8d2173b2652eb64105");
     let output = &parse_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
-    assert!(output.is_pk_hash_script() == false);
+    assert!(output.is_P2PHK() == false);
+    let output = &parse_output(10, x"0014841b80d2cc75f5345c482af96294d04fdd66b2b7");
+    assert!(output.is_P2WPHK() == true);
+    assert!(output.extract_public_key_hash() == x"841b80d2cc75f5345c482af96294d04fdd66b2b7");
+    let output = &parse_output(10, x"0101"); // arbitrary script
+    assert!(output.is_P2PHK() == false);
+    assert!(output.is_P2WPHK() == false);
+    assert!(output.extract_public_key_hash() == vector[]);
 }
 
 #[test]

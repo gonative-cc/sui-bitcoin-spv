@@ -346,7 +346,7 @@ public fun verify_output(
     let mut amounts = vector[];
     let mut i = 0;
     while (i < outputs.length()) {
-        btc_addresses.push_back(outputs[i].p2pkh_address());
+        btc_addresses.push_back(outputs[i].extract_public_key_hash());
         amounts.push_back(outputs[i].amount());
         i = i + 1;
     };
@@ -510,14 +510,14 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
 /// * `proof`: merkle tree proof, this is the vector of 32bytes.
 /// * `tx_index`: index of transaction in block.
 /// * `transaction`: bitcoin transaction. Check transaction.move.
-/// * `receiver_address`: address of receiver in p2pkh or p2wpkh.
+/// * `receiver_pk_hash`: receiver public key hash in p2pkh or p2wpkh. Must not empty
 public fun verify_payment(
     lc: &LightClient,
     height: u64,
     proof: vector<vector<u8>>,
     tx_index: u64,
     transaction: &Transaction,
-    receiver_address: vector<u8>
+    receiver_pk_hash: vector<u8>
 ) : (u64, vector<u8>, vector<u8>) {
     let mut amount = 0;
     let mut op_return_msg = vector[];
@@ -528,7 +528,7 @@ public fun verify_payment(
     let mut i = 0;
     while (i < outputs.length()) {
         let o = outputs[i];
-        if (o.is_pk_hash_script() && o.p2pkh_address() == receiver_address) {
+        if (o.extract_public_key_hash() == receiver_pk_hash) {
             amount = amount + o.amount();
         };
 
