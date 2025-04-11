@@ -4,7 +4,6 @@ module bitcoin_spv::transaction;
 use bitcoin_spv::btc_math::{btc_hash, u256_to_compact, extract_u64, compact_size};
 use bitcoin_spv::utils::slice;
 
-// errors
 // === BTC script opcodes ===
 /// An empty array of bytes is pushed onto the stack. (This is not a no-op: an item is added to the stack.)
 const OP_0: u8 = 0x00;
