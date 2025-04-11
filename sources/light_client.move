@@ -71,7 +71,7 @@ fun init(_ctx: &mut TxContext) {
 /// *start_height: height of the first trusted header 
 /// *trusted_headers: List of trusted headers in hex format.
 /// *parent_chain_work: chain_work at parent block of start_height block.
-/// *finality: block height must deeper `finality` should consider as finalized block
+/// *finality: the finality threshold
 
 /// Header serialization reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
