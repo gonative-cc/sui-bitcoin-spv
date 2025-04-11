@@ -68,7 +68,7 @@ fun init(_ctx: &mut TxContext) {
 /// LightClient constructor. Use `init_light_client` to create and transfer object,
 /// emitting an event.
 /// *params: Btc net work params. Check the params module
-/// *start_height:  the height of first trust block
+/// *start_height: height of the first trusted header 
 /// *trusted_headers: List of trusted headers in hex format.
 /// *parent_chain_work: chain_work at parent block of start_height block.
 /// *finality: block height must deeper `finality` should consider as finalized block
