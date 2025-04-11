@@ -67,6 +67,14 @@ fun init(_ctx: &mut TxContext) {
 
 /// LightClient constructor. Use `init_light_client` to create and transfer object,
 /// emitting an event.
+/// *params: Btc net work params. Check the params module
+/// *start_height:  the height of first trust block
+/// *trusted_headers: List of trusted headers in hex format.
+/// *parent_chain_work: chain_work at parent block of start_height block.
+/// *finality: block height must deeper `finality` should consider as finalized block
+
+/// Header serialization reference:
+/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, parent_chain_work: u256, finality: u64, ctx: &mut TxContext): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
@@ -103,7 +111,7 @@ public fun new_light_client(params: Params, start_height: u64, trusted_headers: 
 /// params: Mainnet, Testnet or Regtest.
 /// start_height: the height of first trust block
 /// trusted_header: The list of trusted header in hex encode.
-/// strart_chain_work: the chain_work at first trusted block.
+/// previous_chain_work: the chain_work at parent block of start_height block
 ///
 /// Header serialization reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
