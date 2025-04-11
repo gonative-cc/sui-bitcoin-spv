@@ -175,16 +175,25 @@ fun cleanup_tests() {
 #[test]
 fun test_reorg() {
     let sender = @0x01;
-
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
+
+    // init chain in in light client
     let headers = vector[
         x"04000000605e6a4291a997994d314801de6ab2aae67bfcb343bc5884678e4001b47e2303201c882d9de99c0137ee538d34f7c473e6a9b5a37901330250a2c62a4b171393fd088653ffff7f20f2ffffef",
         x"04000000762f7efa4640465c8a86f476f27f8f520bdc898776e9207471696e4135530928d0b4cd66abe660e66297ce81bb6d2b192589937400a0b5cd471782668d0574db0c0a8653ffff7f20f3ffffef",
         x"04000000aa56f7acf2d7b0514131d1207f96964bb51e098b8e94a3acccd009dce55cb9739439d226539ec843c85c052bff9a60f4406bd45505d386e6dbfb634a3c8b9aef050b8653ffff7f2001000000",
         x"040000007f8afe86438bacdf44e7d43775a149ae00258e425cae8444a8d0139edf74b70123ef08e6863d7dac586ff2ce6917ef4fd148432aa7845ef0af113775083a211ba70c8653ffff7f20f2ffffef",
-        x"0400000087f380f8ca6f3171df96bfafe7d50f619054f31924392d9adc50b520d7a9e55534a006a28d11bc751389ae146b1468ab485d1437edcfc3a8267040fb90226df4d80d8653ffff7f20feffff3f",
-        x"0400000043f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b212daf618d14e76326f5ee702eacfd886a525c36cf2cbe756c93a5ce54196a60218b108653ffff7f20f3ffffef", // <- fork start here
+        x"0400000087f380f8ca6f3171df96bfafe7d50f619054f31924392d9adc50b520d7a9e55534a006a28d11bc751389ae146b1468ab485d1437edcfc3a8267040fb90226df4d80d8653ffff7f20feffff3f", // <- fork start here
+        // {
+        //     "version": "04000000",
+        //     "previous_block_hash": "43f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b21",
+        //     "merkle_root": "2daf618d14e76326f5ee702eacfd886a525c36cf2cbe756c93a5ce54196a6021",
+        //     "timestamp": "8b108653",
+        //     "difficulty_target": "ffff7f20",
+        //     "nonce": "f3ffffef"
+        // }
+        x"0400000043f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b212daf618d14e76326f5ee702eacfd886a525c36cf2cbe756c93a5ce54196a60218b108653ffff7f20f3ffffef",
         x"0400000089e74025c7ea5152e131bd1ae0b307bde5972e4451b431416ef194abafde6b3f9f8d7b24c42c0f5be70aa5f7f30130fcbaa50928721149c486261a0c8dffd5b22b138653ffff7f20f8ffff9f",
         x"040000000217ca583ab80b6eda0cc99e814b2aa9750497de8e98901f5cfc76235f4e7365db612186fbd125fd83a05d9ccd75a5abf6453cd60e69b5d6e623e782d8e390b66b148653ffff7f20f4ffffef",
         x"04000000cd61864c5790c7903f049f6f2247eb961f492c09a1c17ebec52a7e22a10a1d41f1d563bcbebd74d8bf517b1021ebaef7b9beb24c376fd6f1d695383b5fd4a86216178653ffff7f2002000000",
@@ -197,6 +206,14 @@ fun test_reorg() {
     let mut lc =  new_light_client(params::mainnet(), 1, headers, 2, 8, ctx);
 
     let forks = vector[
+        // {
+        //     "version": "04000000",
+        //     "previous_block_hash": "43f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b21",
+        //     "merkle_root": "0d1457f5e34637e00460b955f89537b152e95c2cfa91a16b0c48e00b3aa273dc",
+        //     "timestamp": "a3108653",
+        //     "difficulty_target": "ffff7f20",
+        //     "nonce": "f2ffffef"
+        // }
         x"0400000043f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b210d1457f5e34637e00460b955f89537b152e95c2cfa91a16b0c48e00b3aa273dca3108653ffff7f20f2ffffef",
         x"040000009124a72f8afc0db55c03fd243d7bb51db1e72fcbf93fded941470768b2ea903f974ba0cf28a6ab523b722fa102db6c43e68c266862b7ef5979b2b28bd0a389b06f138653ffff7f20f2ffffef",
         x"040000000a826811ccd882ecdc079b5ee6cd2bda4a4f04ab2fd0257ec6f650d9dfdf233e2d94e282552d4ce5c258a57009a2d48fa39eee8d3996036e53de7fe443b1a625f2158653ffff7f20f3ffffef",
@@ -213,13 +230,18 @@ fun test_reorg() {
         x"040000008e3caa88f2e32ce528ec63255de09176cf081ec7e51f123d5775b4425539fb514aae597bc1bf9e17d1601471a70542e7ac52e09b5eaf85e8acb2f0e3bd6086d89a2b8653ffff7f2001000000",
         x"0400000061f68cf3904a77101fe0a41cfc605d40564bdf693712a8684fded6b01b7ecb5ca8f039285b833d6c93e42d714669e90de06c143d11fba13cd66e1f2735eb219b302e8653ffff7f20f2ffffef",
     ];
+
+    // update light client with better chain.
+    // the fork start at block 43f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b21
+    // or headers[4]
     lc.insert_headers(forks);
 
-
+    // validate new chain after update
     let head = lc.head();
-
+    // new chain head should identical last header in `forks`.
     assert!(head.header().block_hash() == new_block_header(forks[forks.length() - 1]).block_hash());
     assert!(head.chain_work() == 42);
+
     sui::test_utils::destroy(lc);
     scenario.end();
 }
