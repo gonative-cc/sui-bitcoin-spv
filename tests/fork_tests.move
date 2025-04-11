@@ -173,7 +173,7 @@ fun cleanup_tests() {
 }
 
 #[test]
-fun test_replicate_babylon_reorg() {
+fun test_reorg() {
     let sender = @0x01;
 
     let mut scenario = test_scenario::begin(sender);
