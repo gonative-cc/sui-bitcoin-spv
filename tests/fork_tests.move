@@ -70,6 +70,10 @@ fun insert_headers_switch_fork_tests() {
         x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000"
     ];
 
+    // calc_work = 1 for each block header
+    // Fork visualization:
+    // H0->...->H12->H13->H13->H15->H16->H17
+    //          |  ->F0 ->F1 -> F2->F3 ->F4->F5
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -118,6 +122,10 @@ fun insert_headers_fork_not_enought_power_tests() {
         x"000000306052592f4f0e4886a0eca2c1d154e8b9761e011b4f7b3a00908e2a830f7f6c6a4e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a9dc5b167ffff7f2001000000",
         x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
     ];
+    // calc_work = 1 for each block header
+    // Fork visualization:
+    // H0->...->H12->H13->H13->H15->H16->H17
+    //          |  ->F0 ->F1 -> F2->F3 ->F4
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -231,6 +239,9 @@ fun test_reorg() {
         x"0400000061f68cf3904a77101fe0a41cfc605d40564bdf693712a8684fded6b01b7ecb5ca8f039285b833d6c93e42d714669e90de06c143d11fba13cd66e1f2735eb219b302e8653ffff7f20f2ffffef",
     ];
 
+    // Fork visualization:
+    // H0->H1->H2->H3->H4->...->H9: chain_work = 22
+    //             | ->F0->...->F15: chain_work = 42
     // update light client with better chain.
     // the fork start at block 43f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b21
     // or headers[4]
