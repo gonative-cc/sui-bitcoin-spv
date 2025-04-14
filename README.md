@@ -35,8 +35,8 @@ Check out [SECURITY.md](./SECURITY.md) for security concerns.
 
 ## Setup
 
-1. Make sure you have [sui](https://docs.sui.io/guides/developer/getting-started/sui-install) and `make` installed
-1. Build the project: `make build`
+1. Make sure you have [sui](https://docs.sui.io/guides/developer/getting-started/sui-install)>=1.46 and `make` installed
+2. Build the project: `make build`
 
 ## Talk to us
 
