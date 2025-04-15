@@ -17,13 +17,13 @@ Bitcoin Light Client for [Native](https://gonative.cc) on [Sui](https://sui.io/)
 ### Native Alpha
 
 
-- Version: [#1652f63](https://github.com/gonative-cc/move-bitcoin-spv/tree/1652f63b2368e45fe26151eeb86b8aab47b5799a) (branch: `release/alpha`)
-- Package ID: `0xdad42834a7c57148ac0565aaac98bb104f6fb0e8e271ec1b41573974ad136f15`
-- SPV Object ID: `0x8ebf2b57228565cab7be6aa03579c18a467032f7ca72c514fe7bd9a0d316606d`
+- Version: [#60a1ee2](https://github.com/gonative-cc/move-bitcoin-spv/tree/60a1ee2cb8685c9c7494d5e5f7640b9427375748) (branch: `release/alpha`)
+- Package ID: `0xc31478c4cc6cc146a7ecfc9cc5096d4421d675bdf5577cb7e550392a7cb93dc5`
+- SPV Object ID: `0x4f989d395bb13b4913b483016641eb7c9cacfd88d2a1ba91523d0542a52af9e4`
 
 ## Contributing
 
-Participating in open source is often a highly collaborative experience. We’re encouraged to create in public view, and we’re incentivized to welcome contributions of all kinds from people around the world.
+Participating in open source is often a highly collaborative experience. We’re encouraged to create in public view and incentivized to welcome contributions of all kinds from people around the world.
 
 Check out [contributing repo](https://github.com/gonative-cc/contributig) for our guidelines & policies for how to contribute. Note: we require DCO! Thank you to all those who have contributed!
 
