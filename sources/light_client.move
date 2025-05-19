@@ -61,12 +61,14 @@ public struct LightClient has key, store {
 }
 
 // Alpha testnet: Walkaround for lack of dev-inspect in go SDK
+// Unused after upgrade
 public struct ExistEvent has copy, drop {
     block_hash: vector<u8>,
     exist: bool,
 }
 
 // Alpha testnet: Walkaround for lack of dev-inspect in go SDK
+// Unused after upgrade
 public struct LatestBlockEvent has copy, drop {
     light_block_hash: vector<u8>,
     height: u64,
@@ -485,16 +487,11 @@ public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &L
 }
 
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
-    let exist = df::exists_(&lc.id, block_hash);
-    // Alpha testnet: Walkaround for lack of dev-inspect in go SDK
-    sui::event::emit(ExistEvent {
-        block_hash,
-        exist,
-    });
-    exist
+    df::exists_(&lc.id, block_hash)
 }
 
 // Alpha testnet: Walkaround for lack of dev-inspect in go SDK
+// Unused after upgrade, use head_hash instead
 public fun latest_block_hash(lc: &LightClient) {
     sui::event::emit(LatestBlockEvent {
         light_block_hash: lc.head_hash,
