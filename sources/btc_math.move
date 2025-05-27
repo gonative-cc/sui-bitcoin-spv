@@ -129,9 +129,9 @@ public fun target_to_bits(target: u256): u32 {
         coefficient = get_last_32_bits(bn)
     };
 
-    // handle case target is nagative number.
+    // handle case target is negative number.
     // 0x00800000 is set then it indicates a negative value
-    // and target can be nagative
+    // and target can be negative
     if (coefficient & 0x00800000 > 0) {
         // we push 00 before coefficet
         coefficient = coefficient >> 8;
@@ -163,7 +163,7 @@ public fun bits_to_target(bits: u32): u256 {
     target
 }
 
-/// Encodes a u64 into VarInt format.
+/// Encodes a u256 into VarInt format.
 /// https://learnmeabitcoin.com/technical/general/compact-size/
 public fun u256_to_compact(number: u256): vector<u8> {
     let mut ans = vector[];
