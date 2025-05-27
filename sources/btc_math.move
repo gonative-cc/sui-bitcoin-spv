@@ -5,6 +5,9 @@ module bitcoin_spv::btc_math;
 use std::hash;
 use std::u64::do;
 
+#[test_only]
+use std::unit_test::assert_eq;
+
 /// === Errors ===
 #[error]
 const EInvalidLength: vector<u8> = b"The input vector has an invalid length";
@@ -13,7 +16,7 @@ const EInvalidCompactSizeDecode: vector<u8> = b"Invalid compact size encoding du
 #[error]
 const EInvalidCompactSizeEncode: vector<u8> = b"Invalid compact size encoding during encoding";
 #[error]
-const EInvalidNumberSize : vector<u8> = b"Input vector size does not match with expected size";
+const EInvalidNumberSize: vector<u8> = b"Input vector size does not match with expected size";
 
 /// Converts 4 bytes in little endian format to u32 number
 public fun to_u32(v: vector<u8>): u32 {
@@ -55,7 +58,6 @@ public fun extract_u64(v: vector<u8>, start: u64, end: u64): u64 {
     ans
 }
 
-
 /// Double hashes the value
 public fun btc_hash(data: vector<u8>): vector<u8> {
     let first_hash = hash::sha2_256(data);
@@ -78,7 +80,6 @@ fun compact_size_offset(start_byte: u8): u64 {
     8
 }
 
-
 /// Decodes a compact number - number of integer bytes, from the vector `v`.
 /// Returns the decoded number and the first index in `v` after the number.
 public fun compact_size(v: vector<u8>, start: u64): (u64, u64) {
@@ -91,15 +92,14 @@ public fun compact_size(v: vector<u8>, start: u64): (u64, u64) {
 }
 
 /// number of bytes to represent number.
-fun bytes_of(number: u256) : u8 {
-    let mut b : u8 = 255;
+fun bytes_of(number: u256): u8 {
+    let mut b: u8 = 255;
     while (number & (1 << b) == 0 && b > 0) {
         b = b - 1;
     };
     // Follow logic in bitcoin core
     ((b as u32) / 8 + 1) as u8
 }
-
 
 /// Returns last 32 bits of a number.
 fun get_last_32_bits(number: u256): u32 {
@@ -124,11 +124,10 @@ public fun target_to_bits(target: u256): u32 {
         let bits_shift: u8 = 8 * ( 3 - exponent);
         coefficient = get_last_32_bits(target) << bits_shift;
     } else {
-        let bits_shift : u8 = 8 * (exponent - 3);
+        let bits_shift: u8 = 8 * (exponent - 3);
         let bn = target >> bits_shift;
         coefficient = get_last_32_bits(bn)
     };
-
 
     // handle case target is nagative number.
     // 0x00800000 is set then it indicates a negative value
@@ -164,7 +163,8 @@ public fun bits_to_target(bits: u32): u256 {
     target
 }
 
-
+/// Encodes a u64 into VarInt format.
+/// https://learnmeabitcoin.com/technical/general/compact-size/
 public fun u256_to_compact(number: u256): vector<u8> {
     let mut ans = vector[];
     let mut n = number;
@@ -172,20 +172,20 @@ public fun u256_to_compact(number: u256): vector<u8> {
         ans.push_back(n as u8);
     } else if (n <= 65535) {
         ans.push_back(0xfd);
-        do!(3, |_i| {
-            ans.push_back((n & 256) as u8);
+        do!(2, |_i| {
+            ans.push_back((n & 0xff) as u8);
             n = n >> 8;
         });
     } else if (n <= 4294967295) {
         ans.push_back(0xfe);
-        do!(5, |_i| {
-            ans.push_back((n & 256) as u8);
+        do!(4, |_i| {
+            ans.push_back((n & 0xff) as u8);
             n = n >> 8;
         });
     } else if (n <= 18446744073709551615) {
         ans.push_back(0xff);
-        do!(9, |_i| {
-            ans.push_back((n & 256) as u8);
+        do!(8, |_i| {
+            ans.push_back((n & 0xff) as u8);
             n = n >> 8;
         });
     } else {
@@ -208,31 +208,33 @@ fun bytes_of_test() {
 /// get last 32 bits of number
 fun get_last_32_bits_test() {
     assert!(get_last_32_bits(0) == 0);
-    assert!(get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 0xffffffff);
+    assert!(
+        get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 0xffffffff,
+    );
     assert!(get_last_32_bits(0x0123456789) == 0x23456789);
 }
 
 #[test]
 fun check_compact_size_format_test() {
-    let inputs = vector[
-        0x0a,
-        0xfc,
-        0xfd,
-        0xfe,
-        0xff,
-
-    ];
-    let outputs = vector[
-        0,
-        0,
-        2,
-        4,
-        8,
-    ];
+    let inputs = vector[0x0a, 0xfc, 0xfd, 0xfe, 0xff];
+    let outputs = vector[0, 0, 2, 4, 8];
 
     let mut i = 0;
     while (i < inputs.length()) {
         assert!(compact_size_offset(inputs[i]) == outputs[i]);
         i = i + 1;
     }
+}
+
+#[test]
+fun test_u256_to_compact() {
+    assert_eq!(u256_to_compact(0), x"00");
+    assert_eq!(u256_to_compact(10), x"0a");
+    assert_eq!(u256_to_compact(252), x"fc");
+    assert_eq!(u256_to_compact(253), x"fdfd00");
+    assert_eq!(u256_to_compact(1000), x"fde803");
+    assert_eq!(u256_to_compact(65535), x"fdffff");
+    assert_eq!(u256_to_compact(65536), x"fe00000100");
+    assert_eq!(u256_to_compact(4294967295), x"feffffffff");
+    assert_eq!(u256_to_compact(4294967296), x"ff0000000001000000");
 }
