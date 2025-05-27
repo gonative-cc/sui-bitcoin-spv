@@ -237,4 +237,7 @@ fun test_u256_to_compact() {
     assert_eq!(u256_to_compact(65536), x"fe00000100");
     assert_eq!(u256_to_compact(4294967295), x"feffffffff");
     assert_eq!(u256_to_compact(4294967296), x"ff0000000001000000");
+    assert_eq!(u256_to_compact(0xff), x"fdff00");
+    assert_eq!(u256_to_compact(0xfe), x"fdfe00");
+    assert_eq!(u256_to_compact(0xff00), x"fd00ff");
 }
