@@ -15,7 +15,6 @@ const DifficultyAdjustment_Mainnet: u8 = 0; // mainnet
 const DifficultyAdjustment_V3: u8 = 1; // tesetnet v3
 const DifficultyAdjustment_Regtest: u8 = 2; // regtest
 
-
 // default params for bitcoin mainnet
 public fun mainnet(): Params {
     Params {
@@ -34,7 +33,7 @@ public fun testnet(): Params {
         power_limit_bits: 0x1d00ffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
-        difficulty_adjustment: DifficultyAdjustment_V3
+        difficulty_adjustment: DifficultyAdjustment_V3,
     }
 }
 
@@ -45,12 +44,12 @@ public fun regtest(): Params {
         power_limit: 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
         power_limit_bits: 0x207fffff,
         blocks_pre_retarget: 2016,
-        target_timespan: 2016 * 60 * 10,  // ~ 2 weeks.
-        difficulty_adjustment: DifficultyAdjustment_Regtest
+        target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
+        difficulty_adjustment: DifficultyAdjustment_Regtest,
     }
 }
 
-public fun blocks_pre_retarget(p: &Params) : u64 {
+public fun blocks_pre_retarget(p: &Params): u64 {
     p.blocks_pre_retarget
 }
 

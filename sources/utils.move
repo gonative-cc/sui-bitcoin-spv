@@ -6,7 +6,6 @@ module bitcoin_spv::utils;
 #[error]
 const EOutBoundIndex: vector<u8> = b"The index 'n' is out of bounds for the vector";
 
-
 /// slice() extracts up to but not including end.
 public fun slice(v: vector<u8>, start: u64, end: u64): vector<u8> {
     assert!(end <= v.length(), EOutBoundIndex);
@@ -19,7 +18,6 @@ public fun slice(v: vector<u8>, start: u64, end: u64): vector<u8> {
 
     ans
 }
-
 
 /// returns nth smallest element in the vector v.
 /// NOTE: it mutates the vector v.

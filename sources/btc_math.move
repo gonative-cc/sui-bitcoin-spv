@@ -199,19 +199,20 @@ public fun u256_to_compact(number: u256): vector<u8> {
 // TODO: Check best practice to improve test
 #[test]
 fun bytes_of_test() {
-    assert!(bytes_of(1) == 1);
-    assert!(bytes_of(7) == 1);
-    assert!(bytes_of(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 32);
+    assert_eq!(bytes_of(1), 1);
+    assert_eq!(bytes_of(7), 1);
+    assert_eq!(bytes_of(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff), 32);
 }
 
 #[test]
 /// get last 32 bits of number
 fun get_last_32_bits_test() {
-    assert!(get_last_32_bits(0) == 0);
-    assert!(
-        get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff) == 0xffffffff,
+    assert_eq!(get_last_32_bits(0), 0);
+    assert_eq!(
+        get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff),
+        0xffffffff,
     );
-    assert!(get_last_32_bits(0x0123456789) == 0x23456789);
+    assert_eq!(get_last_32_bits(0x0123456789), 0x23456789);
 }
 
 #[test]
@@ -221,7 +222,7 @@ fun check_compact_size_format_test() {
 
     let mut i = 0;
     while (i < inputs.length()) {
-        assert!(compact_size_offset(inputs[i]) == outputs[i]);
+        assert_eq!(compact_size_offset(inputs[i]), outputs[i]);
         i = i + 1;
     }
 }

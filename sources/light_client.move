@@ -3,37 +3,41 @@
 module bitcoin_spv::light_client;
 
 use bitcoin_spv::block_header::{BlockHeader, new_block_header};
+use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
-use bitcoin_spv::btc_math::target_to_bits;
-use bitcoin_spv::utils::nth_element;
+use bitcoin_spv::params::{Self, Params, is_correct_init_height};
 use bitcoin_spv::transaction::{make_transaction, Transaction};
-use bitcoin_spv::params::{Params, Self, is_correct_init_height};
-
-
+use bitcoin_spv::utils::nth_element;
 use sui::dynamic_field as df;
 use sui::event;
 
 /// === Errors ===
 #[error]
-const EWrongParentBlock: vector<u8> = b"New parent of the new header parent doesn't match the expected parent block hash";
+const EWrongParentBlock: vector<u8> =
+    b"New parent of the new header parent doesn't match the expected parent block hash";
 #[error]
-const EDifficultyNotMatch: vector<u8> = b"The difficulty bits in the header do not match the calculated difficulty";
+const EDifficultyNotMatch: vector<u8> =
+    b"The difficulty bits in the header do not match the calculated difficulty";
 #[error]
-const ETimeTooOld: vector<u8> = b"The timestamp of the block is older than the median of the last 11 blocks";
+const ETimeTooOld: vector<u8> =
+    b"The timestamp of the block is older than the median of the last 11 blocks";
 #[error]
 const EHeaderListIsEmpty: vector<u8> = b"The provided list of headers is empty";
 #[error]
 const EBlockNotFound: vector<u8> = b"The specified block could not be found in the light client";
 #[error]
-const EForkChainWorkTooSmall: vector<u8> = b"The proposed fork has less work than the current chain";
+const EForkChainWorkTooSmall: vector<u8> =
+    b"The proposed fork has less work than the current chain";
 #[error]
-const ETxNotInBlock: vector<u8> = b"The transaction is not included in a finalized block according to the Merkle proof";
+const ETxNotInBlock: vector<u8> =
+    b"The transaction is not included in a finalized block according to the Merkle proof";
 #[error]
-const EInvalidStartHeight: vector<u8> = b"The start height must be a multiple of the retarget period (e.g 2016 for mainnet)";
+const EInvalidStartHeight: vector<u8> =
+    b"The start height must be a multiple of the retarget period (e.g 2016 for mainnet)";
 
 public struct NewLightClientEvent has copy, drop {
-    light_client_id: ID
+    light_client_id: ID,
 }
 
 public struct InsertedHeadersEvent has copy, drop {
@@ -48,8 +52,6 @@ public struct ForkBeyondFinality has copy, drop {
     parent_height: u64,
 }
 
-
-
 public struct LightClient has key, store {
     id: UID,
     params: Params,
@@ -58,24 +60,28 @@ public struct LightClient has key, store {
     finality: u64,
 }
 
-
 // === Init function for module ====
 
-fun init(_ctx: &mut TxContext) {
-    // LC creation is permissionless and it's done through new new_btc_light_client.
-}
+fun init(_ctx: &mut TxContext) {}
 
 /// LightClient constructor. Use `init_light_client` to create and transfer object,
 /// emitting an event.
 /// *params: Btc network params. Check the params module
-/// *start_height: height of the first trusted header 
+/// *start_height: height of the first trusted header
 /// *trusted_headers: List of trusted headers in hex format.
 /// *parent_chain_work: chain_work at parent block of start_height block.
 /// *finality: the finality threshold
 
 /// Header serialization reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun new_light_client(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, parent_chain_work: u256, finality: u64, ctx: &mut TxContext): LightClient {
+public fun new_light_client(
+    params: Params,
+    start_height: u64,
+    trusted_headers: vector<vector<u8>>,
+    parent_chain_work: u256,
+    finality: u64,
+    ctx: &mut TxContext,
+): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
         params: params,
@@ -106,7 +112,6 @@ public fun new_light_client(params: Params, start_height: u64, trusted_headers: 
     lc
 }
 
-
 /// Initializes Bitcoin light client by providing a trusted snapshot height and header
 /// params: Mainnet, Testnet or Regtest.
 /// start_height: the height of first trust block
@@ -115,7 +120,13 @@ public fun new_light_client(params: Params, start_height: u64, trusted_headers: 
 ///
 /// Header serialization reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun init_light_client(params: Params, start_height: u64, trusted_headers: vector<vector<u8>>, parent_chain_work: u256, ctx: &mut TxContext) {
+public fun init_light_client(
+    params: Params,
+    start_height: u64,
+    trusted_headers: vector<vector<u8>>,
+    parent_chain_work: u256,
+    ctx: &mut TxContext,
+) {
     assert!(params.is_correct_init_height(start_height), EInvalidStartHeight);
     let lc = new_light_client(
         params,
@@ -123,10 +134,10 @@ public fun init_light_client(params: Params, start_height: u64, trusted_headers:
         trusted_headers,
         parent_chain_work,
         8,
-        ctx
+        ctx,
     );
     event::emit(NewLightClientEvent {
-        light_client_id: object::id(&lc)
+        light_client_id: object::id(&lc),
     });
     transfer::share_object(lc);
 }
@@ -134,17 +145,19 @@ public fun init_light_client(params: Params, start_height: u64, trusted_headers:
 /// Helper function to initialize new light client.
 /// network: 0 = mainnet, 1 = testnet
 public fun init_light_client_network(
-    network: u8, start_height: u64, start_headers: vector<vector<u8>>, parent_chain_work: u256, ctx: &mut TxContext
-)  {
+    network: u8,
+    start_height: u64,
+    start_headers: vector<vector<u8>>,
+    parent_chain_work: u256,
+    ctx: &mut TxContext,
+) {
     let params = match (network) {
         0 => params::mainnet(),
         1 => params::testnet(),
-        _ => params::regtest()
+        _ => params::regtest(),
     };
     init_light_client(params, start_height, start_headers, parent_chain_work, ctx);
 }
-
-
 
 /*
  * Entry methods
@@ -176,7 +189,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
         // * pro: we protect against double mint for nBTC etc...
         // * cons: we can have a deadlock
         if (parent.height() >= lc.finalized_height()) {
-            event::emit(ForkBeyondFinality{
+            event::emit(ForkBeyondFinality {
                 parent_hash: parent_id,
                 parent_height: parent.height(),
             });
@@ -198,7 +211,7 @@ public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector
     };
 
     let b = lc.head();
-    event::emit(InsertedHeadersEvent{
+    event::emit(InsertedHeadersEvent {
         chain_work: b.chain_work(),
         is_forked,
         head_hash: lc.head_hash,
@@ -215,7 +228,11 @@ public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<
     df::remove<_, LightBlock>(&mut lc.id, block_hash);
 }
 
-public(package) fun set_block_hash_by_height(lc: &mut LightClient, height: u64, block_hash: vector<u8>) {
+public(package) fun set_block_hash_by_height(
+    lc: &mut LightClient,
+    height: u64,
+    block_hash: vector<u8>,
+) {
     let id = &mut lc.id;
     df::remove_if_exists<u64, vector<u8>>(id, height);
     df::add(id, height, block_hash);
@@ -232,12 +249,15 @@ public(package) fun append_block(lc: &mut LightClient, light_block: LightBlock) 
     lc.head_hash = head_hash;
 }
 
-
 /// Insert new header to bitcoin spv
 /// * `parent`: hash of the parent block, must be already recorded in the light client.
 /// NOTE: this function doesn't do fork checks and overwrites the current fork. So it must be
 /// only called internally.
-public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, header: BlockHeader): LightBlock {
+public(package) fun insert_header(
+    lc: &mut LightClient,
+    parent: &LightBlock,
+    header: BlockHeader,
+): LightBlock {
     let parent_header = parent.header();
 
     // verify new header
@@ -266,7 +286,6 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
     next_light_block
 }
 
-
 // TODO: check if we can use reference for parent
 /// Extends chain from the given `parent` by inserting new block headers.
 /// Returns ID of the last inserted block header.
@@ -283,15 +302,23 @@ public(package) fun insert_header(lc: &mut LightClient, parent: &LightBlock, hea
 ///        |-A
 ///        |-A
 ///
-fun extend_chain(lc: &mut LightClient, parent: LightBlock, raw_headers: vector<vector<u8>>): LightBlock {
+fun extend_chain(
+    lc: &mut LightClient,
+    parent: LightBlock,
+    raw_headers: vector<vector<u8>>,
+): LightBlock {
     raw_headers.fold!(parent, |p, raw_header| {
         let header = new_block_header(raw_header);
         lc.insert_header(&p, header)
-    } )
+    })
 }
 
 /// Delete all blocks between head_hash to checkpoint_hash
-public(package) fun cleanup(lc: &mut LightClient, checkpoint_hash: vector<u8>, head_hash: vector<u8>) {
+public(package) fun cleanup(
+    lc: &mut LightClient,
+    checkpoint_hash: vector<u8>,
+    head_hash: vector<u8>,
+) {
     let mut block_hash = head_hash;
     while (checkpoint_hash != block_hash) {
         let previous_block_hash = lc.get_light_block_by_hash(block_hash).header().parent();
@@ -345,7 +372,7 @@ public fun verify_output(
     inputs: vector<u8>,
     output_count: u32,
     outputs: vector<u8>,
-    lock_time: vector<u8>
+    lock_time: vector<u8>,
 ): (vector<vector<u8>>, vector<u64>) {
     let tx = make_transaction(version, input_count, inputs, output_count, outputs, lock_time);
     assert!(lc.verify_tx(height, tx.tx_id(), proof, tx_index), ETxNotInBlock);
@@ -363,7 +390,6 @@ public fun verify_output(
     (btc_addresses, amounts)
 }
 
-
 /// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
 /// proof is merkle proof for tx_id. This is a sha256(32 bytes) vector.
 /// tx_index is index of transaction in block.
@@ -373,7 +399,7 @@ public fun verify_tx(
     height: u64,
     tx_id: vector<u8>,
     proof: vector<vector<u8>>,
-    tx_index: u64
+    tx_index: u64,
 ): bool {
     // TODO: handle: light block/block_header not exist.
     if (height > lc.finalized_height()) {
@@ -385,7 +411,7 @@ public fun verify_tx(
     verify_merkle_proof(merkle_root, proof, tx_id, tx_index)
 }
 
-public fun params(lc: &LightClient): &Params{
+public fun params(lc: &LightClient): &Params {
     &lc.params
 }
 
@@ -401,7 +427,7 @@ public fun relative_ancestor(lc: &LightClient, lb: &LightBlock, distance: u64): 
 
 /// The function calculates the required difficulty for a block that we want to add after
 /// the `parent_block` (potentially fork).
-public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightBlock) : u32 {
+public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightBlock): u32 {
     // reference from https://github.com/btcsuite/btcd/blob/master/blockchain/difficulty.go#L136
     let params = lc.params();
     let blocks_pre_retarget = params.blocks_pre_retarget();
@@ -450,7 +476,6 @@ fun calc_past_median_time(lc: &LightClient, lb: &LightBlock): u32 {
     nth_element(&mut timestamps, size / 2)
 }
 
-
 public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &LightBlock {
     // TODO: Can we use option type?
     df::borrow(&lc.id, block_hash)
@@ -471,13 +496,17 @@ public fun get_light_block_by_height(lc: &LightClient, height: u64): &LightBlock
     lc.get_light_block_by_hash(block_hash)
 }
 
-
 /*
  * Helper function
  */
 
 /// Compute new target
-public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp: u64, last_timestamp: u64): u256 {
+public fun retarget_algorithm(
+    p: &Params,
+    previous_target: u256,
+    first_timestamp: u64,
+    last_timestamp: u64,
+): u256 {
     let mut adjusted_timespan = last_timestamp - first_timestamp;
     let target_timespan = p.target_timespan();
 
@@ -507,7 +536,6 @@ public fun retarget_algorithm(p: &Params, previous_target: u256, first_timestamp
     next_target
 }
 
-
 /// Verifies the transaction and parses outputs to calculates the payment to the receiver.
 /// To if you only want to verify if the tx is included in the block, you can use
 /// `verify_tx` function.
@@ -526,8 +554,8 @@ public fun verify_payment(
     proof: vector<vector<u8>>,
     tx_index: u64,
     transaction: &Transaction,
-    receiver_pk_hash: vector<u8>
-) : (u64, vector<u8>, vector<u8>) {
+    receiver_pk_hash: vector<u8>,
+): (u64, vector<u8>, vector<u8>) {
     let mut amount = 0;
     let mut op_return_msg = vector[];
     let tx_id = transaction.tx_id();

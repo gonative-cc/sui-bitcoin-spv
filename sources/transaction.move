@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MPL-2.0
 
 module bitcoin_spv::transaction;
+
 use bitcoin_spv::btc_math::{btc_hash, u256_to_compact, extract_u64, compact_size};
 use bitcoin_spv::utils::slice;
 
@@ -14,7 +15,7 @@ const OP_HASH160: u8 = 0xa9;
 /// Push the next 20 bytes as an array onto the stack
 const OP_DATA_20: u8 = 0x14;
 /// Returns success if the inputs are exactly equal, failure otherwise
-const OP_EQUALVERIFY: u8  = 0x88;
+const OP_EQUALVERIFY: u8 = 0x88;
 /// https://en.bitcoin.it/wiki/OP_CHECKSIG pushing 1/0 for success/failure
 const OP_CHECKSIG: u8 = 0xac;
 /// nulldata script
@@ -28,11 +29,10 @@ const OP_PUSHDATA1: u8 = 0x4c;
 /// Push the next 75 bytes onto the stack.
 const OP_DATA_75: u8 = 0x4b;
 
-
 /// Represents a Bitcoin transaction output
 public struct Output has copy, drop {
     amount: u64,
-    script_pubkey: vector<u8>
+    script_pubkey: vector<u8>,
 }
 
 /// Represents a Bitcoin transaction
@@ -43,9 +43,8 @@ public struct Transaction has copy, drop {
     output_count: u32,
     outputs: vector<Output>,
     tx_id: vector<u8>,
-    lock_time: vector<u8>
+    lock_time: vector<u8>,
 }
-
 
 /// Bitcoin transaction constructor
 /// * `input_count`: number of input objects
@@ -84,14 +83,14 @@ public fun make_transaction(
         output_count,
         outputs: outputs_decoded,
         lock_time,
-        tx_id
+        tx_id,
     }
 }
 
 public fun parse_output(amount: u64, script_pubkey: vector<u8>): Output {
     Output {
         amount,
-        script_pubkey
+        script_pubkey,
     }
 }
 
@@ -137,14 +136,12 @@ public fun is_P2WPHK(output: &Output): bool {
 public fun extract_public_key_hash(output: &Output): vector<u8> {
     let script = output.script_pubkey;
     if (output.is_P2PHK()) {
-        return  slice(script, 3, 23)
+        return slice(script, 3, 23)
     } else if (output.is_P2WPHK()) {
         return slice(script, 2, 22)
     };
     vector[]
 }
-
-
 
 /// Extracts the data payload from an OP_RETURN output in a transaction.
 /// script = OP_RETURN <data>.
