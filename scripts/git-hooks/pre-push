@@ -1,2 +1,2 @@
 #!/bin/bash
-sui move test
+./report_test_coverage.sh
