@@ -6,10 +6,11 @@ on:
       - master
 
 jobs:
-  run-test:
+  test:
      runs-on: mysten/sui-tools:ci
      steps:
        - uses: actions/checkout@v4
+       - name: Test
+         run: ls
        - name: Run test
-         run: |
-           sui move test
+         run: sui move test
