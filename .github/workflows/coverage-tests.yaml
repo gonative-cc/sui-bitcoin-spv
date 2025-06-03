@@ -1,4 +1,4 @@
-name: Sui Move Tests
+name: Sui Move Coverage Tests
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ jobs:
       image: mysten/sui-tools:ci
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        run: sui move build
-      - name: Run test
-        run: sui move test
+      - name: coverage test
+        run: sui move test --coverage
+      - name: Check test coverage
+        run: ./scripts/report_test_coverage.sh
