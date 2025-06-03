@@ -13,4 +13,4 @@ jobs:
        - name: Test
          run: ls
        - name: Run test
-         run: docker run -it mysten/sui-tools:ci sui move test
+         run: docker run mysten/sui-tools:ci sui move test
