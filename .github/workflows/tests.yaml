@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - master
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -12,7 +11,7 @@ jobs:
       image: mysten/sui-tools:ci
     steps:
       - uses: actions/checkout@v4
-      - name: Test
-        run: ls
+      - name: Build
+        run: sui move build
       - name: Run test
         run: sui move test
