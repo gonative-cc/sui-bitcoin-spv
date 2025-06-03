@@ -1,0 +1,3 @@
+#!/bin/bash
+sui move test --coverage
+sui move coverage summary --test
