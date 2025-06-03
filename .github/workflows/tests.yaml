@@ -7,10 +7,12 @@ on:
 
 jobs:
   test:
-     runs-on: ubuntu-latest
-     steps:
-       - uses: actions/checkout@v4
-       - name: Test
-         run: ls
-       - name: Run test
-         run: docker run mysten/sui-tools:ci sui move test
+    runs-on: ubuntu-latest
+    container:
+      image: mysten/sui-tools:ci
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: ls
+      - name: Run test
+        run: sui move test
