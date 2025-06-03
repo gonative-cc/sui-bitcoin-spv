@@ -1,6 +1,6 @@
 #!/bin/bash
 
-threshold=85.0
+threshold=90
 
 coverage=$(sui move coverage summary --test | grep "% Move Coverage" | tail -n1 | sed -E 's/.*% Move Coverage:[[:space:]]*([0-9.]+).*/\1/')
 
