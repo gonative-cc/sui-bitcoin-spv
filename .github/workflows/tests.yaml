@@ -1,0 +1,15 @@
+name: Sui Move tests
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  run-test:
+     runs-on: mysten/sui-tools:ci
+     steps:
+       - uses: actions/checkout@v4
+       - name: Run test
+         run: |
+           sui move test
