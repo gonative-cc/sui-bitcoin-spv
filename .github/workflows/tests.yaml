@@ -15,3 +15,8 @@ jobs:
         run: sui move build
       - name: Run test
         run: sui move test
+      # Enable when support --coverage flag in sui-tools docker
+      # - name: coverage test
+      #   run:  sui move test --coverage
+      # - name: Check test coverage
+      #   run:  echo "check test coverage range"
