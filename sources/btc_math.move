@@ -242,3 +242,9 @@ fun test_u256_to_compact() {
     assert_eq!(u256_to_compact(0xfe), x"fdfe00");
     assert_eq!(u256_to_compact(0xff00), x"fd00ff");
 }
+
+
+#[test, expected_failure(abort_code = EInvalidCompactSizeEncode)]
+fun test_u256_to_compact_failed() {
+    u256_to_compact(18446744073709551615 + 1);
+}

@@ -4,6 +4,8 @@
 module bitcoin_spv::btc_math_tests;
 use bitcoin_spv::btc_math::{target_to_bits, bits_to_target, compact_size, Self};
 
+use std::unit_test::assert_eq;
+
 
 #[test]
 fun btc_hash_test() {
@@ -25,6 +27,10 @@ fun to_u32_test() {
     assert!(btc_math::to_u32(x"01020304") == 67305985u32);
 }
 
+#[test, expected_failure(abort_code = btc_math::EInvalidLength)]
+fun to_u32_invalid_length() {
+    btc_math::to_u32(x"");
+}
 
 #[test]
 fun to_u256_test() {
@@ -47,6 +53,11 @@ fun to_u256_test() {
     assert!(
         btc_math::to_u256(x"0102030400000000000000000000000000000000000000000000000000000000") == 67305985,
     );
+}
+
+#[test, expected_failure(abort_code = btc_math::EInvalidLength)]
+fun to_u256_invalid_length() {
+    btc_math::to_u256(x"");
 }
 
 #[test]
@@ -84,6 +95,22 @@ fun bits_to_target_tests() {
 }
 
 
+#[test]
+fun extract_u64_success() {
+    assert_eq!(btc_math::extract_u64(x"010203", 0, 1), 1);
+    assert_eq!(btc_math::extract_u64(x"ffffffffffffffff00", 0, 8), 0xffffffffffffffff);
+}
+
+
+#[test, expected_failure(abort_code = btc_math::EInvalidLength)]
+fun extract_u64_failed_invalid_length() {
+    btc_math::extract_u64(x"", 0, 1);
+}
+
+#[test, expected_failure(abort_code = btc_math::EInvalidNumberSize)]
+fun extract_u64_failed_invalue_number_size() {
+    btc_math::extract_u64(x"ffffffffffffffff0000", 0, 9);
+}
 
 #[test]
 fun compact_size_tests() {
@@ -121,4 +148,9 @@ fun compact_size_tests() {
         i = i + 1;
     }
 
+}
+
+#[test, expected_failure(abort_code = btc_math::EInvalidCompactSizeDecode)]
+fun compact_size_failed() {
+    compact_size(x"00fd", 1);
 }
