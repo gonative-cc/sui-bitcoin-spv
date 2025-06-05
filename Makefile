@@ -56,7 +56,7 @@ DOCS_SUBDIR := bitcoin_spv
 
 gen-docs:
 	@sui move build --doc
-	@cp ./$(BUILD_DIR)/$(MODULE_NAME)/docs/$(DOCS_SUBDIR) ./docs
+	@cp -r ./$(BUILD_DIR)/$(MODULE_NAME)/docs/$(DOCS_SUBDIR) ./docs
 
 .PHONY: test test-coverage gen-docs
 
