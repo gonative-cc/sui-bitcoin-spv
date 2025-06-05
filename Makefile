@@ -45,9 +45,8 @@ test:
 	@sui move test
 
 test-coverage:
-	echo TODO
-# sui move test --coverage
-# sui move coverage
+	@sui move test --coverage
+	@sui move coverage summary --test
 
 .PHONY: test test-coverage
 
