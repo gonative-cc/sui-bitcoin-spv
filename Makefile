@@ -49,9 +49,14 @@ test-coverage:
 # sui move test --coverage
 # sui move coverage
 
+# Variables for build output and module name
+BUILD_DIR := build
+MODULE_NAME := BitcoinSPV
+DOCS_SUBDIR := bitcoin_spv
+
 gen-docs:
 	@sui move build --doc
-	@cp ./build/BitcoinSPV/docs/bitcoin_spv ./docs
+	@cp ./$(BUILD_DIR)/$(MODULE_NAME)/docs/$(DOCS_SUBDIR) ./docs
 
 .PHONY: test test-coverage gen-docs
 
