@@ -374,7 +374,14 @@ public fun verify_output(
     outputs: vector<u8>,
     lock_time: vector<u8>,
 ): (vector<vector<u8>>, vector<u64>) {
-    let tx = make_transaction(version, input_count, inputs, output_count, outputs, lock_time);
+    let tx = make_transaction(
+        version,
+        input_count,
+        inputs,
+        output_count,
+        outputs,
+        lock_time,
+    );
     assert!(lc.verify_tx(height, tx.tx_id(), proof, tx_index), ETxNotInBlock);
 
     let outputs = tx.outputs();
@@ -450,7 +457,12 @@ public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightB
     let first_timestamp = first_header.timestamp() as u64;
     let last_timestamp = parent_block.header().timestamp() as u64;
 
-    let new_target = retarget_algorithm(params, previous_target, first_timestamp, last_timestamp);
+    let new_target = retarget_algorithm(
+        params,
+        previous_target,
+        first_timestamp,
+        last_timestamp,
+    );
     let new_bits = target_to_bits(new_target);
     new_bits
 }

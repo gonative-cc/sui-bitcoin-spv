@@ -3,11 +3,15 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
 
-use bitcoin_spv::params;
 use bitcoin_spv::block_header::{new_block_header, BlockHeader};
-use bitcoin_spv::light_client::{LightClient, new_light_client, EForkChainWorkTooSmall, EBlockNotFound};
+use bitcoin_spv::light_client::{
+    LightClient,
+    new_light_client,
+    EForkChainWorkTooSmall,
+    EBlockNotFound
+};
+use bitcoin_spv::params;
 use sui::test_scenario;
-
 
 // Test for fork handle
 // All data gen from https://github.com/gonative-cc/relayer/blob/master/contrib/create-fork.sh
@@ -40,7 +44,7 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
         x"00000030e98bb046cd25a629c91f0c7623cc2ed0c12ef6db5e41956536c261eb673d0b0f813b60988eadd1961289bf5f2098f6ca0c7dd35ae95e78807c6582a46e00107f39c5b167ffff7f2004000000",
         x"000000304f58550f49b5c9dce6328bc8d7b8f5941823efcc51741a024c17d9745ba21111cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d452539c5b167ffff7f2004000000",
         x"00000030aa8bd6ce82edf1f9c03abc2243281f622594bc3aec5106a17f612371f76060084e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a39c5b167ffff7f2003000000",
-        x"0000003040ce8b407650044a4294fd43c6d78cbb4f78ac98527f858f3950dad92fc5982ddebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d23239c5b167ffff7f2002000000"
+        x"0000003040ce8b407650044a4294fd43c6d78cbb4f78ac98527f858f3950dad92fc5982ddebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d23239c5b167ffff7f2002000000",
     ];
 
     let lc = new_light_client(params::regtest(), 0, headers, 0, 8, ctx);
@@ -48,7 +52,6 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
     let block_headers = headers.map!(|h| new_block_header(h));
     (lc, block_headers)
 }
-
 
 #[test]
 fun insert_headers_switch_fork_tests() {
@@ -67,7 +70,7 @@ fun insert_headers_switch_fork_tests() {
         x"00000030525bda2756ff6f9e440c91590490462ac33e0fedb05b1558cfd3f7ce90920d16cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d45259dc5b167ffff7f2002000000",
         x"000000306052592f4f0e4886a0eca2c1d154e8b9761e011b4f7b3a00908e2a830f7f6c6a4e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a9dc5b167ffff7f2001000000",
         x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
-        x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000"
+        x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000",
     ];
 
     // calc_work = 1 for each block header
@@ -138,7 +141,6 @@ fun insert_headers_fork_not_enought_power_tests() {
 #[test]
 #[expected_failure(abort_code = EBlockNotFound)]
 fun insert_headers_block_doesnot_exist() {
-
     // we modifed the previous hash
     // previous hash = db0338a432b1242c3bd22c245583e31788feaa6cb189673877b92f2a34eaf460 = sha256("This is null")
     let headers = vector[
@@ -158,7 +160,7 @@ fun cleanup_tests() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
-    let (mut lc, headers) =  new_lc_for_test(ctx);
+    let (mut lc, headers) = new_lc_for_test(ctx);
 
     let checkpoint = headers[5].block_hash();
     let head_hash = lc.head_hash();
@@ -211,7 +213,7 @@ fun test_reorg() {
     // bits at height 0 always equal power_limit_bits
     // so we start at height 1 for easy testing.
     // previous_power = 2, just follow the context in test
-    let mut lc =  new_light_client(params::mainnet(), 1, headers, 2, 8, ctx);
+    let mut lc = new_light_client(params::mainnet(), 1, headers, 2, 8, ctx);
 
     let forks = vector[
         // {

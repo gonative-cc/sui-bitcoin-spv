@@ -2,10 +2,9 @@
 
 #[test_only]
 module bitcoin_spv::btc_math_tests;
-use bitcoin_spv::btc_math::{target_to_bits, bits_to_target, compact_size, Self};
 
+use bitcoin_spv::btc_math::{Self, target_to_bits, bits_to_target, compact_size};
 use std::unit_test::assert_eq;
-
 
 #[test]
 fun btc_hash_test() {
@@ -74,7 +73,6 @@ fun bits_to_target_tests() {
     assert!(target == 0x000000000000000000eb30000000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
 
-
     // block 860832
     let bits = 0x1703098c;
     let target = bits_to_target(bits);
@@ -86,21 +84,18 @@ fun bits_to_target_tests() {
     assert!(target == 0x00ffff0000000000000000000000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
 
-   // https://learnmeabitcoin.com/explorer/block/0000000000519051eb5f3c5943cdbc176a0eff4e1fbc3e08287bdb76299b8e5c
+    // https://learnmeabitcoin.com/explorer/block/0000000000519051eb5f3c5943cdbc176a0eff4e1fbc3e08287bdb76299b8e5c
     let bits = 0x1c0168fd;
     let target = bits_to_target(bits);
     assert!(target == 0x000000000168fd00000000000000000000000000000000000000000000000000);
     assert!(bits == target_to_bits(target));
-
 }
-
 
 #[test]
 fun extract_u64_success() {
     assert_eq!(btc_math::extract_u64(x"010203", 0, 1), 1);
     assert_eq!(btc_math::extract_u64(x"ffffffffffffffff00", 0, 8), 0xffffffffffffffff);
 }
-
 
 #[test, expected_failure(abort_code = btc_math::EInvalidLength)]
 fun extract_u64_failed_invalid_length() {
@@ -138,7 +133,7 @@ fun compact_size_tests() {
         vector[4294967295, 5],
         vector[4294967296, 9],
         vector[18446744073709551000, 9],
-        vector[18446744073709551615, 9]
+        vector[18446744073709551615, 9],
     ];
 
     let mut i = 0;
@@ -147,7 +142,6 @@ fun compact_size_tests() {
         assert!(x == outputs[i][0] && y == outputs[i][1]);
         i = i + 1;
     }
-
 }
 
 #[test, expected_failure(abort_code = btc_math::EInvalidCompactSizeDecode)]

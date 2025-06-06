@@ -188,7 +188,11 @@ public(package) fun make_outputs(output_count: u32, outputs_bytes: vector<u8>): 
         let amount = slice(outputs_bytes, start, start + 8); // 8 bytes of amount
         start = start + 8;
         (script_pubkey_size, start) = compact_size(outputs_bytes, start);
-        let script_pubkey = slice(outputs_bytes, start, (start + (script_pubkey_size as u64)));
+        let script_pubkey = slice(
+            outputs_bytes,
+            start,
+            (start + (script_pubkey_size as u64)),
+        );
         start = start + (script_pubkey_size as u64);
         let output = parse_output(extract_u64(amount, 0, 8), script_pubkey);
         outputs.push_back(output);
