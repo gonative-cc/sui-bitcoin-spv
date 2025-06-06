@@ -1,0 +1,25 @@
+# Checks formatting in all examples and system packages (TBD for Sui System and Bridge)
+# Uses a fixed NPM version to separate prettier-move release changes from system package
+# changes.
+#
+# With new releases of prettier-move, update the `VERSION` in the env.
+name: Move Formatter
+
+on:
+  push:
+    branches: main
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+env:
+  VERSION: 0.3.0
+
+jobs:
+  prettier-move:
+    name: Check Move formatting
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+      - run: npm install --no-warnings @mysten/prettier-plugin-move@${{ env.VERSION }}
+      - run: npx prettier-move -c **/*.move
