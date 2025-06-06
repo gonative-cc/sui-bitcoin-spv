@@ -159,15 +159,11 @@ public fun init_light_client_network(
     init_light_client(params, start_height, start_headers, parent_chain_work, ctx);
 }
 
-/*
- * Entry methods
- */
-
 /// Insert new headers to extend the LC chain. Fails if the included headers don't
 /// create a heavier chain or fork.
 /// Header serialization reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public entry fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>) {
+public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>) {
     // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
     assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
@@ -351,45 +347,6 @@ public fun finalized_height(lc: &LightClient): u64 {
     lc.head_height - lc.finality
 }
 
-/// verify output transaction
-/// * `height`: block heigh transacion belong
-/// * `proof`: merkle tree proof, this is the vector of 32bytes
-/// * `tx_index`: index of transaction in block
-/// * `version`: version of transaction - 4 bytes.
-/// * `input_count`: number of input objects
-/// * `inputs`: all tx inputs encoded as a single list of bytes.
-/// * `output_count`: number of output objects
-/// * `outputs`: all tx outputs encoded as a single list of bytes.
-/// * `lock_time`: 4 bytes, lock time field in transaction
-/// @return address and amount for each output
-public fun verify_output(
-    lc: &LightClient,
-    height: u64,
-    proof: vector<vector<u8>>,
-    tx_index: u64,
-    version: vector<u8>,
-    input_count: u32,
-    inputs: vector<u8>,
-    output_count: u32,
-    outputs: vector<u8>,
-    lock_time: vector<u8>,
-): (vector<vector<u8>>, vector<u64>) {
-    let tx = make_transaction(version, input_count, inputs, output_count, outputs, lock_time);
-    assert!(lc.verify_tx(height, tx.tx_id(), proof, tx_index), ETxNotInBlock);
-
-    let outputs = tx.outputs();
-    let mut btc_addresses = vector[];
-    let mut amounts = vector[];
-    let mut i = 0;
-    while (i < outputs.length()) {
-        btc_addresses.push_back(outputs[i].extract_public_key_hash());
-        amounts.push_back(outputs[i].amount());
-        i = i + 1;
-    };
-
-    (btc_addresses, amounts)
-}
-
 /// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
 /// proof is merkle proof for tx_id. This is a sha256(32 bytes) vector.
 /// tx_index is index of transaction in block.
@@ -561,10 +518,7 @@ public fun verify_payment(
     let tx_id = transaction.tx_id();
     assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
     let outputs = transaction.outputs();
-
-    let mut i = 0;
-    while (i < outputs.length()) {
-        let o = outputs[i];
+    outputs.do!(|o|{
         if (o.extract_public_key_hash() == receiver_pk_hash) {
             amount = amount + o.amount();
         };
@@ -572,9 +526,7 @@ public fun verify_payment(
         if (o.is_op_return()) {
             op_return_msg = o.op_return();
         };
-
-        i = i + 1;
-    };
+    });
 
     (amount, op_return_msg, tx_id)
 }
