@@ -16,6 +16,7 @@ env:
 
 jobs:
   prettier-move:
+    runs-on: ubuntu-latest
     name: Check Move formatting
     steps:
       - uses: actions/checkout@v4
