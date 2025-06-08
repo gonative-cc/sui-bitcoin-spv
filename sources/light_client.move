@@ -518,7 +518,7 @@ public fun verify_payment(
     let tx_id = transaction.tx_id();
     assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
     let outputs = transaction.outputs();
-    outputs.do!(|o|{
+    outputs.do!(|o| {
         if (o.extract_public_key_hash() == receiver_pk_hash) {
             amount = amount + o.amount();
         };

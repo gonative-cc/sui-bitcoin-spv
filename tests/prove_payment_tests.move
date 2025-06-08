@@ -3,11 +3,10 @@
 #[test_only]
 module bitcoin_spv::verify_payment_tests;
 
-use bitcoin_spv::params;
 use bitcoin_spv::light_client::{new_light_client, ETxNotInBlock};
-use bitcoin_spv::transaction::{make_transaction};
+use bitcoin_spv::params;
+use bitcoin_spv::transaction::make_transaction;
 use sui::test_scenario;
-
 
 #[test]
 fun test_verify_payment() {
@@ -19,7 +18,7 @@ fun test_verify_payment() {
         x"02000000467aa6383f1aad95ed5c4eee2dc10a97ebb1f79760446a0000000000000000004586bab85aa954c20675b8603c2bc68b53a3da5b0d25a8a03dc3a274ab8c981409863a5473691f186b9c6345",
         x"020000002e4fd5261bc0c9e663d32f4bbbb3253e3a8f8e5759f7ae070000000000000000046c024dcdabcc5f3071d8f44e030dba6b9ae7e30336523be2a767c68b0e3ba684863a5473691f180220726b",
         x"02000000ae4bcf449c0e9ea803a663bb09c45f221b62b206353e1e0f000000000000000010638f6182860aa213236fbce7bafc9b68a6f8826d3f05482c4e8cd7465ec9824c8c3a5473691f185c90957a",
-        x"02000000c331af5f49fd96014b398d9541b4d252a8a4235c2797d90b00000000000000003ac10882c715806ec7b557b9de9fd786c0380718335e2ae2c1fbee9fb1465aa03b8c3a5473691f187cd8568e"
+        x"02000000c331af5f49fd96014b398d9541b4d252a8a4235c2797d90b00000000000000003ac10882c715806ec7b557b9de9fd786c0380718335e2ae2c1fbee9fb1465aa03b8c3a5473691f187cd8568e",
     ];
 
     let ctx = scenario.ctx();
@@ -38,7 +37,7 @@ fun test_verify_payment() {
         x"b95b666c9b6ae55cede0667f6de31430997eacdc264e9e50a0f93aef35d83104",
         x"6efa6c0e97e8d9cf95577e088f5bf27d0c5e08523944b15694b1e6681a323553",
         x"b88d2e3a29eb772ae27aec10f33e594c0a108db5d4cbb8ea6a383371cd2e346a",
-        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5ae83cb"
+        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5ae83cb",
     ];
 
     let tx_index = 604;
@@ -48,7 +47,7 @@ fun test_verify_payment() {
         x"8c0bfefccb5755874ea0872a17b0d682c84981eed93fccd3ef86556f51f21522010000006a47304402204bbbefdc49e7289b0f36fe8c7623e93ff7ff751664d63caf49c1d9d8a4cbefd402200582f12a9490bdf8e6980025c08f83c43c50bc472706e3a38e7f1a972404bc4d0121035533036f3a7e9dc4c76e9d3697eb9d573aa76844baaadda347893a793797b639ffffffff",
         4,
         x"10270000000000001976a914303962c3ad29f08d13d98218ceeb7057e9bc184888ac10270000000000001976a914c6a3b95415d3fe9a9161c4b5100c1b6f2ad1e90c88ac00000000000000000d6a0b68656c6c6f20776f726c64e5490600000000001976a914e6228f7a5ee6b15c7cccfd9f9cb7e8699261084588ac",
-        x"00000000"
+        x"00000000",
     );
 
     // Tx: 6dfb16dd580698242bcfd8e433d557ed8c642272a368894de27292a8844a4e75 (Height 303,699)
@@ -58,7 +57,7 @@ fun test_verify_payment() {
         proof,
         tx_index,
         &transaction,
-        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845"
+        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
     );
 
     assert!(tx_id == x"754e4a84a89272e24d8968a37222648ced57d533e4d8cf2b24980658dd16fb6d");
@@ -68,8 +67,6 @@ fun test_verify_payment() {
     scenario.end();
 }
 
-
-
 #[test]
 fun test_verify_payment_with_P2WPHK_output() {
     let sender = @0x01;
@@ -77,7 +74,7 @@ fun test_verify_payment_with_P2WPHK_output() {
     let start_block_height = 0;
     let headers = vector[
         // only one transaction
-        x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000df88e4ad22477438db0a80979cf3dea033aa968c97fe06270f8864941a30649b5c843a5473691f184c13685d"
+        x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000df88e4ad22477438db0a80979cf3dea033aa968c97fe06270f8864941a30649b5c843a5473691f184c13685d",
     ];
 
     let ctx = scenario.ctx();
@@ -96,7 +93,7 @@ fun test_verify_payment_with_P2WPHK_output() {
         // we modify the last output to P2WPHK
         // 14e6228f7a5ee6b15c7cccfd9f9cb7e86992610845 = OP_0 OP_PUSHBYTES_20 e6228f7a5ee6b15c7cccfd9f9cb7e86992610845
         x"10270000000000001976a914303962c3ad29f08d13d98218ceeb7057e9bc184888ac10270000000000001976a914c6a3b95415d3fe9a9161c4b5100c1b6f2ad1e90c88ac00000000000000000d6a0b68656c6c6f20776f726c64e549060000000000160014e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
-        x"00000000"
+        x"00000000",
     );
 
     let (amount, message, tx_id) = lc.verify_payment(
@@ -104,10 +101,8 @@ fun test_verify_payment_with_P2WPHK_output() {
         proof,
         tx_index,
         &transaction,
-        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845"
+        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
     );
-
-
 
     assert!(tx_id == x"df88e4ad22477438db0a80979cf3dea033aa968c97fe06270f8864941a30649b");
     assert!(amount == 412133);
@@ -123,7 +118,7 @@ fun test_verify_payment_fails() {
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
     let headers = vector[
-        x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000d7ee3bfa38399e87f302a41b388f33df29bf3ecb3552ed208a4869e17870a74d5c843a5473691f184c13685d"
+        x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000d7ee3bfa38399e87f302a41b388f33df29bf3ecb3552ed208a4869e17870a74d5c843a5473691f184c13685d",
     ];
     let ctx = scenario.ctx();
     let lc = new_light_client(params::mainnet(), start_block_height, headers, 0, 8, ctx);
@@ -141,7 +136,7 @@ fun test_verify_payment_fails() {
         x"b95b666c9b6ae55cede0667f6de31430997eacdc264e9e50a0f93aef35d83104",
         x"6efa6c0e97e8d9cf95577e088f5bf27d0c5e08523944b15694b1e6681a323553",
         x"b88d2e3a29eb772ae27aec10f33e594c0a108db5d4cbb8ea6a383371cd2e346a",
-        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5aeffff" // <-- modified here, 83cb => ffff
+        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5aeffff", // <-- modified here, 83cb => ffff
     ];
 
     let tx_index = 604;
@@ -152,7 +147,7 @@ fun test_verify_payment_fails() {
         x"8c0bfefccb5755874ea0872a17b0d682c84981eed93fccd3ef86556f51f21522010000006a47304402204bbbefdc49e7289b0f36fe8c7623e93ff7ff751664d63caf49c1d9d8a4cbefd402200582f12a9490bdf8e6980025c08f83c43c50bc472706e3a38e7f1a972404bc4d0121035533036f3a7e9dc4c76e9d3697eb9d573aa76844baaadda347893a793797b639ffffffff",
         4,
         x"10270000000000001976a914303962c3ad29f08d13d98218ceeb7057e9bc184888ac10270000000000001976a914c6a3b95415d3fe9a9161c4b5100c1b6f2ad1e90c88ac00000000000000000d6a0b68656c6c6f20776f726c64e5490600000000001976a914e6228f7a5ee6b15c7cccfd9f9cb7e8699261084588ac",
-        x"00000000"
+        x"00000000",
     );
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
@@ -162,14 +157,12 @@ fun test_verify_payment_fails() {
         proof,
         tx_index,
         &transaction,
-        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845"
+        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
     );
 
     sui::test_utils::destroy(lc);
     scenario.end();
 }
-
-
 
 #[test]
 #[expected_failure(abort_code = ETxNotInBlock)]
@@ -178,7 +171,7 @@ fun test_verify_payment_block_not_finalize() {
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
     let headers = vector[
-        x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000d7ee3bfa38399e87f302a41b388f33df29bf3ecb3552ed208a4869e17870a74d5c843a5473691f184c13685d"
+        x"020000005d42717a33dd7046b6ca5fa33f14a7318b8221ce5b6909040000000000000000d7ee3bfa38399e87f302a41b388f33df29bf3ecb3552ed208a4869e17870a74d5c843a5473691f184c13685d",
     ];
     let ctx = scenario.ctx();
     let lc = new_light_client(params::mainnet(), start_block_height, headers, 0, 8, ctx);
@@ -196,7 +189,7 @@ fun test_verify_payment_block_not_finalize() {
         x"b95b666c9b6ae55cede0667f6de31430997eacdc264e9e50a0f93aef35d83104",
         x"6efa6c0e97e8d9cf95577e088f5bf27d0c5e08523944b15694b1e6681a323553",
         x"b88d2e3a29eb772ae27aec10f33e594c0a108db5d4cbb8ea6a383371cd2e346a",
-        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5ae83cb" // <-- modified here, 83cb => ffff
+        x"2e7ed7831d341177f75647c7ce999efede045099c396c18be790b0d1a5ae83cb", // <-- modified here, 83cb => ffff
     ];
 
     let tx_index = 604;
@@ -206,7 +199,7 @@ fun test_verify_payment_block_not_finalize() {
         x"8c0bfefccb5755874ea0872a17b0d682c84981eed93fccd3ef86556f51f21522010000006a47304402204bbbefdc49e7289b0f36fe8c7623e93ff7ff751664d63caf49c1d9d8a4cbefd402200582f12a9490bdf8e6980025c08f83c43c50bc472706e3a38e7f1a972404bc4d0121035533036f3a7e9dc4c76e9d3697eb9d573aa76844baaadda347893a793797b639ffffffff",
         4,
         x"10270000000000001976a914303962c3ad29f08d13d98218ceeb7057e9bc184888ac10270000000000001976a914c6a3b95415d3fe9a9161c4b5100c1b6f2ad1e90c88ac00000000000000000d6a0b68656c6c6f20776f726c64e5490600000000001976a914e6228f7a5ee6b15c7cccfd9f9cb7e8699261084588ac",
-        x"00000000"
+        x"00000000",
     );
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
@@ -216,7 +209,7 @@ fun test_verify_payment_block_not_finalize() {
         proof,
         tx_index,
         &transaction,
-        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845"
+        x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
     );
 
     sui::test_utils::destroy(lc);

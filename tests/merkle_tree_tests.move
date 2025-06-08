@@ -4,7 +4,6 @@ module bitcoin_spv::merkle_tree_tests;
 
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 
-
 #[test]
 fun verify_merkle_proof_with_single_node_test() {
     let root = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000";
@@ -25,13 +24,12 @@ fun verify_merkle_proof_with_multiple_node_test() {
         x"5722a73b9d34d24cf478110300f357261af0f58492b40a2e43ee3bebc47ca258",
         x"c46d5f5873dd8abf4f485896f7b685fef9cd39ac6488630c947af2be80a55ce9",
         x"640a62ef76aaab85f93a19ac9a9e16af5572bf891654e29d343d1537e8199584",
-        x"cf118c0a5b81e83b0add90aee66103e8c975b160f74f05682ea6d6c6bc4d1ccd"
+        x"cf118c0a5b81e83b0add90aee66103e8c975b160f74f05682ea6d6c6bc4d1ccd",
     ];
     let tx_id = x"3236cb8910885835403dded03a20e7c36437ce35f942887ed12393405b622442";
     let tx_index = 0;
     assert!(verify_merkle_proof(root, proof, tx_id, tx_index));
 }
-
 
 #[test]
 fun verify_merkle_proof_with_invalid_proof_test() {
@@ -50,7 +48,7 @@ fun verify_merkle_proof_with_invalid_proof_test() {
         x"60c3386a0b49e75f1723d6ab28ac9a2028a0c72866e2111d79d4817b88e17c82",
         x"1937847768d92837bae3832bb8e5a4ab4434b97e00a6c10182f211f592409068",
         x"d6f5652400d9a3d1cc150a7fb692e874cc42d76bdafc842f2fe0f835a7c24d2d",
-        x"60c109b187d64571efbaa8047be85821f8e67e0e85f2f5894bc63d00c2ed9d64"
+        x"60c109b187d64571efbaa8047be85821f8e67e0e85f2f5894bc63d00c2ed9d64",
     ];
     let tx_index = 0;
     assert!(verify_merkle_proof(root, proof, tx_id, tx_index) == false);
