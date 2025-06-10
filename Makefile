@@ -1,6 +1,8 @@
 
+
 setup-hooks:
 	@cd .git/hooks; ln -s -f ../../scripts/git-hooks/* ./
+	@npm install -g prettier @mysten/prettier-plugin-move
 
 .git/hooks/pre-commit: setup
 

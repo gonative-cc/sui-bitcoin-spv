@@ -1,3 +1,8 @@
 #!/bin/sh
 
 make lint-git
+
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep '\.move$')
+
+echo $STAGED_FILES
+npx prettier-move $STAGED_FILES --write
