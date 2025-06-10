@@ -65,7 +65,7 @@ gen-docs:
 	@sui move build --doc
 	@cp -r ./$(BUILD_DIR)/$(MODULE_NAME)/docs/$(DOCS_SUBDIR) ./docs
 
-.PHONY: test-coverage gen-docs
+.PHONY: gen-docs
 
 ###############################################################################
 ##                                Infrastructure                             ##
