@@ -10,7 +10,7 @@ build: .git/hooks/pre-commit
 	@sui move build
 
 publish:
-	@sui client publish --skip-dependency-verification  --gas-budget 100000000
+	@sui client publish --gas-budget 100000000
 
 # used as pre-commit
 lint-git:

@@ -26,8 +26,8 @@ sui client faucet --url https://faucet.devnet.sui.io/v1/gas
 ### Deploy Bitcoin SPV packages
 
 ```sh
-cd <path/to/bitcoin_spv>
-sui client publish --skip-dependency-verification  --gas-budget 100000000
+cd <path/to/sui-bitcoin-spv>
+make pushlish 
 ```
 
 For this demo, we initialize the light client with a trusted snapshot at block height 201600.
