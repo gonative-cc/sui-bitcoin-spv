@@ -27,7 +27,7 @@ sui client faucet --url https://faucet.devnet.sui.io/v1/gas
 
 ```sh
 cd <path/to/sui-bitcoin-spv>
-make pushlish 
+make publish 
 ```
 
 For this demo, we initialize the light client with a trusted snapshot at block height 201600.
