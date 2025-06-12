@@ -36,7 +36,7 @@ Check out [SECURITY.md](./SECURITY.md) for security concerns.
 
 ## Setup
 
-Check out [here](./DEMO.md) for step-by-step deployment and main APIs demonstration.
+Check out [demo](./DEMO.md) for step-by-step deployment and main API demonstration.
 
 ## Talk to us
 
