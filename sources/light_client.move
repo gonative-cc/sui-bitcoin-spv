@@ -7,7 +7,7 @@ use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::params::{Self, Params, is_correct_init_height};
-use bitcoin_spv::transaction::{make_transaction, Transaction};
+use bitcoin_spv::transaction::Transaction;
 use bitcoin_spv::utils::nth_element;
 use sui::dynamic_field as df;
 use sui::event;
@@ -47,7 +47,7 @@ public struct InsertedHeadersEvent has copy, drop {
     head_height: u64,
 }
 
-public struct ForkBeyondFinality has copy, drop {
+public struct ForkBeyondFinalityEvent has copy, drop {
     parent_hash: vector<u8>,
     parent_height: u64,
 }
@@ -185,7 +185,7 @@ public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>)
         // * pro: we protect against double mint for nBTC etc...
         // * cons: we can have a deadlock
         if (parent.height() >= lc.finalized_height()) {
-            event::emit(ForkBeyondFinality {
+            event::emit(ForkBeyondFinalityEvent {
                 parent_hash: parent_id,
                 parent_height: parent.height(),
             });

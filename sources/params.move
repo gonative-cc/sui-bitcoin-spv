@@ -11,9 +11,9 @@ public struct Params has store {
     difficulty_adjustment: u8, // for Bitcoin testnet
 }
 
-const DifficultyAdjustment_Mainnet: u8 = 0; // mainnet
-const DifficultyAdjustment_V3: u8 = 1; // tesetnet v3
-const DifficultyAdjustment_Regtest: u8 = 2; // regtest
+const DIFFICULTYADJUSTMENT_MAINNET: u8 = 0; // mainnet
+const DIFFICULTYADJUSTMENT_V3: u8 = 1; // tesetnet v3
+const DIFFICULTYADJUSTMENT_REGTEST: u8 = 2; // regtest
 
 // default params for bitcoin mainnet
 public fun mainnet(): Params {
@@ -22,7 +22,7 @@ public fun mainnet(): Params {
         power_limit_bits: 0x1d00ffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
-        difficulty_adjustment: DifficultyAdjustment_Mainnet,
+        difficulty_adjustment: DIFFICULTYADJUSTMENT_MAINNET,
     }
 }
 
@@ -33,7 +33,7 @@ public fun testnet(): Params {
         power_limit_bits: 0x1d00ffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
-        difficulty_adjustment: DifficultyAdjustment_V3,
+        difficulty_adjustment: DIFFICULTYADJUSTMENT_V3,
     }
 }
 
@@ -45,7 +45,7 @@ public fun regtest(): Params {
         power_limit_bits: 0x207fffff,
         blocks_pre_retarget: 2016,
         target_timespan: 2016 * 60 * 10, // ~ 2 weeks.
-        difficulty_adjustment: DifficultyAdjustment_Regtest,
+        difficulty_adjustment: DIFFICULTYADJUSTMENT_REGTEST,
     }
 }
 
@@ -66,7 +66,7 @@ public fun target_timespan(p: &Params): u64 {
 }
 
 public fun pow_no_retargeting(p: &Params): bool {
-    p.difficulty_adjustment == DifficultyAdjustment_Regtest
+    p.difficulty_adjustment == DIFFICULTYADJUSTMENT_REGTEST
 }
 
 public(package) fun is_correct_init_height(p: &Params, h: u64): bool {
@@ -77,5 +77,5 @@ public(package) fun is_correct_init_height(p: &Params, h: u64): bool {
 // NOTE: Bitcoin testnet v3 has difficulty adjustment, that may checks many blocks
 // in the past and go out of the loop limit. So we need to skip that computation.
 public fun skip_difficulty_check(p: &Params): bool {
-    p.difficulty_adjustment == DifficultyAdjustment_V3
+    p.difficulty_adjustment == DIFFICULTYADJUSTMENT_V3
 }
