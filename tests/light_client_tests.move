@@ -9,11 +9,13 @@ use bitcoin_spv::light_client::{
     insert_header,
     new_light_client,
     init_light_client,
+    update_version,
     LightClient,
     EWrongParentBlock,
     EDifficultyNotMatch,
     ETimeTooOld,
-    EInvalidStartHeight
+    EInvalidStartHeight,
+    EAlreadyUpdated
 };
 use bitcoin_spv::params;
 use sui::test_scenario;
@@ -331,6 +333,17 @@ fun test_insert_header_failed_timestamp_too_old() {
     );
     let h = *lc.head();
     lc.insert_header(&h, new_header);
+    sui::test_utils::destroy(lc);
+    scenario.end();
+}
+
+#[test]
+#[expected_failure(abort_code = EAlreadyUpdated)]
+fun test_update_version_fail() {
+    let sender = @0x01;
+    let mut scenario = test_scenario::begin(sender);
+    let mut lc = new_lc_for_test(scenario.ctx());
+    update_version(&mut lc);
     sui::test_utils::destroy(lc);
     scenario.end();
 }

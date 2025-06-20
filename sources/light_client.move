@@ -12,6 +12,9 @@ use bitcoin_spv::utils::nth_element;
 use sui::dynamic_field as df;
 use sui::event;
 
+/// Package version
+const VERSION: u32 = 1;
+
 /// === Errors ===
 #[error]
 const EWrongParentBlock: vector<u8> =
@@ -35,6 +38,11 @@ const ETxNotInBlock: vector<u8> =
 #[error]
 const EInvalidStartHeight: vector<u8> =
     b"The start height must be a multiple of the retarget period (e.g 2016 for mainnet)";
+#[error]
+const EVersionMismatch: vector<u8> = b"The package has been updated. You are using a wrong version";
+#[error]
+const EAlreadyUpdated: vector<u8> =
+    b"The package version has been already updated to the latest one";
 
 public struct NewLightClientEvent has copy, drop {
     light_client_id: ID,
@@ -54,6 +62,7 @@ public struct ForkBeyondFinality has copy, drop {
 
 public struct LightClient has key, store {
     id: UID,
+    version: u32,
     params: Params,
     head_height: u64,
     head_hash: vector<u8>,
@@ -84,6 +93,7 @@ public fun new_light_client(
 ): LightClient {
     let mut lc = LightClient {
         id: object::new(ctx),
+        version: VERSION,
         params: params,
         head_height: 0,
         head_hash: vector[],
@@ -164,6 +174,7 @@ public fun init_light_client_network(
 /// Header serialization reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>) {
+    assert!(lc.version == VERSION, EVersionMismatch);
     // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
     assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
@@ -329,21 +340,25 @@ public(package) fun cleanup(
 
 /// Returns height of the blockchain head (latest, not confirmed block).
 public fun head_height(lc: &LightClient): u64 {
+    assert!(lc.version == VERSION, EVersionMismatch);
     lc.head_height
 }
 
 /// Returns height of the blockchain head (latest, not confirmed block).
 public fun head_hash(lc: &LightClient): vector<u8> {
+    assert!(lc.version == VERSION, EVersionMismatch);
     lc.head_hash
 }
 
 /// Returns blockchain head light block (latest, not confirmed block).
 public fun head(lc: &LightClient): &LightBlock {
+    assert!(lc.version == VERSION, EVersionMismatch);
     lc.get_light_block_by_hash(lc.head_hash)
 }
 
 /// Returns latest finalized_block height
 public fun finalized_height(lc: &LightClient): u64 {
+    assert!(lc.version == VERSION, EVersionMismatch);
     lc.head_height - lc.finality
 }
 
@@ -358,6 +373,7 @@ public fun verify_tx(
     proof: vector<vector<u8>>,
     tx_index: u64,
 ): bool {
+    assert!(lc.version == VERSION, EVersionMismatch);
     // TODO: handle: light block/block_header not exist.
     if (height > lc.finalized_height()) {
         return false
@@ -369,14 +385,17 @@ public fun verify_tx(
 }
 
 public fun params(lc: &LightClient): &Params {
+    assert!(lc.version == VERSION, EVersionMismatch);
     &lc.params
 }
 
 public fun client_id(lc: &LightClient): &UID {
+    assert!(lc.version == VERSION, EVersionMismatch);
     &lc.id
 }
 
 public fun relative_ancestor(lc: &LightClient, lb: &LightBlock, distance: u64): &LightBlock {
+    assert!(lc.version == VERSION, EVersionMismatch);
     let ancestor_height = lb.height() - distance;
     let ancestor_block_hash = lc.get_block_hash_by_height(ancestor_height);
     lc.get_light_block_by_hash(ancestor_block_hash)
@@ -385,6 +404,7 @@ public fun relative_ancestor(lc: &LightClient, lb: &LightBlock, distance: u64): 
 /// The function calculates the required difficulty for a block that we want to add after
 /// the `parent_block` (potentially fork).
 public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightBlock): u32 {
+    assert!(lc.version == VERSION, EVersionMismatch);
     // reference from https://github.com/btcsuite/btcd/blob/master/blockchain/difficulty.go#L136
     let params = lc.params();
     let blocks_pre_retarget = params.blocks_pre_retarget();
@@ -434,21 +454,25 @@ fun calc_past_median_time(lc: &LightClient, lb: &LightBlock): u32 {
 }
 
 public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &LightBlock {
+    assert!(lc.version == VERSION, EVersionMismatch);
     // TODO: Can we use option type?
     df::borrow(&lc.id, block_hash)
 }
 
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
+    assert!(lc.version == VERSION, EVersionMismatch);
     let exist = df::exists_(&lc.id, block_hash);
     exist
 }
 
 public fun get_block_hash_by_height(lc: &LightClient, height: u64): vector<u8> {
+    assert!(lc.version == VERSION, EVersionMismatch);
     // copy the block hash
     *df::borrow<u64, vector<u8>>(&lc.id, height)
 }
 
 public fun get_light_block_by_height(lc: &LightClient, height: u64): &LightBlock {
+    assert!(lc.version == VERSION, EVersionMismatch);
     let block_hash = lc.get_block_hash_by_height(height);
     lc.get_light_block_by_hash(block_hash)
 }
@@ -513,6 +537,7 @@ public fun verify_payment(
     transaction: &Transaction,
     receiver_pk_hash: vector<u8>,
 ): (u64, vector<u8>, vector<u8>) {
+    assert!(lc.version == VERSION, EVersionMismatch);
     let mut amount = 0;
     let mut op_return_msg = vector[];
     let tx_id = transaction.tx_id();
@@ -529,4 +554,11 @@ public fun verify_payment(
     });
 
     (amount, op_return_msg, tx_id)
+}
+
+/// Updates the light_client.version to the latest,
+/// migrating the object to the latest package version
+public fun update_version(lc: &mut LightClient) {
+    assert!(VERSION > lc.version, EAlreadyUpdated);
+    lc.version = VERSION;
 }
