@@ -48,7 +48,7 @@ test:
 
 test-coverage:
 	@sui move test --coverage
-	@sui move coverage summary --test
+	@sui move coverage summary
 
 
 .PHONY: test test-coverage

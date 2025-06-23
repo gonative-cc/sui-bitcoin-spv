@@ -35,7 +35,7 @@ fun test_nth_element_outbound_index() {
 #[test]
 fun slice_happy_cases() {
     assert_eq!(slice(vector[1, 2, 3], 1, 2), vector[2]);
-    assert_eq!(slice(vector[1, 2, 3, 9, 10], 2, 4), vector[2, 3]);
+    assert_eq!(slice(vector[1, 2, 3, 9, 10], 2, 4), vector[3, 9]);
 }
 
 #[test, expected_failure(abort_code = EInvalidSliceRange)]
