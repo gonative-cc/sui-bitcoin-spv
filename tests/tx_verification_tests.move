@@ -18,8 +18,7 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
         x"006000268138f1b23ce293b438ce2f6ba73658fbddef5607ce3e01000000000000000000468b267b782a9bf25b419bf3035cb177a98c75dd0b961bce3036e822d0fa0ce88337cf665b250317b0f11b99",
     ];
     // finality = 4 => first block is finalized.
-    let lc = new_light_client(params::mainnet(), start_block, headers, 0, 4, ctx);
-    return lc
+    new_light_client(params::mainnet(), start_block, headers, 0, 4, ctx)
 }
 
 #[test_only]

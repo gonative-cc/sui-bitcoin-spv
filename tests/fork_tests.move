@@ -11,6 +11,7 @@ use bitcoin_spv::light_client::{
     EBlockNotFound
 };
 use bitcoin_spv::params;
+use std::unit_test::assert_eq;
 use sui::test_scenario;
 
 // Test for fork handle
@@ -252,8 +253,11 @@ fun test_reorg() {
     // validate new chain after update
     let head = lc.head();
     // new chain head should identical last header in `forks`.
-    assert!(head.header().block_hash() == new_block_header(forks[forks.length() - 1]).block_hash());
-    assert!(head.chain_work() == 42);
+    assert_eq!(
+        head.header().block_hash(),
+        new_block_header(forks[forks.length() - 1]).block_hash(),
+    );
+    assert_eq!(head.chain_work(), 42);
 
     sui::test_utils::destroy(lc);
     scenario.end();

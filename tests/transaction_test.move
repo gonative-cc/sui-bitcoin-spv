@@ -3,10 +3,8 @@
 #[test_only]
 module bitcoin_spv::transaction_tests;
 
-use bitcoin_spv::light_client::new_light_client;
-use bitcoin_spv::params;
 use bitcoin_spv::transaction::{make_transaction, parse_output};
-use sui::test_scenario;
+use std::unit_test::assert_eq;
 
 #[test]
 fun decoded_transaction_tests() {
@@ -23,14 +21,14 @@ fun decoded_transaction_tests() {
             x"00000000",
         );
 
-    assert!(tx.tx_id() == x"3c709a042df4c469cd808be0af8a701d7666eaa1cd364454333c82934bd77edc");
+    assert_eq!(tx.tx_id(), x"3c709a042df4c469cd808be0af8a701d7666eaa1cd364454333c82934bd77edc");
 
     let outputs = tx.outputs();
 
-    assert!(outputs[0].extract_public_key_hash() == x"0fef69f3ac0d9d0473a318ae508875ad0eae3dcc");
-    assert!(outputs[0].amount() == 500000);
-    assert!(outputs[1].extract_public_key_hash() == x"51e6b602f387b4c5bb8a4d8cdf1b059c826374e3");
-    assert!(outputs[1].amount() == 7466184);
+    assert_eq!(outputs[0].extract_public_key_hash(), x"0fef69f3ac0d9d0473a318ae508875ad0eae3dcc");
+    assert_eq!(outputs[0].amount(), 500000);
+    assert_eq!(outputs[1].extract_public_key_hash(), x"51e6b602f387b4c5bb8a4d8cdf1b059c826374e3");
+    assert_eq!(outputs[1].amount(), 7466184);
 
     // ported from summa-tx/bitcoin-spv
     // https://github.com/summa-tx/bitcoin-spv/blob/master/solidity/test/ViewSPV.test.js#L56
@@ -52,16 +50,16 @@ fun decoded_transaction_tests() {
 fun pkh_script_tests() {
     let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
     assert!(output.is_P2PHK() == true);
-    assert!(output.extract_public_key_hash() == x"55ae51684c43435da751ac8d2173b2652eb64105");
+    assert_eq!(output.extract_public_key_hash(), x"55ae51684c43435da751ac8d2173b2652eb64105");
     let output = &parse_output(10, x"79a9140fef69f3ac0d9d0473a318ae508875ad0eae3dcc88ac");
     assert!(output.is_P2PHK() == false);
     let output = &parse_output(10, x"0014841b80d2cc75f5345c482af96294d04fdd66b2b7");
-    assert!(output.is_P2WPHK() == true);
-    assert!(output.extract_public_key_hash() == x"841b80d2cc75f5345c482af96294d04fdd66b2b7");
+    assert_eq!(output.is_P2WPHK(), true);
+    assert_eq!(output.extract_public_key_hash(), x"841b80d2cc75f5345c482af96294d04fdd66b2b7");
     let output = &parse_output(10, x"0101"); // arbitrary script
     assert!(output.is_P2PHK() == false);
     assert!(output.is_P2WPHK() == false);
-    assert!(output.extract_public_key_hash() == vector[]);
+    assert_eq!(output.extract_public_key_hash(), vector[]);
 }
 
 #[test]
@@ -75,14 +73,12 @@ fun op_return_script_tests() {
     ];
     let expected_result = vector[x"68656c6c6f20776f726c64", x"", x"01020304", x"010203", x"010203"];
 
-    let mut i = 0;
-    while (i < data.length()) {
+    data.length().do!(|i| {
         let o = &parse_output(0, data[i]);
         // this return error code at test index fails
-        assert!(o.is_op_return(), i);
-        assert!(o.op_return() == expected_result[i], i);
-        i = i + 1;
-    };
+        assert!(o.is_op_return());
+        assert!(o.op_return() == expected_result[i]);
+    });
 
     let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
     assert!(output.is_op_return() == false);

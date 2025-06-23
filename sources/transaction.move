@@ -155,6 +155,7 @@ public fun op_return(output: &Output): vector<u8> {
         return vector[]
     };
 
+    // TODO: better document here. maybe use some ascii chart
     if (script[1] <= OP_DATA_75) {
         // script = OP_RETURN OP_DATA_<len> DATA
         //          |      2 bytes         |  the rest |
@@ -176,6 +177,7 @@ public fun op_return(output: &Output): vector<u8> {
 }
 
 // TODO: create readbytes APIs
+// This is reader module in sui-native
 /// * `output_count`: number of output objects in outputs bytes
 /// * `outputs`: all tx outputs encoded as a single list of bytes.
 public(package) fun make_outputs(output_count: u32, outputs_bytes: vector<u8>): vector<Output> {

@@ -18,6 +18,7 @@ use bitcoin_spv::light_client::{
     EAlreadyUpdated
 };
 use bitcoin_spv::params;
+use std::unit_test::{assert_eq, assert_ref_eq};
 use sui::test_scenario;
 
 #[test_only]
@@ -124,8 +125,7 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
         // }
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
     ];
-    let lc = new_light_client(params::mainnet(), start_block, headers, 0, 8, ctx);
-    return lc
+    new_light_client(params::mainnet(), start_block, headers, 0, 8, ctx)
 }
 
 #[test]
@@ -176,14 +176,13 @@ fun test_set_get_block_happy_case() {
     let header = new_block_header(
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
     );
-    assert!(lc.head_height() == 858816);
-    assert!(lc.head().header().block_hash() == header.block_hash());
+    assert_eq!(lc.head_height(), 858816);
+    assert_eq!(lc.head().header().block_hash(), header.block_hash());
     sui::test_utils::destroy(lc);
     scenario.end();
 }
 
-#[test]
-#[expected_failure]
+#[test, expected_failure]
 fun test_set_get_block_failed_case() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -217,9 +216,8 @@ fun test_insert_header_happy_cases() {
     lc.insert_headers(raw_headers);
     let head_block = lc.get_light_block_by_hash(lc.head_hash()).header();
 
-    assert!(head_block == new_block_header(raw_headers[0]));
-    assert!(head_block == lc.head().header());
-
+    assert_eq!(*head_block, new_block_header(raw_headers[0]));
+    assert_ref_eq!(head_block, lc.head().header());
     // {
     //     "version": "0040a320",
     //     "previous_block_hash": "aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a01000000000000000000",
@@ -251,7 +249,7 @@ fun test_insert_header_happy_cases() {
     ];
 
     lc.insert_headers(headers);
-    assert!(lc.head().header() == new_block_header(headers[0]));
+    assert_eq!(*lc.head().header(), new_block_header(headers[0]));
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -260,8 +258,7 @@ fun test_insert_header_happy_cases() {
 // doesn't create a chain, but a tree under node Z:
 // X-Y-Z-A
 //     \-A
-#[test]
-#[expected_failure(abort_code = EWrongParentBlock)]
+#[test, expected_failure(abort_code = EWrongParentBlock)]
 fun test_insert_headers_that_dont_form_a_chain() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -281,12 +278,10 @@ fun test_insert_headers_that_dont_form_a_chain() {
     // we insert 2 identical headers.
     let raw_headers = vector[h, h];
     lc.insert_headers(raw_headers);
-    sui::test_utils::destroy(lc);
-    scenario.end();
+    abort
 }
 
-#[test]
-#[expected_failure(abort_code = EWrongParentBlock)]
+#[test, expected_failure(abort_code = EWrongParentBlock)]
 fun test_insert_header_failed_block_hash_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -299,13 +294,10 @@ fun test_insert_header_failed_block_hash_not_match() {
     );
     let h = *lc.head();
     lc.insert_header(&h, new_header);
-
-    sui::test_utils::destroy(lc);
-    scenario.end();
+    abort
 }
 
-#[test]
-#[expected_failure(abort_code = EDifficultyNotMatch)]
+#[test, expected_failure(abort_code = EDifficultyNotMatch)]
 fun test_insert_header_failed_difficulty_not_match() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -317,12 +309,10 @@ fun test_insert_header_failed_difficulty_not_match() {
     );
     let h = *lc.head();
     lc.insert_header(&h, new_header);
-    sui::test_utils::destroy(lc);
-    scenario.end();
+    abort
 }
 
-#[test]
-#[expected_failure(abort_code = ETimeTooOld)]
+#[test, expected_failure(abort_code = ETimeTooOld)]
 fun test_insert_header_failed_timestamp_too_old() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
@@ -333,17 +323,14 @@ fun test_insert_header_failed_timestamp_too_old() {
     );
     let h = *lc.head();
     lc.insert_header(&h, new_header);
-    sui::test_utils::destroy(lc);
-    scenario.end();
+    abort
 }
 
-#[test]
-#[expected_failure(abort_code = EAlreadyUpdated)]
+#[test, expected_failure(abort_code = EAlreadyUpdated)]
 fun test_update_version_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
     update_version(&mut lc);
-    sui::test_utils::destroy(lc);
-    scenario.end();
+    abort
 }

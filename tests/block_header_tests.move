@@ -5,6 +5,7 @@ module bitcoin_spv::block_header_tests;
 
 use bitcoin_spv::block_header::{new_block_header, EPoW, EInvalidBlockHeaderSize};
 use bitcoin_spv::btc_math::to_u32;
+use std::unit_test::assert_eq;
 
 #[test]
 fun block_header_test() {
@@ -15,18 +16,23 @@ fun block_header_test() {
     let header = new_block_header(raw_header);
 
     // verify data extract from header
-    assert!(header.version() == to_u32(x"00008020"));
-    assert!(header.parent() == x"0e102b98a160f4416c8ff0198db9b177523525c9de8a00000000000000000000");
-    assert!(
-        header.merkle_root() == x"3b9b941003024e1afa90199732fdb1366a122ab0a5cacd3f7bcb8cb8815a811b",
+    assert_eq!(header.version(), to_u32(x"00008020"));
+    assert_eq!(
+        header.parent(),
+        x"0e102b98a160f4416c8ff0198db9b177523525c9de8a00000000000000000000",
     );
-    assert!(header.timestamp() == to_u32(x"560e8864"));
-    assert!(header.bits() == to_u32(x"697e0517"));
-    assert!(header.nonce() == to_u32(x"67c0c9fd"));
-    assert!(
-        header.block_hash() == x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000",
+    assert_eq!(
+        header.merkle_root(),
+        x"3b9b941003024e1afa90199732fdb1366a122ab0a5cacd3f7bcb8cb8815a811b",
     );
-    assert!(header.calc_work() == 220053167595535890616746);
+    assert_eq!(header.timestamp(), to_u32(x"560e8864"));
+    assert_eq!(header.bits(), to_u32(x"697e0517"));
+    assert_eq!(header.nonce(), to_u32(x"67c0c9fd"));
+    assert_eq!(
+        header.block_hash(),
+        x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000",
+    );
+    assert_eq!(header.calc_work(), 220053167595535890616746);
 }
 
 #[test]
@@ -70,14 +76,12 @@ fun pow_check_failure_test() {
     header.pow_check();
 }
 
-#[test]
-#[expected_failure(abort_code = EInvalidBlockHeaderSize)]
+#[test, expected_failure(abort_code = EInvalidBlockHeaderSize)]
 fun fails_by_invalid_block_header_size_too_short_test() {
     new_block_header(x"0123456789abcdef");
 }
 
-#[test]
-#[expected_failure(abort_code = EInvalidBlockHeaderSize)]
+#[test, expected_failure(abort_code = EInvalidBlockHeaderSize)]
 fun fails_by_invalid_block_header_size__too_long_test() {
     new_block_header(
         x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d00000000ffff",
