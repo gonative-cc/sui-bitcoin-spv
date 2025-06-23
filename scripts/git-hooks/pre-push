@@ -2,9 +2,9 @@
 
 threshold=80
 
-coverage=$(sui move coverage summary --test | grep "% Move Coverage" | tail -n1 | sed -E 's/.*% Move Coverage:[[:space:]]*([0-9.]+).*/\1/')
+coverage=$(sui move coverage summary | grep "% Move Coverage" | tail -n1 | sed -E 's/.*% Move Coverage:[[:space:]]*([0-9.]+).*/\1/')
 
-
+echo $coverage
 if awk "BEGIN {exit ($coverage < $threshold ? 0 : 1)}"; then
     echo "❌ Coverage is low"
     exit 1
