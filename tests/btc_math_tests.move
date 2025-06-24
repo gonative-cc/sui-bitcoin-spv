@@ -50,6 +50,8 @@ fun to_u256_test() {
         btc_math::to_u256(x"0001000000000000000000000000000000000000000000000000000000000000"),
         256,
     );
+    // 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff  = 2^256 - 1 = 2^255 - 1 + 2^255.
+    // we avoid overflow when compare 2 number in this case
     assert_eq!(
         btc_math::to_u256(x"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
         (1 << 255) - 1 + (1 << 255),

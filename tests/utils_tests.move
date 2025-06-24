@@ -7,7 +7,7 @@ use bitcoin_spv::utils::{nth_element, EOutBoundIndex, slice, EInvalidSliceRange}
 use std::unit_test::assert_eq;
 
 #[test]
-fun test_nth_element() {
+fun nth_element_happy_cases() {
     let mut v = vector[2, 8, 4, 3, 3];
     assert_eq!(nth_element(&mut v, 1), 3);
     assert_eq!(nth_element(&mut v, 0), 2);
@@ -29,7 +29,6 @@ fun test_nth_element() {
 #[test, expected_failure(abort_code = EOutBoundIndex)]
 fun test_nth_element_outbound_index() {
     nth_element(&mut vector[], 1);
-    abort
 }
 
 #[test]

@@ -182,7 +182,7 @@ fun test_set_get_block_happy_case() {
     scenario.end();
 }
 
-#[test, expected_failure]
+#[test, expected_failure(abort_code = sui::dynamic_field::EFieldDoesNotExist)]
 fun test_set_get_block_failed_case() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
