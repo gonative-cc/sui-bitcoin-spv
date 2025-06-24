@@ -7,7 +7,7 @@ use bitcoin_spv::btc_math::{Self, target_to_bits, bits_to_target, compact_size};
 use std::unit_test::assert_eq;
 
 #[test]
-fun btc_hash_test() {
+fun btc_hash_happy_case() {
     let pre_image =
         x"00000020acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000dd0258540ffa51df2af80bd4e3ae82b7781c167ec84d4001e09c2e4053cdc4410d0f8864697e0517893b3045";
     let result = x"37ed684e163e76275a38fc0a318730c0aed92967f64c03000000000000000000";
@@ -16,7 +16,7 @@ fun btc_hash_test() {
 }
 
 #[test]
-fun to_u32_test() {
+fun to_u32_happy_cases() {
     //  Bytes vector is in little-endian format.
     assert_eq!(btc_math::to_u32(x"00000000"), 0u32);
     assert_eq!(btc_math::to_u32(x"01000000"), 1u32);
@@ -27,12 +27,12 @@ fun to_u32_test() {
 }
 
 #[test, expected_failure(abort_code = btc_math::EInvalidLength)]
-fun to_u32_invalid_length() {
+fun to_u32_invalid_length_should_fail() {
     btc_math::to_u32(x"");
 }
 
 #[test]
-fun to_u256_test() {
+fun to_u256_happy_cases() {
     //  Bytes vector is in little-endian format.
     assert_eq!(
         btc_math::to_u256(x"0000000000000000000000000000000000000000000000000000000000000000"),
@@ -63,12 +63,12 @@ fun to_u256_test() {
 }
 
 #[test, expected_failure(abort_code = btc_math::EInvalidLength)]
-fun to_u256_invalid_length() {
+fun to_u256_invalid_length_should_fail() {
     btc_math::to_u256(x"");
 }
 
 #[test]
-fun bits_to_target_tests() {
+fun bits_to_target_happy_cases() {
     // Data get from btc main net at block 880,086
     let bits = 0x17028c61;
     let target = bits_to_target(bits);
@@ -100,23 +100,23 @@ fun bits_to_target_tests() {
 }
 
 #[test]
-fun extract_u64_success() {
+fun extract_u64_happy_cases() {
     assert_eq!(btc_math::extract_u64(x"010203", 0, 1), 1);
     assert_eq!(btc_math::extract_u64(x"ffffffffffffffff00", 0, 8), 0xffffffffffffffff);
 }
 
 #[test, expected_failure(abort_code = btc_math::EInvalidLength)]
-fun extract_u64_failed_invalid_length() {
+fun extract_u64_invalid_length_should_fail() {
     btc_math::extract_u64(x"", 0, 1);
 }
 
 #[test, expected_failure(abort_code = btc_math::EInvalidNumberSize)]
-fun extract_u64_failed_invalue_number_size() {
+fun extract_u64_invalue_number_size_should_fail() {
     btc_math::extract_u64(x"ffffffffffffffff0000", 0, 9);
 }
 
 #[test]
-fun compact_size_tests() {
+fun compact_size_happy_cases() {
     let inputs = vector[
         x"fa",
         x"fc",
@@ -153,6 +153,6 @@ fun compact_size_tests() {
 }
 
 #[test, expected_failure(abort_code = btc_math::EInvalidCompactSizeDecode)]
-fun compact_size_failed() {
+fun compact_size_invalid_size_decode_should_fail() {
     compact_size(x"00fd", 1);
 }

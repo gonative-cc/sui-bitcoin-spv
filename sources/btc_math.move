@@ -199,7 +199,7 @@ public fun u256_to_compact(number: u256): vector<u8> {
 // internal test
 // TODO: Check best practice to improve test
 #[test]
-fun bytes_of_test() {
+fun bytes_of_happy_cases() {
     assert_eq!(bytes_of(1), 1);
     assert_eq!(bytes_of(7), 1);
     assert_eq!(bytes_of(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff), 32);
@@ -207,7 +207,7 @@ fun bytes_of_test() {
 
 #[test]
 /// get last 32 bits of number
-fun get_last_32_bits_test() {
+fun get_last_32_bits_happy_cases() {
     assert_eq!(get_last_32_bits(0), 0);
     assert_eq!(
         get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff),
@@ -217,7 +217,7 @@ fun get_last_32_bits_test() {
 }
 
 #[test]
-fun check_compact_size_format_test() {
+fun check_compact_size_format_happy_cases() {
     let inputs = vector[0x0a, 0xfc, 0xfd, 0xfe, 0xff];
     let outputs = vector[0, 0, 2, 4, 8];
 
@@ -229,7 +229,7 @@ fun check_compact_size_format_test() {
 }
 
 #[test]
-fun test_u256_to_compact() {
+fun u256_to_compact_happy_cases() {
     assert_eq!(u256_to_compact(0), x"00");
     assert_eq!(u256_to_compact(10), x"0a");
     assert_eq!(u256_to_compact(252), x"fc");
@@ -245,6 +245,6 @@ fun test_u256_to_compact() {
 }
 
 #[test, expected_failure(abort_code = EInvalidCompactSizeEncode)]
-fun test_u256_to_compact_failed() {
+fun u256_to_compact_invalid_compact_size_should_fail() {
     u256_to_compact(18446744073709551615 + 1);
 }

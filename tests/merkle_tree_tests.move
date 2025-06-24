@@ -5,7 +5,7 @@ module bitcoin_spv::merkle_tree_tests;
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 
 #[test]
-fun verify_merkle_proof_with_single_node_test() {
+fun verify_merkle_proof_with_single_node_happy_case() {
     let root = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000";
     let proof = vector[];
     let tx_id = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000";
@@ -14,7 +14,7 @@ fun verify_merkle_proof_with_single_node_test() {
 }
 
 #[test]
-fun verify_merkle_proof_with_multiple_node_test() {
+fun verify_merkle_proof_with_multiple_node_happy_case() {
     let root = x"e54435f50bfc776b8f3d9ac047963ee6bdddd8d40b69236b4d97acb52a1fdce4";
     let proof = vector[
         x"7f27c8469739fe2bcccc60678924b6f9f0c48b7a0c8d5383ec3918adf75b2f8e",
@@ -32,7 +32,7 @@ fun verify_merkle_proof_with_multiple_node_test() {
 }
 
 #[test]
-fun verify_merkle_proof_with_invalid_proof_test() {
+fun verify_merkle_proof_with_invalid_proof_should_fail() {
     // ported from summa-tx
     // https://github.com/summa-tx/bitcoin-spv/blob/master/solidity/test/ViewSPV.test.js#L44
     // https://github.com/summa-tx/bitcoin-spv/blob/master/testVectors.json#L1114

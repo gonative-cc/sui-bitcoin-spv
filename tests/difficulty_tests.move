@@ -20,7 +20,7 @@ fun is_equal_target(x: u256, y: u256): bool {
 }
 
 #[test]
-fun retarget_algorithm_test() {
+fun retarget_algorithm_happy_cases() {
     let p = params::mainnet();
 
     // sources: https://learnmeabitcoin.com/explorer/block/00000000000000000002819359a9af460f342404bec23e7478512a619584083b
@@ -57,7 +57,7 @@ fun retarget_algorithm_test() {
 }
 
 #[test]
-fun test_difficulty_computation_mainnet() {
+fun difficulty_computation_mainnet_happy_cases() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
@@ -112,7 +112,7 @@ fun test_difficulty_computation_mainnet() {
 }
 
 #[test]
-fun test_difficulty_computation_regtest() {
+fun difficulty_computation_regtest_happy_case() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 

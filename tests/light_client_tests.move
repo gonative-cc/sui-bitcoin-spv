@@ -128,9 +128,8 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
     new_light_client(params::mainnet(), start_block, headers, 0, 8, ctx)
 }
 
-#[test]
-#[expected_failure(abort_code = EInvalidStartHeight)]
-fun test_init_light_client_wrong_start_height() {
+#[test, expected_failure(abort_code = EInvalidStartHeight)]
+fun init_light_client_wrong_start_height_should_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -145,7 +144,7 @@ fun test_init_light_client_wrong_start_height() {
 }
 
 #[test]
-fun test_init_light_client() {
+fun init_light_client_happy_case() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -183,7 +182,7 @@ fun test_set_get_block_happy_case() {
 }
 
 #[test, expected_failure(abort_code = sui::dynamic_field::EFieldDoesNotExist)]
-fun test_set_get_block_failed_case() {
+fun set_get_block_doesnot_exist_should_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -196,7 +195,7 @@ fun test_set_get_block_failed_case() {
 }
 
 #[test]
-fun test_insert_header_happy_cases() {
+fun insert_header_happy_cases() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
@@ -259,7 +258,7 @@ fun test_insert_header_happy_cases() {
 // X-Y-Z-A
 //     \-A
 #[test, expected_failure(abort_code = EWrongParentBlock)]
-fun test_insert_headers_that_dont_form_a_chain() {
+fun insert_headers_that_dont_from_a_chain_should_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
 
@@ -282,7 +281,7 @@ fun test_insert_headers_that_dont_form_a_chain() {
 }
 
 #[test, expected_failure(abort_code = EWrongParentBlock)]
-fun test_insert_header_failed_block_hash_not_match() {
+fun insert_header_block_hash_not_match_should_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
@@ -298,7 +297,7 @@ fun test_insert_header_failed_block_hash_not_match() {
 }
 
 #[test, expected_failure(abort_code = EDifficultyNotMatch)]
-fun test_insert_header_failed_difficulty_not_match() {
+fun insert_header_failed_difficulty_not_match_should_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
@@ -313,7 +312,7 @@ fun test_insert_header_failed_difficulty_not_match() {
 }
 
 #[test, expected_failure(abort_code = ETimeTooOld)]
-fun test_insert_header_failed_timestamp_too_old() {
+fun insert_header_failed_timestamp_too_old_should_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());

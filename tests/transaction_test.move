@@ -7,7 +7,7 @@ use bitcoin_spv::transaction::{make_transaction, parse_output};
 use std::unit_test::assert_eq;
 
 #[test]
-fun decoded_transaction_tests() {
+fun decoded_transaction_happy_cases() {
     // Tx: dc7ed74b93823c33544436cda1ea66761d708aafe08b80cd69c4f42d049a703c (Height 303,699)
     // from mainnet
 
@@ -47,7 +47,7 @@ fun decoded_transaction_tests() {
 }
 
 #[test]
-fun pkh_script_tests() {
+fun pkh_script_happy_cases() {
     let output = &parse_output(100, x"76a91455ae51684c43435da751ac8d2173b2652eb6410588ac");
     assert!(output.is_P2PHK() == true);
     assert_eq!(output.extract_public_key_hash(), x"55ae51684c43435da751ac8d2173b2652eb64105");
@@ -63,7 +63,7 @@ fun pkh_script_tests() {
 }
 
 #[test]
-fun op_return_script_tests() {
+fun op_return_script_happy_cases() {
     let data = vector[
         x"6a0b68656c6c6f20776f726c64",
         x"6a",

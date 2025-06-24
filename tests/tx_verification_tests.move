@@ -46,7 +46,7 @@ fun sample_data(): (u64, vector<u8>, vector<vector<u8>>, u64) {
 }
 
 #[test]
-fun test_verify_tx() {
+fun verify_tx_happy_cases() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let lc = new_lc_for_test(scenario.ctx());

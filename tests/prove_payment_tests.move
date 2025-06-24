@@ -9,7 +9,7 @@ use bitcoin_spv::transaction::make_transaction;
 use sui::test_scenario;
 
 #[test]
-fun test_verify_payment() {
+fun verify_payment_happy_cases() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
@@ -68,7 +68,7 @@ fun test_verify_payment() {
 }
 
 #[test]
-fun test_verify_payment_with_P2WPHK_output() {
+fun verify_payment_with_P2WPHK_output_happy_cases() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 0;
@@ -111,9 +111,8 @@ fun test_verify_payment_with_P2WPHK_output() {
     scenario.end();
 }
 
-#[test]
-#[expected_failure(abort_code = ETxNotInBlock)]
-fun test_verify_payment_fails() {
+#[test, expected_failure(abort_code = ETxNotInBlock)]
+fun verify_payment_for_tx_not_in_block_shoul_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;
@@ -164,9 +163,8 @@ fun test_verify_payment_fails() {
     scenario.end();
 }
 
-#[test]
-#[expected_failure(abort_code = ETxNotInBlock)]
-fun test_verify_payment_block_not_finalize() {
+#[test, expected_failure(abort_code = ETxNotInBlock)]
+fun verify_payment_on_block_not_finalize_should_fail() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let start_block_height = 325001;

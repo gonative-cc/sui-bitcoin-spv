@@ -106,9 +106,8 @@ fun insert_headers_switch_fork_tests() {
     scenario.end();
 }
 
-#[test]
-#[expected_failure(abort_code = EForkChainWorkTooSmall)]
-fun insert_headers_fork_not_enought_power_tests() {
+#[test, expected_failure(abort_code = EForkChainWorkTooSmall)]
+fun insert_headers_fork_not_enought_power_should_fail() {
     let headers = vector[
         // fork starts here
         // but not enough chain power
@@ -139,9 +138,8 @@ fun insert_headers_fork_not_enought_power_tests() {
     scenario.end();
 }
 
-#[test]
-#[expected_failure(abort_code = EBlockNotFound)]
-fun insert_headers_block_doesnot_exist() {
+#[test, expected_failure(abort_code = EBlockNotFound)]
+fun insert_headers_block_does_not_exist_should_fail() {
     // we modifed the previous hash
     // previous hash = db0338a432b1242c3bd22c245583e31788feaa6cb189673877b92f2a34eaf460 = sha256("This is null")
     let headers = vector[
@@ -157,7 +155,7 @@ fun insert_headers_block_doesnot_exist() {
 }
 
 #[test]
-fun cleanup_tests() {
+fun cleanup_happy_cases() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -184,7 +182,7 @@ fun cleanup_tests() {
 }
 
 #[test]
-fun test_reorg() {
+fun reorg_happy_case() {
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();

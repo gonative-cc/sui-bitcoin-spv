@@ -27,7 +27,7 @@ fun nth_element_happy_cases() {
 }
 
 #[test, expected_failure(abort_code = EOutBoundIndex)]
-fun test_nth_element_outbound_index() {
+fun nth_element_outbound_index_should_fail() {
     nth_element(&mut vector[], 1);
 }
 

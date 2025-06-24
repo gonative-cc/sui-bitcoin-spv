@@ -8,7 +8,7 @@ use bitcoin_spv::btc_math::to_u32;
 use std::unit_test::assert_eq;
 
 #[test]
-fun block_header_test() {
+fun block_header_happy_case() {
     // data get from block 0000000000000000000293bf6e86820d867cc4ca13cd98326af85bb3bebab9ac from mainnet
     // or block 794143
     let raw_header =
@@ -36,7 +36,7 @@ fun block_header_test() {
 }
 
 #[test]
-fun pow_check_happy_test() {
+fun pow_check_happy_cases() {
     // https://learnmeabitcoin.com/explorer/block/00000000f01df1dbc52bce6d8d31167a8fef76f1a8eb67897469cf92205e806b
     // {
     //     "version": "01000000",
@@ -68,7 +68,7 @@ fun pow_check_happy_test() {
 
 #[test]
 #[expected_failure(abort_code = EPoW)] // ENotFound is a constant defined in the module
-fun pow_check_failure_test() {
+fun pow_check_on_header_not_satisfy_pow_should_fail() {
     // we get block header from https://learnmeabitcoin.com/explorer/block/000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f. However, we set nonce = 0x00000000 which is make pow_check failed
     let header = new_block_header(
         x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d00000000",
@@ -77,12 +77,12 @@ fun pow_check_failure_test() {
 }
 
 #[test, expected_failure(abort_code = EInvalidBlockHeaderSize)]
-fun fails_by_invalid_block_header_size_too_short_test() {
+fun block_header_size_too_short_should_fail() {
     new_block_header(x"0123456789abcdef");
 }
 
 #[test, expected_failure(abort_code = EInvalidBlockHeaderSize)]
-fun fails_by_invalid_block_header_size__too_long_test() {
+fun block_header_size_too_long_should_fail() {
     new_block_header(
         x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d00000000ffff",
     );
