@@ -12,6 +12,7 @@ use bitcoin_spv::light_client::{
     calc_next_required_difficulty
 };
 use bitcoin_spv::params;
+use std::unit_test::assert_eq;
 use sui::test_scenario;
 
 #[test_only]
@@ -32,8 +33,8 @@ fun retarget_algorithm_happy_cases() {
     let expected = bits_to_target(0x17028c61);
     let second_timestamp = 0x67841db6;
     let actual = retarget_algorithm(&p, previous_target, first_timestamp, second_timestamp);
-    assert!(actual == 244084856254285558118414851546990328505140483644194816);
-    assert!(is_equal_target(expected, actual));
+    assert_eq!(actual, 244084856254285558118414851546990328505140483644194816);
+    assert_eq!(is_equal_target(expected, actual), true);
 
     // source:https://learnmeabitcoin.com/explorer/block/00000000000000000002819359a9af460f342404bec23e7478512a619584083b
     let previous_target = bits_to_target(0x1703098c);
@@ -41,7 +42,7 @@ fun retarget_algorithm_happy_cases() {
     let expected = bits_to_target(0x17032f14);
     let second_timestamp = 0x66f466dc;
     let actual = retarget_algorithm(&p, previous_target, first_timestamp, second_timestamp);
-    assert!(is_equal_target(expected, actual));
+    assert_eq!(is_equal_target(expected, actual), true);
 
     // overflow tests
     // 2000ffff
@@ -51,7 +52,7 @@ fun retarget_algorithm_happy_cases() {
     // second_timestamp - first_timestamp always greater than target_timespan * 4
     let actual = retarget_algorithm(&p, previous_target, first_timestamp, second_timestamp);
     let expected = 26959946667150639794667015087019630673637144422540572481103610249215;
-    assert!(actual == expected);
+    assert_eq!(actual, expected);
 
     sui::test_utils::destroy(p);
 }
@@ -75,8 +76,9 @@ fun difficulty_computation_mainnet_happy_cases() {
 
     let block_hash = lc.get_block_hash_by_height(0);
     // The next difficulty at genesis block is equal power of limit.
-    assert!(
-        calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(block_hash)) == lc.params().power_limit_bits(),
+    assert_eq!(
+        calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(block_hash)),
+        lc.params().power_limit_bits(),
     );
 
     // check retarget difficulty
@@ -106,7 +108,7 @@ fun difficulty_computation_mainnet_happy_cases() {
     let new_bits = calc_next_required_difficulty(&lc, lc.get_light_block_by_hash(last_block_hash));
 
     // 0x1703098c is bits of block 860832
-    assert!(new_bits == 0x1703098c);
+    assert_eq!(new_bits, 0x1703098c);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -131,7 +133,7 @@ fun difficulty_computation_regtest_happy_case() {
 
     let block = lc.get_light_block_by_height(10);
     let new_bits = lc.calc_next_required_difficulty(block);
-    assert!(new_bits == lc.params().power_limit_bits());
+    assert_eq!(new_bits, lc.params().power_limit_bits());
     sui::test_utils::destroy(lc);
     scenario.end();
 }

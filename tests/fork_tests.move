@@ -94,14 +94,14 @@ fun insert_headers_switch_fork_tests() {
     headers.do!(|h| {
         let inserted_block_hash = lc.get_block_hash_by_height(insert_point);
         let inserted_block = lc.get_light_block_by_hash(inserted_block_hash);
-        assert!(inserted_block_hash == new_block_header(h).block_hash());
-        assert!(inserted_block.height() == insert_point);
-        assert!(inserted_block.header().block_hash() == inserted_block_hash);
+        assert_eq!(inserted_block_hash, new_block_header(h).block_hash());
+        assert_eq!(inserted_block.height(), insert_point);
+        assert_eq!(inserted_block.header().block_hash(), inserted_block_hash);
         insert_point = insert_point + 1;
     });
 
-    assert!(lc.head().height() == insert_point - 1);
-    assert!(lc.head().header() == last_header);
+    assert_eq!(lc.head().height(), insert_point - 1);
+    assert_eq!(*lc.head().header(), last_header);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -170,9 +170,9 @@ fun cleanup_happy_cases() {
 
     while (i < headers.length()) {
         if (i <= height) {
-            assert!(lc.exist(headers[i].block_hash()));
+            assert_eq!(lc.exist(headers[i].block_hash()), true);
         } else {
-            assert!(!lc.exist(headers[i].block_hash()));
+            assert_eq!(lc.exist(headers[i].block_hash()), false);
         };
         i = i + 1;
     };

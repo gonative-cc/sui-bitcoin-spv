@@ -6,6 +6,7 @@ module bitcoin_spv::verify_payment_tests;
 use bitcoin_spv::light_client::{new_light_client, ETxNotInBlock};
 use bitcoin_spv::params;
 use bitcoin_spv::transaction::make_transaction;
+use std::unit_test::assert_eq;
 use sui::test_scenario;
 
 #[test]
@@ -60,9 +61,9 @@ fun verify_payment_happy_cases() {
         x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
     );
 
-    assert!(tx_id == x"754e4a84a89272e24d8968a37222648ced57d533e4d8cf2b24980658dd16fb6d");
-    assert!(amount == 412133);
-    assert!(message == x"68656c6c6f20776f726c64");
+    assert_eq!(tx_id, x"754e4a84a89272e24d8968a37222648ced57d533e4d8cf2b24980658dd16fb6d");
+    assert_eq!(amount, 412133);
+    assert_eq!(message, x"68656c6c6f20776f726c64");
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -104,9 +105,9 @@ fun verify_payment_with_P2WPHK_output_happy_cases() {
         x"e6228f7a5ee6b15c7cccfd9f9cb7e86992610845",
     );
 
-    assert!(tx_id == x"df88e4ad22477438db0a80979cf3dea033aa968c97fe06270f8864941a30649b");
-    assert!(amount == 412133);
-    assert!(message == x"68656c6c6f20776f726c64");
+    assert_eq!(tx_id, x"df88e4ad22477438db0a80979cf3dea033aa968c97fe06270f8864941a30649b");
+    assert_eq!(amount, 412133);
+    assert_eq!(message, x"68656c6c6f20776f726c64");
     sui::test_utils::destroy(lc);
     scenario.end();
 }

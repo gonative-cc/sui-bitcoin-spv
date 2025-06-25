@@ -3,6 +3,7 @@
 module bitcoin_spv::merkle_tree_tests;
 
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
+use std::unit_test::assert_eq;
 
 #[test]
 fun verify_merkle_proof_with_single_node_happy_case() {
@@ -10,7 +11,7 @@ fun verify_merkle_proof_with_single_node_happy_case() {
     let proof = vector[];
     let tx_id = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000";
     let tx_index = 0;
-    assert!(verify_merkle_proof(root, proof, tx_id, tx_index));
+    assert_eq!(verify_merkle_proof(root, proof, tx_id, tx_index), true);
 }
 
 #[test]
@@ -28,7 +29,7 @@ fun verify_merkle_proof_with_multiple_node_happy_case() {
     ];
     let tx_id = x"3236cb8910885835403dded03a20e7c36437ce35f942887ed12393405b622442";
     let tx_index = 0;
-    assert!(verify_merkle_proof(root, proof, tx_id, tx_index));
+    assert_eq!(verify_merkle_proof(root, proof, tx_id, tx_index), true);
 }
 
 #[test]
@@ -51,5 +52,5 @@ fun verify_merkle_proof_with_invalid_proof_should_fail() {
         x"60c109b187d64571efbaa8047be85821f8e67e0e85f2f5894bc63d00c2ed9d64",
     ];
     let tx_index = 0;
-    assert!(verify_merkle_proof(root, proof, tx_id, tx_index) == false);
+    assert_eq!(verify_merkle_proof(root, proof, tx_id, tx_index), false);
 }

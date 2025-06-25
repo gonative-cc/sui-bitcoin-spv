@@ -147,7 +147,7 @@ fun compact_size_happy_cases() {
     let mut i = 0;
     while (i < inputs.length()) {
         let (x, y) = compact_size(inputs[i], 0);
-        assert!(x == outputs[i][0] && y == outputs[i][1]);
+        assert_eq!(x == outputs[i][0] && y == outputs[i][1], true);
         i = i + 1;
     }
 }

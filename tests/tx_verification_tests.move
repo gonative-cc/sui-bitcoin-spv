@@ -5,6 +5,7 @@ module bitcoin_spv::tx_verification_tests;
 
 use bitcoin_spv::light_client::{new_light_client, LightClient};
 use bitcoin_spv::params;
+use std::unit_test::assert_eq;
 use sui::test_scenario;
 
 #[test_only]
@@ -53,27 +54,27 @@ fun verify_tx_happy_cases() {
 
     let (height, tx_id, proof, tx_index) = sample_data();
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
-    assert!(res == true);
+    assert_eq!(res, true);
 
     let (height, tx_id, proof, _) = sample_data();
     let tx_index = 100;
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
-    assert!(res == false);
+    assert_eq!(res, false);
 
     let (height, _, proof, tx_index) = sample_data();
     let tx_id = x"010203";
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
-    assert!(res == false);
+    assert_eq!(res, false);
 
     let (height, tx_id, _, tx_index) = sample_data();
     let proof = vector[];
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
-    assert!(res == false);
+    assert_eq!(res, false);
 
     let (_, tx_id, proof, tx_index) = sample_data();
     let height = 858817; // this block not finalize yet.
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
-    assert!(res == false);
+    assert_eq!(res, false);
 
     sui::test_utils::destroy(lc);
     scenario.end();
