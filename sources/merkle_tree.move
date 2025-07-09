@@ -15,7 +15,7 @@ module bitcoin_spv::merkle_tree {
         btc_hash(z)
     }
 
-    /// verify tx_id belong to merkle tree
+    /// Verifies if tx_id belongs to the merkle tree
     public fun verify_merkle_proof(
         root: vector<u8>,
         merkle_path: vector<vector<u8>>,
