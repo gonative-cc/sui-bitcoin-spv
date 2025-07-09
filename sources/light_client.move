@@ -28,8 +28,7 @@ const ETimeTooOld: vector<u8> =
 #[error]
 const EHeaderListIsEmpty: vector<u8> = b"The provided list of headers is empty";
 #[error]
-const EBlockNotFound: vector<u8> =
-    b"The specified block could not be found in the light client";
+const EBlockNotFound: vector<u8> = b"The specified block could not be found in the light client";
 #[error]
 const EForkChainWorkTooSmall: vector<u8> =
     b"The proposed fork has less work than the current chain";
@@ -40,8 +39,7 @@ const ETxNotInBlock: vector<u8> =
 const EInvalidStartHeight: vector<u8> =
     b"The start height must be a multiple of the retarget period (e.g 2016 for mainnet)";
 #[error]
-const EVersionMismatch: vector<u8> =
-    b"The package has been updated. You are using a wrong version";
+const EVersionMismatch: vector<u8> = b"The package has been updated. You are using a wrong version";
 #[error]
 const EAlreadyUpdated: vector<u8> =
     b"The package version has been already updated to the latest one";
