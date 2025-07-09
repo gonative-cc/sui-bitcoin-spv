@@ -427,7 +427,12 @@ public fun calc_next_required_difficulty(lc: &LightClient, parent_block: &LightB
     let first_timestamp = first_header.timestamp() as u64;
     let last_timestamp = parent_block.header().timestamp() as u64;
 
-    let new_target = retarget_algorithm(params, previous_target, first_timestamp, last_timestamp);
+    let new_target = retarget_algorithm(
+        params,
+        previous_target,
+        first_timestamp,
+        last_timestamp,
+    );
     let new_bits = target_to_bits(new_target);
     new_bits
 }
