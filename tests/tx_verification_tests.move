@@ -62,7 +62,7 @@ fun verify_tx_happy_cases() {
     assert_eq!(res, false);
 
     let (height, _, proof, tx_index) = sample_data();
-    let tx_id = x"010203";
+    let tx_id = vector::tabulate!(32, |_| 0);
     let res = lc.verify_tx(height, tx_id, proof, tx_index);
     assert_eq!(res, false);
 

@@ -1,5 +1,5 @@
 {
-    "printWidth": 96,
+    "printWidth": 100,
     "wrapComments": false,
     "useModuleLabel": true,
     "autoGroupImports": "module",

@@ -2,7 +2,7 @@
 #[test_only]
 module bitcoin_spv::merkle_tree_tests;
 
-use bitcoin_spv::merkle_tree::verify_merkle_proof;
+use bitcoin_spv::merkle_tree::{verify_merkle_proof, EInvalidMerkleHashLengh};
 use std::unit_test::assert_eq;
 
 #[test]
@@ -53,4 +53,31 @@ fun verify_merkle_proof_with_invalid_proof_should_fail() {
     ];
     let tx_index = 0;
     assert_eq!(verify_merkle_proof(root, proof, tx_id, tx_index), false);
+}
+
+#[test, expected_failure(abort_code = EInvalidMerkleHashLengh)]
+fun tx_id_invalid_length_should_fail() {
+    let root = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000";
+    let proof = vector[];
+    let tx_id = x""; // invalid length
+    let tx_index = 0;
+    verify_merkle_proof(root, proof, tx_id, tx_index);
+}
+
+#[test, expected_failure(abort_code = EInvalidMerkleHashLengh)]
+fun root_invalid_length_should_fail() {
+    let root = x"";
+    let proof = vector[];
+    let tx_id = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000"; // invalid length
+    let tx_index = 0;
+    verify_merkle_proof(root, proof, tx_id, tx_index);
+}
+
+#[test, expected_failure(abort_code = EInvalidMerkleHashLengh)]
+fun merkle_path_element_invalid_length_should_fail() {
+    let root = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000";
+    let proof = vector[x"01"];
+    let tx_id = x"acb9babeb35bf86a3298cd13cac47c860d82866ebf9302000000000000000000"; // invalid length
+    let tx_index = 1;
+    verify_merkle_proof(root, proof, tx_id, tx_index);
 }
