@@ -35,29 +35,41 @@ fun to_u32_invalid_length_should_fail() {
 fun to_u256_happy_cases() {
     //  Bytes vector is in little-endian format.
     assert_eq!(
-        btc_math::to_u256(x"0000000000000000000000000000000000000000000000000000000000000000"),
+        btc_math::to_u256(
+            x"0000000000000000000000000000000000000000000000000000000000000000",
+        ),
         0,
     );
     assert_eq!(
-        btc_math::to_u256(x"0100000000000000000000000000000000000000000000000000000000000000"),
+        btc_math::to_u256(
+            x"0100000000000000000000000000000000000000000000000000000000000000",
+        ),
         1,
     );
     assert_eq!(
-        btc_math::to_u256(x"ff00000000000000000000000000000000000000000000000000000000000000"),
+        btc_math::to_u256(
+            x"ff00000000000000000000000000000000000000000000000000000000000000",
+        ),
         255,
     );
     assert_eq!(
-        btc_math::to_u256(x"0001000000000000000000000000000000000000000000000000000000000000"),
+        btc_math::to_u256(
+            x"0001000000000000000000000000000000000000000000000000000000000000",
+        ),
         256,
     );
     // 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff  = 2^256 - 1 = 2^255 - 1 + 2^255.
     // we avoid overflow when compare 2 number in this case
     assert_eq!(
-        btc_math::to_u256(x"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"),
+        btc_math::to_u256(
+            x"ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        ),
         (1 << 255) - 1 + (1 << 255),
     );
     assert_eq!(
-        btc_math::to_u256(x"0102030400000000000000000000000000000000000000000000000000000000"),
+        btc_math::to_u256(
+            x"0102030400000000000000000000000000000000000000000000000000000000",
+        ),
         67305985,
     );
 }

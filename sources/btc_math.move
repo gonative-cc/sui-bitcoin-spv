@@ -202,7 +202,10 @@ public fun u256_to_compact(number: u256): vector<u8> {
 fun bytes_of_happy_cases() {
     assert_eq!(bytes_of(1), 1);
     assert_eq!(bytes_of(7), 1);
-    assert_eq!(bytes_of(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff), 32);
+    assert_eq!(
+        bytes_of(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff),
+        32,
+    );
 }
 
 #[test]
@@ -210,7 +213,9 @@ fun bytes_of_happy_cases() {
 fun get_last_32_bits_happy_cases() {
     assert_eq!(get_last_32_bits(0), 0);
     assert_eq!(
-        get_last_32_bits(0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff),
+        get_last_32_bits(
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
+        ),
         0xffffffff,
     );
     assert_eq!(get_last_32_bits(0x0123456789), 0x23456789);
