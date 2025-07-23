@@ -3,6 +3,7 @@
 module bitcoin_spv::merkle_tree;
 
 use bitcoin_spv::btc_math::btc_hash;
+use std::hash::sha2_256;
 
 #[error]
 const EInvalidMerkleHashLengh: vector<u8> = b"Invalid merkle element hash length";
@@ -29,10 +30,12 @@ public fun verify_merkle_proof(
 
     let merkle_root = merkle_path.fold!(tx_id, |child_hash, merkle_value| {
         assert!(merkle_value.length() == HASH_LENGTH, EInvalidMerkleHashLengh);
+
+        let h = sha2_256(merkle_value);
         let parent_hash = if (index % 2 == 1) {
-            merkle_hash(merkle_value, child_hash)
+            merkle_hash(h, child_hash)
         } else {
-            merkle_hash(child_hash, merkle_value)
+            merkle_hash(child_hash, h)
         };
         index = index >> 1;
         parent_hash
