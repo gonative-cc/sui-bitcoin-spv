@@ -15,7 +15,7 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
         x"01000000acda3db591d5c2c63e8c09e7523a5b0581707ef3e3520d6ca180000000000000701179cb9a9e0fe709cc96261b6b943b31362b61dacba94b03f9b71a06cc2eff7d1c1b4d4c86041b75962f88",
         x"010000007cb25d910aa274ad3e520e80e1e37440a7a2914b34ccd827f806030000000000fae45c19a095c8c796acf7a07257822f4e3c42c9d2ce513ceabc0188c041b6f8a21c1b4d4c86041be1dc4463",
     ];
-    // finality = 1 => first block is finalized.
+    // finality=1 => block is "final" after one confirmation.
     new_light_client(params::mainnet(), start_block, headers, 0, 1, ctx)
 }
 
@@ -59,7 +59,7 @@ fun verify_tx_happy_cases() {
     assert_eq!(res, false);
 
     // https://learnmeabitcoin.com/explorer/block/000000000003eea21d9f1b96fe87abfcd241cac75f3a2762a8f0a14c429c7901
-    // this block is not finaly
+    // finality=1, this block is not finalized in the test.
     let res = lc.verify_tx(
         height + 1,
         // coinbase tx

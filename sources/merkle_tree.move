@@ -19,14 +19,11 @@ fun merkle_hash(x: vector<u8>, y: vector<u8>): vector<u8> {
 
 /// Verifies if tx_id belongs to the merkle tree
 /// BTC doesn't recognize different between 64 bytes Tx and internal merkle tree node, that reduces the security of SPV proofs.
-/// For more details:
-/// - https://bitslog.com/2018/06/09/leaf-node-weakness-in-bitcoin-merkle-tree-design
 /// We modified the merkle tree verify algorithm inspire by this solution:
 /// - https://bitslog.com/2018/08/21/simple-change-to-the-bitcoin-merkleblock-command-to-protect-from-leaf-node-weakness-in-transaction-merkle-tree/
-/// The main idea instead of compute new merkle node = HASH256(X||Y) with X, Y is children nodes.
-/// We compute new merkle node = HASH256(SHA256(M), Y) which X = SHA256(M) or HASH256(X, SHA256(N)),
-/// depends on the current not is right or left.
-/// Send N(M) make the space is huge for attacker.
+/// Gist: instead of computing new merkle node = HASH256(X||Y) where X, Y is children nodes;
+/// we compute new merkle node = HASH256(SHA256(X), Y) or node=HASH256(X, SHA256(Y)),
+/// depending if we are coming from left or right.
 /// The trade off here is we need more hash execution.
 public fun verify_merkle_proof(
     root: vector<u8>,
