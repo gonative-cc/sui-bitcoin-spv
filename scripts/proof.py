@@ -99,6 +99,8 @@ def main():
         data = json.load(file)
     tx_hashes = data["tx"]
 
+    # Transaction index we downloaded from learnmeabitcoin is big-endian format.
+    # We need to convert it to little-endian
     all_hashes = list(map(big_endian_to_little_endian, tx_hashes))
     single_hashes = list(map(big_endian_to_little_endian, tx_hashes))
 
