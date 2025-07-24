@@ -546,6 +546,7 @@ public fun verify_payment(
     let mut amount = 0;
     let mut op_return_msg = vector[];
     let tx_id = transaction.tx_id();
+
     assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
     let outputs = transaction.outputs();
     outputs.do!(|o| {
