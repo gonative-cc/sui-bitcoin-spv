@@ -40,6 +40,5 @@ public fun verify_merkle_proof(
         index = index >> 1;
         parent_hash
     });
-
     merkle_root == root
 }
