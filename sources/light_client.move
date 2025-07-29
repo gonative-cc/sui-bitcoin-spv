@@ -9,7 +9,6 @@ use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::params::{Self, Params, is_correct_init_height};
 use bitcoin_spv::utils::nth_element;
 use btc_parser::tx::Transaction;
-use sui::dynamic_field as df;
 use sui::event;
 use sui::table::{Self, Table};
 
@@ -68,6 +67,7 @@ public struct LightClient has key, store {
     head_height: u64,
     head_hash: vector<u8>,
     light_block_by_hash: Table<vector<u8>, LightBlock>,
+    block_hash_by_height: Table<u64, vector<u8>>,
     finality: u64,
 }
 
@@ -100,6 +100,7 @@ public fun new_light_client(
         head_height: 0,
         head_hash: vector[],
         light_block_by_hash: table::new(ctx),
+        block_hash_by_height: table::new(ctx),
         finality,
     };
 
@@ -238,15 +239,18 @@ public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<
     lc.light_block_by_hash.remove(block_hash);
 }
 
+/// overwrite if height exist before
 public(package) fun set_block_hash_by_height(
     lc: &mut LightClient,
     height: u64,
     block_hash: vector<u8>,
 ) {
-    let id = &mut lc.id;
-
-    df::remove_if_exists<u64, vector<u8>>(id, height);
-    df::add(id, height, block_hash);
+    if (lc.block_hash_by_height.contains(height)) {
+        let h_mut = lc.block_hash_by_height.borrow_mut(height);
+        *h_mut = block_hash;
+    } else {
+        lc.block_hash_by_height.add(height, block_hash);
+    }
 }
 
 /// Appends light block to the current branch and overwrites the current blockchain head.
@@ -476,7 +480,7 @@ public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
 public fun get_block_hash_by_height(lc: &LightClient, height: u64): vector<u8> {
     assert!(lc.version == VERSION, EVersionMismatch);
     // copy the block hash
-    *df::borrow<u64, vector<u8>>(&lc.id, height)
+    *lc.block_hash_by_height.borrow(height)
 }
 
 public fun get_light_block_by_height(lc: &LightClient, height: u64): &LightBlock {
