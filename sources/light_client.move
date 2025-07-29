@@ -11,6 +11,7 @@ use bitcoin_spv::utils::nth_element;
 use btc_parser::tx::Transaction;
 use sui::dynamic_field as df;
 use sui::event;
+use sui::table::{Self, Table};
 
 /// Package version
 const VERSION: u32 = 1;
@@ -66,6 +67,7 @@ public struct LightClient has key, store {
     params: Params,
     head_height: u64,
     head_hash: vector<u8>,
+    light_block_by_hash: Table<vector<u8>, LightBlock>,
     finality: u64,
 }
 
@@ -97,6 +99,7 @@ public fun new_light_client(
         params: params,
         head_height: 0,
         head_hash: vector[],
+        light_block_by_hash: table::new(ctx),
         finality,
     };
 
@@ -228,11 +231,11 @@ public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>)
 
 public(package) fun insert_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
-    df::add(&mut lc.id, block_hash, lb);
+    lc.light_block_by_hash.add(block_hash, lb);
 }
 
 public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<u8>) {
-    df::remove<_, LightBlock>(&mut lc.id, block_hash);
+    lc.light_block_by_hash.remove(block_hash);
 }
 
 public(package) fun set_block_hash_by_height(
@@ -241,6 +244,7 @@ public(package) fun set_block_hash_by_height(
     block_hash: vector<u8>,
 ) {
     let id = &mut lc.id;
+
     df::remove_if_exists<u64, vector<u8>>(id, height);
     df::add(id, height, block_hash);
 }
@@ -353,7 +357,7 @@ public fun head_hash(lc: &LightClient): vector<u8> {
 /// Returns blockchain head light block (latest, not confirmed block).
 public fun head(lc: &LightClient): &LightBlock {
     assert!(lc.version == VERSION, EVersionMismatch);
-    lc.get_light_block_by_hash(lc.head_hash)
+    lc.light_block_by_hash.borrow(lc.head_hash)
 }
 
 /// Returns latest finalized_block height
@@ -460,13 +464,12 @@ fun calc_past_median_time(lc: &LightClient, lb: &LightBlock): u32 {
 
 public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &LightBlock {
     assert!(lc.version == VERSION, EVersionMismatch);
-    // TODO: Can we use option type?
-    df::borrow(&lc.id, block_hash)
+    lc.light_block_by_hash.borrow(block_hash)
 }
 
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
     assert!(lc.version == VERSION, EVersionMismatch);
-    let exist = df::exists_(&lc.id, block_hash);
+    let exist = lc.light_block_by_hash.contains(block_hash);
     exist
 }
 
