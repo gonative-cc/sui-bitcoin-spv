@@ -56,7 +56,7 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
 
 #[test]
 fun insert_headers_switch_fork_tests() {
-    let headers = vector[
+    let raw_headers = vector[
         //         {
         //     "version": "00000030",
         //     "previous_block_hash": "7306011c31d1f14a422c50c70cbedb1233757505cb887d82d51ae3f27e23062d",
@@ -74,6 +74,8 @@ fun insert_headers_switch_fork_tests() {
         x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000",
     ];
 
+    let headers = raw_headers.map!(|h| new_block_header(h));
+
     // calc_work = 1 for each block header
     // Fork visualization:
     // H0->...->H12->H13->H13->H15->H16->H17
@@ -84,8 +86,8 @@ fun insert_headers_switch_fork_tests() {
 
     let (mut lc, _) = new_lc_for_test(ctx);
 
-    let first_header = new_block_header(headers[0]);
-    let last_header = new_block_header(headers[headers.length() - 1]);
+    let first_header = headers[0];
+    let last_header = headers[headers.length() - 1];
     let mut insert_point = lc.get_light_block_by_hash(first_header.parent()).height() + 1;
 
     lc.insert_headers(headers);
@@ -94,7 +96,7 @@ fun insert_headers_switch_fork_tests() {
     headers.do!(|h| {
         let inserted_block_hash = lc.get_block_hash_by_height(insert_point);
         let inserted_block = lc.get_light_block_by_hash(inserted_block_hash);
-        assert_eq!(inserted_block_hash, new_block_header(h).block_hash());
+        assert_eq!(inserted_block_hash, h.block_hash());
         assert_eq!(inserted_block.height(), insert_point);
         assert_eq!(inserted_block.header().block_hash(), inserted_block_hash);
         insert_point = insert_point + 1;
@@ -108,7 +110,7 @@ fun insert_headers_switch_fork_tests() {
 
 #[test, expected_failure(abort_code = EForkChainWorkTooSmall)]
 fun insert_headers_fork_not_enought_power_should_fail() {
-    let headers = vector[
+    let raw_headers = vector[
         // fork starts here
         // but not enough chain power
         // {
@@ -125,6 +127,8 @@ fun insert_headers_fork_not_enought_power_should_fail() {
         x"000000306052592f4f0e4886a0eca2c1d154e8b9761e011b4f7b3a00908e2a830f7f6c6a4e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a9dc5b167ffff7f2001000000",
         x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
     ];
+
+    let headers = raw_headers.map!(|h| new_block_header(h));
     // calc_work = 1 for each block header
     // Fork visualization:
     // H0->...->H12->H13->H13->H15->H16->H17
@@ -142,9 +146,10 @@ fun insert_headers_fork_not_enought_power_should_fail() {
 fun insert_headers_block_does_not_exist_should_fail() {
     // we modifed the previous hash
     // previous hash = db0338a432b1242c3bd22c245583e31788feaa6cb189673877b92f2a34eaf460 = sha256("This is null")
-    let headers = vector[
+    let raw_headers = vector[
         x"00000030db0338a432b1242c3bd22c245583e31788feaa6cb189673877b92f2a34eaf4606be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
     ];
+    let headers = raw_headers.map!(|h| new_block_header(h));
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -214,7 +219,7 @@ fun reorg_happy_case() {
     // previous_power = 2, just follow the context in test
     let mut lc = new_light_client(params::mainnet(), 1, headers, 2, 8, ctx);
 
-    let forks = vector[
+    let raw_forks = vector[
         // {
         //     "version": "04000000",
         //     "previous_block_hash": "43f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b21",
@@ -240,21 +245,20 @@ fun reorg_happy_case() {
         x"0400000061f68cf3904a77101fe0a41cfc605d40564bdf693712a8684fded6b01b7ecb5ca8f039285b833d6c93e42d714669e90de06c143d11fba13cd66e1f2735eb219b302e8653ffff7f20f2ffffef",
     ];
 
+    let forks = raw_forks.map!(|f| new_block_header(f));
     // Fork visualization:
     // H0->H1->H2->H3->H4->...->H9: chain_work = 22
     //             | ->F0->...->F15: chain_work = 42
     // update light client with better chain.
     // the fork start at block 43f67f2fa04b9de8d29a29fab30e1468db5036f31243729a09c40fd2854f8b21
     // or headers[4]
+
     lc.insert_headers(forks);
 
     // validate new chain after update
     let head = lc.head();
     // new chain head should identical last header in `forks`.
-    assert_eq!(
-        head.header().block_hash(),
-        new_block_header(forks[forks.length() - 1]).block_hash(),
-    );
+    assert_eq!(head.header().block_hash(), forks[forks.length() - 1].block_hash());
     assert_eq!(head.chain_work(), 42);
 
     sui::test_utils::destroy(lc);
