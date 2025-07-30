@@ -173,18 +173,18 @@ public fun init_light_client_network(
 /// create a heavier chain or fork.
 /// Header serialization reference:
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>) {
+public fun insert_headers(lc: &mut LightClient, headers: vector<BlockHeader>) {
     assert!(lc.version == VERSION, EVersionMismatch);
     // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
-    assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
+    assert!(!headers.is_empty(), EHeaderListIsEmpty);
 
-    let first_header = new_block_header(raw_headers[0]);
+    let first_header = headers[0];
     let head = *lc.head();
 
     let mut is_forked = false;
     if (first_header.parent() == head.header().block_hash()) {
         // extend current chain
-        lc.extend_chain(head, raw_headers);
+        lc.extend_chain(head, headers);
     } else {
         // handle a new fork
         let parent_id = first_header.parent();
@@ -205,7 +205,7 @@ public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>)
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
 
-        let fork_head = lc.extend_chain(*parent, raw_headers);
+        let fork_head = lc.extend_chain(*parent, headers);
         let fork_chain_work = fork_head.chain_work();
 
         assert!(current_chain_work < fork_chain_work, EForkChainWorkTooSmall);
@@ -312,10 +312,9 @@ public(package) fun insert_header(
 fun extend_chain(
     lc: &mut LightClient,
     parent: LightBlock,
-    raw_headers: vector<vector<u8>>,
+    headers: vector<BlockHeader>,
 ): LightBlock {
-    raw_headers.fold!(parent, |p, raw_header| {
-        let header = new_block_header(raw_header);
+    headers.fold!(parent, |p, header| {
         lc.insert_header(&p, header)
     })
 }

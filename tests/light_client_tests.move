@@ -209,13 +209,16 @@ fun insert_header_happy_cases() {
     //     "difficulty_target": "5b250317",
     //     "nonce": "80f1e351"
     // }
-    let raw_headers = vector[
-        x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351",
+    let headers = vector[
+        new_block_header(
+            x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351",
+        ),
     ];
-    lc.insert_headers(raw_headers);
+
+    lc.insert_headers(headers);
     let head_block = lc.get_light_block_by_hash(lc.head_hash()).header();
 
-    assert_eq!(*head_block, new_block_header(raw_headers[0]));
+    assert_eq!(head_block.block_hash(), headers[0].block_hash());
     assert_ref_eq!(head_block, lc.head().header());
     // {
     //     "version": "0040a320",
@@ -244,11 +247,13 @@ fun insert_header_happy_cases() {
     //     "nonce": "16c80c0d"
     // }
     let headers = vector[
-        x"006089239c7c45da6d872c93dc9e8389d52b04bdd0a824eb308002000000000000000000fb4c3ac894ebc99c7a7b76ded35ec1c719907320ab781689ba1dedca40c5a9d7c50de1668c09031716c80c0d",
+        new_block_header(
+            x"006089239c7c45da6d872c93dc9e8389d52b04bdd0a824eb308002000000000000000000fb4c3ac894ebc99c7a7b76ded35ec1c719907320ab781689ba1dedca40c5a9d7c50de1668c09031716c80c0d",
+        ),
     ];
 
     lc.insert_headers(headers);
-    assert_eq!(*lc.head().header(), new_block_header(headers[0]));
+    assert_eq!(*lc.head().header(), headers[0]);
     sui::test_utils::destroy(lc);
     scenario.end();
 }
@@ -272,11 +277,12 @@ fun insert_headers_that_dont_from_a_chain_should_fail() {
     //     "difficulty_target": "5b250317",
     //     "nonce": "80f1e351"
     // }
-    let h =
-        x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351";
+    let h = new_block_header(
+        x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351",
+    );
     // we insert 2 identical headers.
-    let raw_headers = vector[h, h];
-    lc.insert_headers(raw_headers);
+    let headers = vector[h, h];
+    lc.insert_headers(headers);
     abort
 }
 
