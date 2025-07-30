@@ -21,7 +21,10 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ### Features
 
+- #[114](https://github.com/gonative-cc/sui-bitcoin-spv/pull/114) feat: use sui::table to store headers
+
 ### Breaking Changes
+
 
 ### Bug Fixes
 
@@ -29,7 +32,7 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ### Bug Fixes
 
-- [#78](https://github.com/gonative-cc/move-bitcoin-spv/pull/78) fix: parse P2WPHK output
+- [#78](https://github.com/gonative-cc/sui-bitcoin-spv/pull/78) fix: parse P2WPHK output
 
 ## v0.3.0 (2024-04-04)
 
