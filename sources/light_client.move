@@ -175,7 +175,7 @@ public fun init_light_client_network(
 /// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun insert_headers(lc: &mut LightClient, headers: vector<BlockHeader>) {
     assert!(lc.version == VERSION, EVersionMismatch);
-    // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
+
     assert!(!headers.is_empty(), EHeaderListIsEmpty);
 
     let first_header = headers[0];
