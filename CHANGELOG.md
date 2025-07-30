@@ -21,7 +21,7 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ### Features
 
-- [#115](https://github.com/gonative-cc/sui-bitcoin-spv/pull/115) feat: use BlockHeader type in smart contract method's parameters  
+- #[#115](https://github.com/gonative-cc/sui-bitcoin-spv/pull/115) feat: use BlockHeader type in smart contract method's parameters  
 - #[114](https://github.com/gonative-cc/sui-bitcoin-spv/pull/114) feat: use sui::table to store headers
 
 ### Breaking Changes
