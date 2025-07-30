@@ -239,7 +239,7 @@ public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<
     lc.light_block_by_hash.remove(block_hash);
 }
 
-/// overwrite if height exist before
+/// Maps height to block_hash, overwrite if height exists in table
 public(package) fun set_block_hash_by_height(
     lc: &mut LightClient,
     height: u64,
