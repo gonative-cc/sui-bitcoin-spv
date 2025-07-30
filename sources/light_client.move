@@ -473,8 +473,7 @@ public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &L
 
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
     assert!(lc.version == VERSION, EVersionMismatch);
-    let exist = lc.light_block_by_hash.contains(block_hash);
-    exist
+    lc.light_block_by_hash.contains(block_hash)
 }
 
 public fun get_block_hash_by_height(lc: &LightClient, height: u64): vector<u8> {
