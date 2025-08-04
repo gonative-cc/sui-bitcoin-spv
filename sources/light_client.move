@@ -2,7 +2,7 @@
 
 module bitcoin_spv::light_client;
 
-use bitcoin_spv::block_header::{BlockHeader, new_block_header};
+use bitcoin_spv::block_header::BlockHeader;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
@@ -75,20 +75,17 @@ public struct LightClient has key, store {
 
 fun init(_ctx: &mut TxContext) {}
 
-/// LightClient constructor. Use `init_light_client` to create and transfer object,
-/// emitting an event.
+/// LightClient constructor. Create light client and verify data.
 /// *params: Btc network params. Check the params module
 /// *start_height: height of the first trusted header
 /// *trusted_headers: List of trusted headers in hex format.
 /// *parent_chain_work: chain_work at parent block of start_height block.
 /// *finality: the finality threshold
 
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client(
     params: Params,
     start_height: u64,
-    trusted_headers: vector<vector<u8>>,
+    trusted_headers: vector<BlockHeader>,
     parent_chain_work: u256,
     finality: u64,
     ctx: &mut TxContext,
@@ -108,8 +105,7 @@ public fun new_light_client(
     if (!trusted_headers.is_empty()) {
         let mut height = start_height;
         let mut head_hash = vector[];
-        trusted_headers.do!(|raw_header| {
-            let header = new_block_header(raw_header);
+        trusted_headers.do!(|header| {
             head_hash = header.block_hash();
             let current_chain_work = parent_chain_work + header.calc_work();
             let light_block = new_light_block(height, header, current_chain_work);
@@ -126,28 +122,35 @@ public fun new_light_client(
     lc
 }
 
-/// Initializes Bitcoin light client by providing a trusted snapshot height and header
-/// params: Mainnet, Testnet or Regtest.
-/// start_height: the height of first trust block
+/// Initializes Bitcoin light client by providing a trusted snapshot height and header.
+/// Use `initialize_light_client` to create and transfer object,
+/// emitting an event.
+/// network: 0 = mainnet, 1 = testnet, other = regtest
+/// start_height: the height of the first trusted header
 /// trusted_header: The list of trusted header in hex encode.
 /// previous_chain_work: the chain_work at parent block of start_height block
-///
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun init_light_client(
-    params: Params,
+public fun initialize_light_client(
+    network: u8,
     start_height: u64,
-    trusted_headers: vector<vector<u8>>,
+    trusted_headers: vector<BlockHeader>,
     parent_chain_work: u256,
+    finality: u64,
     ctx: &mut TxContext,
 ) {
+    let params = match (network) {
+        0 => params::mainnet(),
+        1 => params::testnet(),
+        _ => params::regtest(),
+    };
+
     assert!(params.is_correct_init_height(start_height), EInvalidStartHeight);
+
     let lc = new_light_client(
         params,
         start_height,
         trusted_headers,
         parent_chain_work,
-        8,
+        finality,
         ctx,
     );
     event::emit(NewLightClientEvent {
@@ -156,27 +159,8 @@ public fun init_light_client(
     transfer::share_object(lc);
 }
 
-/// Helper function to initialize new light client.
-/// network: 0 = mainnet, 1 = testnet
-public fun init_light_client_network(
-    network: u8,
-    start_height: u64,
-    start_headers: vector<vector<u8>>,
-    parent_chain_work: u256,
-    ctx: &mut TxContext,
-) {
-    let params = match (network) {
-        0 => params::mainnet(),
-        1 => params::testnet(),
-        _ => params::regtest(),
-    };
-    init_light_client(params, start_height, start_headers, parent_chain_work, ctx);
-}
-
 /// Insert new headers to extend the LC chain. Fails if the included headers don't
 /// create a heavier chain or fork.
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun insert_headers(lc: &mut LightClient, headers: vector<BlockHeader>) {
     assert!(lc.version == VERSION, EVersionMismatch);
 
