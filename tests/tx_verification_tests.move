@@ -3,6 +3,7 @@
 #[test_only]
 module bitcoin_spv::tx_verification_tests;
 
+use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::light_client::{new_light_client, LightClient};
 use bitcoin_spv::params;
 use std::unit_test::assert_eq;
@@ -14,7 +15,7 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
     let headers = vector[
         x"01000000acda3db591d5c2c63e8c09e7523a5b0581707ef3e3520d6ca180000000000000701179cb9a9e0fe709cc96261b6b943b31362b61dacba94b03f9b71a06cc2eff7d1c1b4d4c86041b75962f88",
         x"010000007cb25d910aa274ad3e520e80e1e37440a7a2914b34ccd827f806030000000000fae45c19a095c8c796acf7a07257822f4e3c42c9d2ce513ceabc0188c041b6f8a21c1b4d4c86041be1dc4463",
-    ];
+    ].map!(|h| new_block_header(h));
     // finality=1 => block is "final" after one confirmation.
     new_light_client(params::mainnet(), start_block, headers, 0, 1, ctx)
 }
