@@ -75,16 +75,13 @@ public struct LightClient has key, store {
 
 fun init(_ctx: &mut TxContext) {}
 
-/// LightClient constructor. Use `init_light_client` to create and transfer object,
-/// emitting an event.
+/// LightClient constructor. Create light client and verify data.
 /// *params: Btc network params. Check the params module
 /// *start_height: height of the first trusted header
 /// *trusted_headers: List of trusted headers in hex format.
 /// *parent_chain_work: chain_work at parent block of start_height block.
 /// *finality: the finality threshold
 
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client(
     params: Params,
     start_height: u64,
@@ -125,8 +122,10 @@ public fun new_light_client(
     lc
 }
 
-/// Initializes Bitcoin light client by providing a trusted snapshot height and header
-/// network: 0 = mainnet, 1 = testnet
+/// Initializes Bitcoin light client by providing a trusted snapshot height and header.
+/// Use `initialize_light_client` to create and transfer object,
+/// emitting an event.
+/// network: 0 = mainnet, 1 = testnet, other = regtest
 /// start_height: the height of the first trusted header
 /// trusted_header: The list of trusted header in hex encode.
 /// previous_chain_work: the chain_work at parent block of start_height block
@@ -162,8 +161,6 @@ public fun initialize_light_client(
 
 /// Insert new headers to extend the LC chain. Fails if the included headers don't
 /// create a heavier chain or fork.
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun insert_headers(lc: &mut LightClient, headers: vector<BlockHeader>) {
     assert!(lc.version == VERSION, EVersionMismatch);
 
