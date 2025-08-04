@@ -127,8 +127,7 @@ public fun new_light_client(
 
 /// Initializes Bitcoin light client by providing a trusted snapshot height and header
 /// network: 0 = mainnet, 1 = testnet
-/// params: Mainnet, Testnet or Regtest.
-/// start_height: the height of first trust block
+/// start_height: the height of the first trusted header
 /// trusted_header: The list of trusted header in hex encode.
 /// previous_chain_work: the chain_work at parent block of start_height block
 public fun initialize_light_client(
