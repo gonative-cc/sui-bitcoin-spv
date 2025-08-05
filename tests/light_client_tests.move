@@ -8,7 +8,7 @@ use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::light_client::{
     insert_header,
     new_light_client,
-    init_light_client,
+    initialize_light_client,
     update_version,
     LightClient,
     EWrongParentBlock,
@@ -24,7 +24,7 @@ use sui::test_scenario;
 #[test_only]
 fun new_lc_for_test(ctx: &mut TxContext): LightClient {
     let start_block = 858806;
-    let headers = vector[
+    let raw_headers = vector[
         // {
         //     "version": "00a0b434",
         //     "previous_block_hash": "e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000",
@@ -125,6 +125,7 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
         // }
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
     ];
+    let headers = raw_headers.map!(|h| new_block_header(h));
     new_light_client(params::mainnet(), start_block, headers, 0, 8, ctx)
 }
 
@@ -135,11 +136,13 @@ fun init_light_client_wrong_start_height_should_fail() {
     let ctx = scenario.ctx();
     // only the height is important in this case.
     let height = 2;
-    let headers = vector[
+    let raw_headers = vector[
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213",
     ];
-    init_light_client(params::mainnet(), height, headers, 8, ctx);
+    let headers = raw_headers.map!(|h| new_block_header(h));
+
+    initialize_light_client(0, height, headers, 0, 8, ctx);
     scenario.end();
 }
 
@@ -150,11 +153,12 @@ fun init_light_client_happy_case() {
     let ctx = scenario.ctx();
     let height = 2016;
     // only the height is important in this case.
-    let headers = vector[
+    let raw_headers = vector[
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213",
     ];
-    init_light_client(params::mainnet(), height, headers, 8, ctx);
+    let headers = raw_headers.map!(|h| new_block_header(h));
+    initialize_light_client(0, height, headers, 0, 8, ctx);
     scenario.end();
 }
 
