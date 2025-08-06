@@ -57,8 +57,9 @@ async function main() {
 		}
 	});
 
-	let result = await client.waitForTransaction({ digest: res.digest });
-	console.log(result)
+	await client.waitForTransaction({ digest: res.digest });
+
+	console.log(res.events[0].parsedJson)
 }
 
 
