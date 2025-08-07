@@ -2,7 +2,7 @@
 
 [move]
 version = 3
-manifest_digest = "589C72A8E669970F2F936B5018A3229359C3F69FDCC9FF0291D6681F7BE35FBA"
+manifest_digest = "45ED250626C8579E610D86199D2D59E57F158536AF777B5B7D0F01F1A9ECF71A"
 deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
@@ -45,7 +45,7 @@ dependencies = [
 
 [[move.package]]
 id = "btc_parser"
-source = { git = "https://github.com/gonative-cc/sui-native", rev = "master", subdir = "./btc_parser" }
+source = { git = "https://github.com/gonative-cc/sui-native", rev = "vu/version-manager", subdir = "./btc_parser" }
 
 dependencies = [
   { id = "Bridge", name = "Bridge" },
@@ -62,7 +62,13 @@ flavor = "sui"
 [env]
 
 [env.devnet]
-chain-id = "5c7c5411"
-original-published-id = "0x2d5eba13fed795825cb3b9623f1cde171ed19e787caba281259c70ba2cc799ad"
-latest-published-id = "0x2d5eba13fed795825cb3b9623f1cde171ed19e787caba281259c70ba2cc799ad"
+chain-id = "4256f1d2"
+original-published-id = "0x5698a7a53a3134dfda08ad2406d586453f5236d15f75e8a0f896f880c118e39e"
+latest-published-id = "0x5698a7a53a3134dfda08ad2406d586453f5236d15f75e8a0f896f880c118e39e"
+published-version = "1"
+
+[env.testnet]
+chain-id = "4c78adac"
+original-published-id = "0x7e7daf17f75096977b0d9791f5f5fb3b2cb6ef44149747117ff5f1c0c4a6e00b"
+latest-published-id = "0x7e7daf17f75096977b0d9791f5f5fb3b2cb6ef44149747117ff5f1c0c4a6e00b"
 published-version = "1"
