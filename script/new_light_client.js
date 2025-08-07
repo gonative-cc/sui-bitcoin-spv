@@ -59,7 +59,7 @@ async function main() {
 
 	await client.waitForTransaction({ digest: res.digest });
 
-	console.log(res.events[0].parsedJson)
+	console.log(JSON.stringify(res.events[0].parsedJson, null, 2));
 }
 
 
