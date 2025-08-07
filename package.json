@@ -1,7 +1,7 @@
 {
 	"name": "btclc",
 	"version": "1.0.0",
-	"description": "<!-- markdownlint-disable MD041 --> <!-- markdownlint-disable MD013 -->",
+	"description": "Helper for bitcoin spv",
 	"main": "index.js",
 	"type": "module",
 	"directories": {
