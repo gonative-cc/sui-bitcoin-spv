@@ -1,3 +1,5 @@
 build/*
 .trace
 .coverage_map.mvcov
+node_modules
+.env
