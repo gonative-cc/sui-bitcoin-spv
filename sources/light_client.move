@@ -2,15 +2,14 @@
 
 module bitcoin_spv::light_client;
 
-use bitcoin_spv::block_header::{BlockHeader, new_block_header};
+use bitcoin_spv::block_header::BlockHeader;
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::params::{Self, Params, is_correct_init_height};
 use bitcoin_spv::utils::nth_element;
-use btc_parser::tx::Transaction;
-use sui::dynamic_field as df;
 use sui::event;
+use sui::table::{Self, Table};
 
 /// Package version
 const VERSION: u32 = 1;
@@ -32,9 +31,6 @@ const EBlockNotFound: vector<u8> = b"The specified block could not be found in t
 #[error]
 const EForkChainWorkTooSmall: vector<u8> =
     b"The proposed fork has less work than the current chain";
-#[error]
-const ETxNotInBlock: vector<u8> =
-    b"The transaction is not included in a finalized block according to the Merkle proof";
 #[error]
 const EInvalidStartHeight: vector<u8> =
     b"The start height must be a multiple of the retarget period (e.g 2016 for mainnet)";
@@ -66,6 +62,8 @@ public struct LightClient has key, store {
     params: Params,
     head_height: u64,
     head_hash: vector<u8>,
+    light_block_by_hash: Table<vector<u8>, LightBlock>,
+    block_hash_by_height: Table<u64, vector<u8>>,
     finality: u64,
 }
 
@@ -73,20 +71,17 @@ public struct LightClient has key, store {
 
 fun init(_ctx: &mut TxContext) {}
 
-/// LightClient constructor. Use `init_light_client` to create and transfer object,
-/// emitting an event.
+/// LightClient constructor. Create light client and verify data.
 /// *params: Btc network params. Check the params module
 /// *start_height: height of the first trusted header
 /// *trusted_headers: List of trusted headers in hex format.
 /// *parent_chain_work: chain_work at parent block of start_height block.
 /// *finality: the finality threshold
 
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
 public fun new_light_client(
     params: Params,
     start_height: u64,
-    trusted_headers: vector<vector<u8>>,
+    trusted_headers: vector<BlockHeader>,
     parent_chain_work: u256,
     finality: u64,
     ctx: &mut TxContext,
@@ -97,6 +92,8 @@ public fun new_light_client(
         params: params,
         head_height: 0,
         head_hash: vector[],
+        light_block_by_hash: table::new(ctx),
+        block_hash_by_height: table::new(ctx),
         finality,
     };
 
@@ -104,8 +101,7 @@ public fun new_light_client(
     if (!trusted_headers.is_empty()) {
         let mut height = start_height;
         let mut head_hash = vector[];
-        trusted_headers.do!(|raw_header| {
-            let header = new_block_header(raw_header);
+        trusted_headers.do!(|header| {
             head_hash = header.block_hash();
             let current_chain_work = parent_chain_work + header.calc_work();
             let light_block = new_light_block(height, header, current_chain_work);
@@ -122,28 +118,35 @@ public fun new_light_client(
     lc
 }
 
-/// Initializes Bitcoin light client by providing a trusted snapshot height and header
-/// params: Mainnet, Testnet or Regtest.
-/// start_height: the height of first trust block
+/// Initializes Bitcoin light client by providing a trusted snapshot height and header.
+/// Use `initialize_light_client` to create and transfer object,
+/// emitting an event.
+/// network: 0 = mainnet, 1 = testnet, other = regtest
+/// start_height: the height of the first trusted header
 /// trusted_header: The list of trusted header in hex encode.
 /// previous_chain_work: the chain_work at parent block of start_height block
-///
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun init_light_client(
-    params: Params,
+public fun initialize_light_client(
+    network: u8,
     start_height: u64,
-    trusted_headers: vector<vector<u8>>,
+    trusted_headers: vector<BlockHeader>,
     parent_chain_work: u256,
+    finality: u64,
     ctx: &mut TxContext,
 ) {
+    let params = match (network) {
+        0 => params::mainnet(),
+        1 => params::testnet(),
+        _ => params::regtest(),
+    };
+
     assert!(params.is_correct_init_height(start_height), EInvalidStartHeight);
+
     let lc = new_light_client(
         params,
         start_height,
         trusted_headers,
         parent_chain_work,
-        8,
+        finality,
         ctx,
     );
     event::emit(NewLightClientEvent {
@@ -152,39 +155,20 @@ public fun init_light_client(
     transfer::share_object(lc);
 }
 
-/// Helper function to initialize new light client.
-/// network: 0 = mainnet, 1 = testnet
-public fun init_light_client_network(
-    network: u8,
-    start_height: u64,
-    start_headers: vector<vector<u8>>,
-    parent_chain_work: u256,
-    ctx: &mut TxContext,
-) {
-    let params = match (network) {
-        0 => params::mainnet(),
-        1 => params::testnet(),
-        _ => params::regtest(),
-    };
-    init_light_client(params, start_height, start_headers, parent_chain_work, ctx);
-}
-
 /// Insert new headers to extend the LC chain. Fails if the included headers don't
 /// create a heavier chain or fork.
-/// Header serialization reference:
-/// https://developer.bitcoin.org/reference/block_chain.html#block-headers
-public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>) {
+public fun insert_headers(lc: &mut LightClient, headers: vector<BlockHeader>) {
     assert!(lc.version == VERSION, EVersionMismatch);
-    // TODO: check if we can use BlockHeader instead of raw_header or vector<u8>(bytes)
-    assert!(!raw_headers.is_empty(), EHeaderListIsEmpty);
 
-    let first_header = new_block_header(raw_headers[0]);
+    assert!(!headers.is_empty(), EHeaderListIsEmpty);
+
+    let first_header = headers[0];
     let head = *lc.head();
 
     let mut is_forked = false;
     if (first_header.parent() == head.header().block_hash()) {
         // extend current chain
-        lc.extend_chain(head, raw_headers);
+        lc.extend_chain(head, headers);
     } else {
         // handle a new fork
         let parent_id = first_header.parent();
@@ -205,7 +189,7 @@ public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>)
         let current_chain_work = head.chain_work();
         let current_block_hash = head.header().block_hash();
 
-        let fork_head = lc.extend_chain(*parent, raw_headers);
+        let fork_head = lc.extend_chain(*parent, headers);
         let fork_chain_work = fork_head.chain_work();
 
         assert!(current_chain_work < fork_chain_work, EForkChainWorkTooSmall);
@@ -228,21 +212,25 @@ public fun insert_headers(lc: &mut LightClient, raw_headers: vector<vector<u8>>)
 
 public(package) fun insert_light_block(lc: &mut LightClient, lb: LightBlock) {
     let block_hash = lb.header().block_hash();
-    df::add(&mut lc.id, block_hash, lb);
+    lc.light_block_by_hash.add(block_hash, lb);
 }
 
 public(package) fun remove_light_block(lc: &mut LightClient, block_hash: vector<u8>) {
-    df::remove<_, LightBlock>(&mut lc.id, block_hash);
+    lc.light_block_by_hash.remove(block_hash);
 }
 
+/// Maps height to block_hash, overwrites the block_hash (reorg) if height exists in table
 public(package) fun set_block_hash_by_height(
     lc: &mut LightClient,
     height: u64,
     block_hash: vector<u8>,
 ) {
-    let id = &mut lc.id;
-    df::remove_if_exists<u64, vector<u8>>(id, height);
-    df::add(id, height, block_hash);
+    if (lc.block_hash_by_height.contains(height)) {
+        let h_mut = lc.block_hash_by_height.borrow_mut(height);
+        *h_mut = block_hash;
+    } else {
+        lc.block_hash_by_height.add(height, block_hash);
+    }
 }
 
 /// Appends light block to the current branch and overwrites the current blockchain head.
@@ -312,10 +300,9 @@ public(package) fun insert_header(
 fun extend_chain(
     lc: &mut LightClient,
     parent: LightBlock,
-    raw_headers: vector<vector<u8>>,
+    headers: vector<BlockHeader>,
 ): LightBlock {
-    raw_headers.fold!(parent, |p, raw_header| {
-        let header = new_block_header(raw_header);
+    headers.fold!(parent, |p, header| {
         lc.insert_header(&p, header)
     })
 }
@@ -353,7 +340,7 @@ public fun head_hash(lc: &LightClient): vector<u8> {
 /// Returns blockchain head light block (latest, not confirmed block).
 public fun head(lc: &LightClient): &LightBlock {
     assert!(lc.version == VERSION, EVersionMismatch);
-    lc.get_light_block_by_hash(lc.head_hash)
+    lc.light_block_by_hash.borrow(lc.head_hash)
 }
 
 /// Returns latest finalized_block height
@@ -460,20 +447,18 @@ fun calc_past_median_time(lc: &LightClient, lb: &LightBlock): u32 {
 
 public fun get_light_block_by_hash(lc: &LightClient, block_hash: vector<u8>): &LightBlock {
     assert!(lc.version == VERSION, EVersionMismatch);
-    // TODO: Can we use option type?
-    df::borrow(&lc.id, block_hash)
+    lc.light_block_by_hash.borrow(block_hash)
 }
 
 public fun exist(lc: &LightClient, block_hash: vector<u8>): bool {
     assert!(lc.version == VERSION, EVersionMismatch);
-    let exist = df::exists_(&lc.id, block_hash);
-    exist
+    lc.light_block_by_hash.contains(block_hash)
 }
 
 public fun get_block_hash_by_height(lc: &LightClient, height: u64): vector<u8> {
     assert!(lc.version == VERSION, EVersionMismatch);
     // copy the block hash
-    *df::borrow<u64, vector<u8>>(&lc.id, height)
+    *lc.block_hash_by_height.borrow(height)
 }
 
 public fun get_light_block_by_height(lc: &LightClient, height: u64): &LightBlock {
@@ -520,45 +505,6 @@ public fun retarget_algorithm(
     };
 
     next_target
-}
-
-/// Verifies the transaction and parses outputs to calculates the payment to the receiver.
-/// To if you only want to verify if the tx is included in the block, you can use
-/// `verify_tx` function.
-/// Returns the the total amount of satoshi send to `receiver_address` from transaction outputs,
-/// the content of the `OP_RETURN` opcode output, and tx_id (hash).
-/// If OP_RETURN is not included in the transaction, return an empty vector.
-/// NOTE: output with OP_RETURN is invalid, and only one such output can be included in a TX.
-/// * `height`: block height the transaction belongs to.
-/// * `proof`: merkle tree proof, this is the vector of 32bytes.
-/// * `tx_index`: index of transaction in block.
-/// * `transaction`: bitcoin transaction. Check transaction.move.
-/// * `receiver_pk_hash`: receiver public key hash in p2pkh or p2wpkh. Must not empty
-public fun verify_payment(
-    lc: &LightClient,
-    height: u64,
-    proof: vector<vector<u8>>,
-    tx_index: u64,
-    transaction: &Transaction,
-    receiver_pk_hash: vector<u8>,
-): (u64, vector<u8>, vector<u8>) {
-    assert!(lc.version == VERSION, EVersionMismatch);
-    let mut amount = 0;
-    let mut op_return_msg = vector[];
-    let tx_id = transaction.tx_id();
-    assert!(lc.verify_tx(height, tx_id, proof, tx_index), ETxNotInBlock);
-    let outputs = transaction.outputs();
-    outputs.do!(|o| {
-        if (o.extract_public_key_hash() == receiver_pk_hash) {
-            amount = amount + o.amount();
-        };
-
-        if (o.is_op_return()) {
-            op_return_msg = o.op_return();
-        };
-    });
-
-    (amount, op_return_msg, tx_id)
 }
 
 /// Updates the light_client.version to the latest,

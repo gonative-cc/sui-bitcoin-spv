@@ -1,0 +1,28 @@
+{
+	"name": "btclc",
+	"version": "1.0.0",
+	"description": "Helper for bitcoin spv",
+	"main": "index.js",
+	"type": "module",
+	"directories": {
+		"doc": "docs",
+		"test": "tests"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gonative-cc/sui-bitcoin-spv.git"
+	},
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/gonative-cc/sui-bitcoin-spv/issues"
+	},
+	"homepage": "https://github.com/gonative-cc/sui-bitcoin-spv#readme",
+	"dependencies": {
+		"@mysten/sui": "^1.37.1",
+		"dotenv": "^17.2.1"
+	}
+}
