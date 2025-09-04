@@ -21,6 +21,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
       - run: npm install --no-warnings @mysten/prettier-plugin-move@${{ env.VERSION }}
       - run: npx prettier-move -c **/*.move
