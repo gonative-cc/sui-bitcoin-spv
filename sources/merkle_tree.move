@@ -11,7 +11,7 @@ const EInvalidMerkleHashLengh: vector<u8> = b"Invalid merkle element hash length
 const HASH_LENGTH: u64 = 32;
 
 /// Internal merkle hash computation for BTC merkle tree
-fun merkle_hash(x: vector<u8>, y: vector<u8>): vector<u8> {
+public(package) fun merkle_hash(x: vector<u8>, y: vector<u8>): vector<u8> {
     let mut z = x;
     z.append(y);
     btc_hash(z)

@@ -1,5 +1,5 @@
 [package]
-name = "BitcoinSPV"
+name = "bitcoin_spv"
 edition = "2024.beta"
 license = "MPL-2.0"
 authors = ["Native"]
