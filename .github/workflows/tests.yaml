@@ -15,6 +15,7 @@ jobs:
       - name: Build
         run: sui move build
       - name: Run test
+        # set more gas when run test with flag -i
         run: sui move test -i 5000000
       # Enable when support --coverage flag in sui-tools docker
       # - name: coverage test

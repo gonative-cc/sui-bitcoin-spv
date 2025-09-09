@@ -34,16 +34,19 @@ fun reduce_single_hashes(v: vector<vector<u8>>): vector<vector<u8>> {
     result
 }
 
+// create proof for merkle verification
+// we return premiage of node not a double hash.
+// check verify_merkle_proof document for more information
 fun create_proof_for_testing(
-    single_hashes: vector<vector<u8>>,
-    double_hashes: vector<vector<u8>>,
+    preimage_hashes: vector<vector<u8>>,
+    tx_ids: vector<vector<u8>>,
     tx_index: u64,
 ): vector<vector<u8>> {
     let mut index = tx_index;
     let mut proof = vector[];
 
-    let mut preimage_hashes = single_hashes;
-    let mut previous_level_hashes = double_hashes;
+    let mut preimage_hashes = preimage_hashes;
+    let mut previous_level_hashes = tx_ids;
     while (previous_level_hashes.length() > 1) {
         if (index % 2 == 0) {
             if (index + 1 < previous_level_hashes.length()) {
@@ -89,8 +92,9 @@ fun verify_merkle_proof_with_multiple_node_happy_case() {
 }
 
 #[test]
-fun heavy_verification_happy_case() {
-    // Data extract from BitVM tests!
+fun verify_merkle_proofs_heavy_happy_case() {
+    // Data extracted from BitVM tests!
+    // https://github.com/BitVM/BitVM/blob/main/final-spv/src/merkle_tree.rs#L324
     let tx_ids = vector[
         x"c9a10bc1044a9d89db7d1a2d8e0074f0cec9f9911da3160caeab593709406b90",
         x"854fbf7fd59627540f0377b3d59dc2c493a6442d9e429fe084b9d11dc6fc8420",
