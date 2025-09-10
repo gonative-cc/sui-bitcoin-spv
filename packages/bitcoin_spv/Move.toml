@@ -7,8 +7,6 @@ authors = ["Native"]
 [dependencies]
 # For remote import, use the `{ git = "...", subdir = "...", rev = "..." }`.
 # Revision can be a branch, a tag, and a commit hash.
-btc_parser = { git = "https://github.com/gonative-cc/sui-native", subdir = "./btc_parser", rev = "master" }
-
 # For local dependencies use `local = path`. Path is relative to the package root
 # Local = { local = "../path/to" }
 
