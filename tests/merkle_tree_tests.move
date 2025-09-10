@@ -12,7 +12,7 @@ fun single_hash(x: vector<u8>, y: vector<u8>): vector<u8> {
     sha2_256(z)
 }
 
-fun reduce_double_hashes(v: vector<vector<u8>>): vector<vector<u8>> {
+fun next_level_merkle_tree(v: vector<vector<u8>>): vector<vector<u8>> {
     let mut result = vector[];
 
     let mut i = 0;
@@ -23,7 +23,7 @@ fun reduce_double_hashes(v: vector<vector<u8>>): vector<vector<u8>> {
     result
 }
 
-fun reduce_single_hashes(v: vector<vector<u8>>): vector<vector<u8>> {
+fun next_level_preimage_hashes(v: vector<vector<u8>>): vector<vector<u8>> {
     let mut result = vector[];
 
     let mut i = 0;
@@ -62,8 +62,8 @@ fun create_proof_for_testing(
             let last_element = previous_level_hashes[previous_level_hashes.length() - 1];
             previous_level_hashes.push_back(last_element);
         };
-        preimage_hashes = reduce_single_hashes(previous_level_hashes);
-        previous_level_hashes = reduce_double_hashes(previous_level_hashes);
+        preimage_hashes = next_level_preimage_hashes(previous_level_hashes);
+        previous_level_hashes = next_level_merkle_tree(previous_level_hashes);
         index = index / 2;
     };
 
