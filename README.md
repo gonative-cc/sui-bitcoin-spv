@@ -7,7 +7,7 @@
 
 The collection of BTC primitive components are written in Sui Move: 
 	- [Bitcoin SPV](./packages/bitcoin_spv/): BTC Light client helps verify blocks and transactions on the Sui. 
-	- [BTC parser](./packages/btc_parser/): parse and extract BTC transaction data, including input, output, and witness...
+	- [BTC parser](./packages/btc_parser/): parses, extracts... etc from BTC transaction, including input, output, and witness etc.
 
 
 ## Contributing
