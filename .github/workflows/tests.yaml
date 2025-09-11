@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mysten/sui-tools:ci
+    strategy:
+      matrix:
+        working-directory:
+          - packages/bitcoin_spv
+          - packages/btc_parser
     steps:
       - uses: actions/checkout@v5
       - name: Build
