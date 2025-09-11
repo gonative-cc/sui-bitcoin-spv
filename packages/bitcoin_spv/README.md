@@ -22,7 +22,6 @@ Bitcoin Light Client for [Native](https://gonative.cc) on [Sui](https://sui.io/)
 -   Package ID: `0xc31478c4cc6cc146a7ecfc9cc5096d4421d675bdf5577cb7e550392a7cb93dc5`
 -   SPV Object ID: `0x4f989d395bb13b4913b483016641eb7c9cacfd88d2a1ba91523d0542a52af9e4`
 
-
 ## Setup
 
 Check out [setup](../../scripts/SETUP.md) for step-by-step deployment.
