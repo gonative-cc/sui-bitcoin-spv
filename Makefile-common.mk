@@ -60,12 +60,10 @@ test-coverage:
 ###############################################################################
 # Variables for build output and module name
 BUILD_DIR := build
-MODULE_NAME := BitcoinSPV
-DOCS_SUBDIR := bitcoin_spv
-
+PACKAGE_NAME := $(notdir $(CURDIR))
 gen-docs:
 	@sui move build --doc
-	@cp -r ./$(BUILD_DIR)/$(MODULE_NAME)/docs/$(DOCS_SUBDIR) ./docs
+	@cp -r ./$(BUILD_DIR)/$(PACKAGE_NAME)/docs/$(PACKAGE_NAME) ./docs
 
 .PHONY: gen-docs
 

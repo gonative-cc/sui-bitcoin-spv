@@ -75,29 +75,29 @@
 ## Constants
 
 
-<a name="bitcoin_spv_params_DifficultyAdjustment_Mainnet"></a>
+<a name="bitcoin_spv_params_DIFFICULTYADJUSTMENT_MAINNET"></a>
 
 
 
-<pre><code><b>const</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_Mainnet">DifficultyAdjustment_Mainnet</a>: u8 = 0;
+<pre><code><b>const</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_MAINNET">DIFFICULTYADJUSTMENT_MAINNET</a>: u8 = 0;
 </code></pre>
 
 
 
-<a name="bitcoin_spv_params_DifficultyAdjustment_V3"></a>
+<a name="bitcoin_spv_params_DIFFICULTYADJUSTMENT_V3"></a>
 
 
 
-<pre><code><b>const</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_V3">DifficultyAdjustment_V3</a>: u8 = 1;
+<pre><code><b>const</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_V3">DIFFICULTYADJUSTMENT_V3</a>: u8 = 1;
 </code></pre>
 
 
 
-<a name="bitcoin_spv_params_DifficultyAdjustment_Regtest"></a>
+<a name="bitcoin_spv_params_DIFFICULTYADJUSTMENT_REGTEST"></a>
 
 
 
-<pre><code><b>const</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_Regtest">DifficultyAdjustment_Regtest</a>: u8 = 2;
+<pre><code><b>const</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_REGTEST">DIFFICULTYADJUSTMENT_REGTEST</a>: u8 = 2;
 </code></pre>
 
 
@@ -123,7 +123,7 @@
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_power_limit_bits">power_limit_bits</a>: 0x1d00ffff,
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_blocks_pre_retarget">blocks_pre_retarget</a>: 2016,
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_target_timespan">target_timespan</a>: 2016 * 60 * 10, // ~ 2 weeks.
-        difficulty_adjustment: <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_Mainnet">DifficultyAdjustment_Mainnet</a>,
+        difficulty_adjustment: <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_MAINNET">DIFFICULTYADJUSTMENT_MAINNET</a>,
     }
 }
 </code></pre>
@@ -153,7 +153,7 @@
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_power_limit_bits">power_limit_bits</a>: 0x1d00ffff,
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_blocks_pre_retarget">blocks_pre_retarget</a>: 2016,
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_target_timespan">target_timespan</a>: 2016 * 60 * 10, // ~ 2 weeks.
-        difficulty_adjustment: <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_V3">DifficultyAdjustment_V3</a>,
+        difficulty_adjustment: <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_V3">DIFFICULTYADJUSTMENT_V3</a>,
     }
 }
 </code></pre>
@@ -183,7 +183,7 @@
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_power_limit_bits">power_limit_bits</a>: 0x207fffff,
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_blocks_pre_retarget">blocks_pre_retarget</a>: 2016,
         <a href="../bitcoin_spv/params.md#bitcoin_spv_params_target_timespan">target_timespan</a>: 2016 * 60 * 10, // ~ 2 weeks.
-        difficulty_adjustment: <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_Regtest">DifficultyAdjustment_Regtest</a>,
+        difficulty_adjustment: <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_REGTEST">DIFFICULTYADJUSTMENT_REGTEST</a>,
     }
 }
 </code></pre>
@@ -304,7 +304,7 @@
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_pow_no_retargeting">pow_no_retargeting</a>(p: &<a href="../bitcoin_spv/params.md#bitcoin_spv_params_Params">Params</a>): bool {
-    p.difficulty_adjustment == <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_Regtest">DifficultyAdjustment_Regtest</a>
+    p.difficulty_adjustment == <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_REGTEST">DIFFICULTYADJUSTMENT_REGTEST</a>
 }
 </code></pre>
 
@@ -352,7 +352,7 @@
 
 
 <pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/params.md#bitcoin_spv_params_skip_difficulty_check">skip_difficulty_check</a>(p: &<a href="../bitcoin_spv/params.md#bitcoin_spv_params_Params">Params</a>): bool {
-    p.difficulty_adjustment == <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DifficultyAdjustment_V3">DifficultyAdjustment_V3</a>
+    p.difficulty_adjustment == <a href="../bitcoin_spv/params.md#bitcoin_spv_params_DIFFICULTYADJUSTMENT_V3">DIFFICULTYADJUSTMENT_V3</a>
 }
 </code></pre>
 
