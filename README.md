@@ -7,9 +7,9 @@
 
 This repository contains a set of primitive components for on-chain Bitcoin operations:
 
-[Bitcoin SPV](./packages/bitcoin_spv) - A core implementation of a Bitcoin light client using Simple Payment Verification (SPV). It manages the on-chain storage of the Bitcoin block header chain, validates new headers, and provides functions to verify transaction inclusion using Merkle proofs.
+- [Bitcoin SPV](./packages/bitcoin_spv) - A core implementation of a Bitcoin light client using Simple Payment Verification (SPV). It manages the on-chain storage of the Bitcoin block header chain, validates new headers, and provides functions to verify transaction inclusion using Merkle proofs.
 
-[BTC Parser](./packages/btc_parser) - A low-level, foundational utility for parsing and deserializing raw Bitcoin data structures. It handles block headers, transactions, inputs, outputs, and witness data, providing the essential building blocks for the applications.
+- [BTC Parser](./packages/btc_parser) - A low-level, foundational utility for parsing and deserializing raw Bitcoin data structures. It handles block headers, transactions, inputs, outputs, and witness data, providing the essential building blocks for the applications.
 
 ## Contributing
 
