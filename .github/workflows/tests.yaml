@@ -15,6 +15,9 @@ jobs:
         working-directory:
           - packages/bitcoin_spv
           - packages/btc_parser
+    defaults:
+      run:
+        working-directory: ${{ matrix.working-directory }}
     steps:
       - uses: actions/checkout@v5
       - name: Build
