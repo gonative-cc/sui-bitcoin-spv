@@ -1,4 +1,4 @@
-import { fromHex } from "@mysten/sui/utils";
+import { fromHex, fromBase64 } from "@mysten/sui/utils";
 import { getFullnodeUrl, SuiClient } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
@@ -6,7 +6,16 @@ import { Ed25519Keypair } from "@mysten/sui/keypairs/ed25519";
 import "dotenv/config";
 
 function loadSigner() {
-	return Ed25519Keypair.deriveKeypair(process.env.MNEMONIC);
+	if (process.env.ENCODE_SK) {
+		let sk = fromBase64(process.env.ENCODE_SK);
+		return Ed25519Keypair.fromSecretKey(sk.slice(1));
+	}
+	if (process.env.MNEMONIC) {
+		return Ed25519Keypair.deriveKeypair(process.env.MNEMONIC);
+	}
+	throw new Error(
+		"Missing required environment variable: Please set either ENCODE_SK or MNEMONIC."
+	);
 }
 
 async function main() {
