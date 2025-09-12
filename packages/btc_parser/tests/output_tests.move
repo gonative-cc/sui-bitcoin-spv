@@ -86,3 +86,22 @@ fun P2WHS_happy_cases() {
     assert_eq!(output.is_P2WSH(), false);
     assert_eq!(output.extract_witness_script_hash(), option::none());
 }
+
+#[test]
+fun taproot_happy_cases() {
+    let output =
+        &output::new(100, x"51200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667");
+    assert_eq!(output.is_taproot(), true);
+    assert_eq!(
+        output.extract_taproot(),
+        option::some(x"0f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667"),
+    );
+    // add 00 to script
+    let output =
+        &output::new(
+            100,
+            x"0051200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a667",
+        );
+    assert_eq!(output.is_taproot(), false);
+    assert_eq!(output.extract_witness_script_hash(), option::none());
+}
