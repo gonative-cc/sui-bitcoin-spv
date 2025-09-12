@@ -19,14 +19,18 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ## Unreleased
 
+
 ### Features
 
-- [#115](https://github.com/gonative-cc/sui-bitcoin-spv/pull/115) feat: use BlockHeader type in smart contract method's parameters  
+- [#127](https://github.com/gonative-cc/sui-bitcoin-spv/pull/127) feat: add btc_parser packages
+- [#106](https://github.com/gonative-cc/sui-bitcoin-spv/pull/106) feat: mitigate Merkle tree leaf-node weakness
+- [#115](https://github.com/gonative-cc/sui-bitcoin-spv/pull/115) feat: use BlockHeader type in smart contract method's parameters / PTB friendly
 - [#114](https://github.com/gonative-cc/sui-bitcoin-spv/pull/114) feat: use sui::table to store headers
 
 ### Breaking Changes
 
 - [#116](https://github.com/gonative-cc/sui-bitcoin-spv/pull/116) feat: simplify initialize for light client
+- [#117](https://github.com/gonative-cc/sui-bitcoin-spv/pull/117) remove verify payment method in light client
 
 ### Bug Fixes
 
