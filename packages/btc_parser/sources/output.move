@@ -8,6 +8,7 @@ use btc_parser::vector_utils::vector_slice;
 // === BTC script opcodes ===
 /// An empty array of bytes is pushed onto the stack. (This is not a no-op: an item is added to the stack.)
 const OP_0: u8 = 0x00;
+const OP_1: u8 = 0x01;
 /// Duplicates the top stack item
 const OP_DUP: u8 = 0x76;
 /// Pop the top stack item and push its RIPEMD(SHA256(top item)) hash
@@ -98,6 +99,13 @@ public fun is_P2WPHK(output: &Output): bool {
         script[1] == OP_DATA_20
 }
 
+public fun is_taproot(output: &Output): bool {
+    let script = output.script_pubkey;
+    script.length() == 34 &&
+	script[0] == OP_1 &&
+	script[1] == OP_DATA_32
+}
+
 // TODO: add support script addresses.
 // TODO: check and verify the address to make sure we support it. Return error otherwise
 /// extracts public key hash (PKH) from the output in P2PHK or P2WPKH
@@ -124,6 +132,15 @@ public fun extract_script_hash(output: &Output): Option<vector<u8>> {
 public fun extract_witness_script_hash(output: &Output): Option<vector<u8>> {
     let script = output.script_pubkey;
     if (output.is_P2WSH()) {
+        option::some(vector_slice(&script, 2, 34))
+    } else {
+        option::none()
+    }
+}
+
+public fun extract_taproot(output: &Output): Option<vector<u8>> {
+    let script = output.script_pubkey;
+    if (output.is_taproot()) {
         option::some(vector_slice(&script, 2, 34))
     } else {
         option::none()
