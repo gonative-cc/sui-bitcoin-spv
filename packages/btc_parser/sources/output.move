@@ -8,7 +8,7 @@ use btc_parser::vector_utils::vector_slice;
 // === BTC script opcodes ===
 /// An empty array of bytes is pushed onto the stack. (This is not a no-op: an item is added to the stack.)
 const OP_0: u8 = 0x00;
-const OP_1: u8 = 0x01;
+const OP_1: u8 = 0x51;
 /// Duplicates the top stack item
 const OP_DUP: u8 = 0x76;
 /// Pop the top stack item and push its RIPEMD(SHA256(top item)) hash
