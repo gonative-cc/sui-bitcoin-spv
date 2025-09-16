@@ -3,7 +3,7 @@
 module btc_parser::tx;
 
 use btc_parser::crypto::hash256;
-use btc_parser::encoding::{u64_to_varint_bytes, le_bytes_to_u64};
+use btc_parser::encoding::u64_to_varint_bytes;
 use btc_parser::input::{Self, Input};
 use btc_parser::output::{Self, Output};
 use btc_parser::reader::Reader;
@@ -23,6 +23,12 @@ public struct Transaction has copy, drop, store {
     witness: vector<InputWitness>,
     locktime: vector<u8>,
     tx_id: vector<u8>,
+}
+
+public fun new_witness(items: vector<vector<u8>>): InputWitness {
+    InputWitness {
+        items,
+    }
 }
 
 // TODO: `new` is not good name here.

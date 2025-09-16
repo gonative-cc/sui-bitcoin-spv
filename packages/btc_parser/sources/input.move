@@ -2,7 +2,7 @@
 
 module btc_parser::input;
 
-use btc_parser::encoding::{u64_to_varint_bytes, le_bytes_to_u64};
+use btc_parser::encoding::u64_to_varint_bytes;
 use btc_parser::reader::Reader;
 
 /// Input in btc transaction

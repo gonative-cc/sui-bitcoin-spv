@@ -16,5 +16,5 @@ A foundational utility library, written in Sui Move, for parsing and deserializi
 
 ## Talk to us
 
--   Follow the Native team's activities on the [Native X/Twitter account](https://x.com/NativeNetwork).
--   Join the conversation on [Native Discord](https://discord.gg/gonative).
+- Follow the Native team's activities on the [Native X/Twitter account](https://x.com/NativeNetwork).
+- Join the conversation on [Native Discord](https://discord.gg/gonative).

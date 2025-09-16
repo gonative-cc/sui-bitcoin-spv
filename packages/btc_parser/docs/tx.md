@@ -7,6 +7,7 @@
 
 -  [Struct `InputWitness`](#btc_parser_tx_InputWitness)
 -  [Struct `Transaction`](#btc_parser_tx_Transaction)
+-  [Function `new_witness`](#btc_parser_tx_new_witness)
 -  [Function `new`](#btc_parser_tx_new)
 -  [Function `items`](#btc_parser_tx_items)
 -  [Function `version`](#btc_parser_tx_version)
@@ -119,6 +120,32 @@ BTC transaction
 <dd>
 </dd>
 </dl>
+
+
+</details>
+
+<a name="btc_parser_tx_new_witness"></a>
+
+## Function `new_witness`
+
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/tx.md#btc_parser_tx_new_witness">new_witness</a>(<a href="../btc_parser/tx.md#btc_parser_tx_items">items</a>: vector&lt;vector&lt;u8&gt;&gt;): <a href="../btc_parser/tx.md#btc_parser_tx_InputWitness">btc_parser::tx::InputWitness</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/tx.md#btc_parser_tx_new_witness">new_witness</a>(<a href="../btc_parser/tx.md#btc_parser_tx_items">items</a>: vector&lt;vector&lt;u8&gt;&gt;): <a href="../btc_parser/tx.md#btc_parser_tx_InputWitness">InputWitness</a> {
+    <a href="../btc_parser/tx.md#btc_parser_tx_InputWitness">InputWitness</a> {
+	<a href="../btc_parser/tx.md#btc_parser_tx_items">items</a>
+    }
+}
+</code></pre>
+
 
 
 </details>
@@ -437,7 +464,6 @@ deseriablize transaction from bytes
     <b>let</b> <b>mut</b> marker: Option&lt;u8&gt; = option::none();
     <b>let</b> <b>mut</b> flag: Option&lt;u8&gt; = option::none();
     <b>if</b> (segwit[0] == 0x00 && segwit[1] == 0x01) {
-        // TODO: Handle case marker and option is none
         marker = option::some(r.read_byte());
         flag = option::some(r.read_byte());
     };
@@ -445,43 +471,24 @@ deseriablize transaction from bytes
     raw_tx.append(u64_to_varint_bytes(number_inputs));
     <b>let</b> <b>mut</b> <a href="../btc_parser/tx.md#btc_parser_tx_inputs">inputs</a> = vector[];
     number_inputs.do!(|_| {
-        <b>let</b> <a href="../btc_parser/tx.md#btc_parser_tx_tx_id">tx_id</a> = r.read(32);
-        raw_tx.append(<a href="../btc_parser/tx.md#btc_parser_tx_tx_id">tx_id</a>);
-        <b>let</b> vout = r.read(4);
-        raw_tx.append(vout);
-        <b>let</b> script_sig_size = r.read_compact_size();
-        raw_tx.append(u64_to_varint_bytes(script_sig_size));
-        <b>let</b> script_sig = r.read(script_sig_size);
-        raw_tx.append(script_sig);
-        <b>let</b> sequence = r.read(4);
-        raw_tx.append(sequence);
+        <b>let</b> inp = <a href="../btc_parser/input.md#btc_parser_input_decode">input::decode</a>(r);
         <a href="../btc_parser/tx.md#btc_parser_tx_inputs">inputs</a>.push_back(
-            <a href="../btc_parser/input.md#btc_parser_input_new">input::new</a>(
-                <a href="../btc_parser/tx.md#btc_parser_tx_tx_id">tx_id</a>,
-                vout,
-                script_sig,
-                sequence,
-            ),
+            inp,
         );
+        raw_tx.append(inp.encode());
     });
     // read <a href="../btc_parser/tx.md#btc_parser_tx_outputs">outputs</a>
     <b>let</b> number_outputs = r.read_compact_size();
     raw_tx.append(u64_to_varint_bytes(number_outputs));
     <b>let</b> <b>mut</b> <a href="../btc_parser/tx.md#btc_parser_tx_outputs">outputs</a> = vector[];
     number_outputs.do!(|_| {
-        <b>let</b> amount = r.read(8);
-        raw_tx.append(amount);
-        <b>let</b> script_pubkey_size = r.read_compact_size();
-        <b>let</b> script_pubkey = r.read(script_pubkey_size);
-        raw_tx.append(u64_to_varint_bytes(script_pubkey_size));
-        raw_tx.append(script_pubkey);
+        <b>let</b> out = <a href="../btc_parser/output.md#btc_parser_output_decode">output::decode</a>(r);
         <a href="../btc_parser/tx.md#btc_parser_tx_outputs">outputs</a>.push_back(
-            <a href="../btc_parser/output.md#btc_parser_output_new">output::new</a>(
-                le_bytes_to_u64(amount),
-                script_pubkey,
-            ),
-        )
+            out,
+        );
+        raw_tx.append(out.encode());
     });
+    // extract <a href="../btc_parser/tx.md#btc_parser_tx_witness">witness</a>
     <b>let</b> <b>mut</b> <a href="../btc_parser/tx.md#btc_parser_tx_witness">witness</a> = vector[];
     <b>if</b> (segwit[0] == 0x00 && segwit[1] == 0x01) {
         number_inputs.do!(|_| {

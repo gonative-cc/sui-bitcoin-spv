@@ -16,13 +16,18 @@
 -  [Function `is_P2PHK`](#btc_parser_output_is_P2PHK)
 -  [Function `is_op_return`](#btc_parser_output_is_op_return)
 -  [Function `is_P2WPHK`](#btc_parser_output_is_P2WPHK)
+-  [Function `is_taproot`](#btc_parser_output_is_taproot)
 -  [Function `extract_public_key_hash`](#btc_parser_output_extract_public_key_hash)
 -  [Function `extract_script_hash`](#btc_parser_output_extract_script_hash)
 -  [Function `extract_witness_script_hash`](#btc_parser_output_extract_witness_script_hash)
+-  [Function `extract_taproot`](#btc_parser_output_extract_taproot)
 -  [Function `op_return`](#btc_parser_output_op_return)
+-  [Function `decode`](#btc_parser_output_decode)
+-  [Function `encode`](#btc_parser_output_encode)
 
 
 <pre><code><b>use</b> <a href="../btc_parser/encoding.md#btc_parser_encoding">btc_parser::encoding</a>;
+<b>use</b> <a href="../btc_parser/reader.md#btc_parser_reader">btc_parser::reader</a>;
 <b>use</b> <a href="../btc_parser/vector_utils.md#btc_parser_vector_utils">btc_parser::vector_utils</a>;
 <b>use</b> <a href="../dependencies/std/option.md#std_option">std::option</a>;
 <b>use</b> <a href="../dependencies/std/vector.md#std_vector">std::vector</a>;
@@ -78,6 +83,15 @@ An empty array of bytes is pushed onto the stack. (This is not a no-op: an item 
 
 
 <pre><code><b>const</b> <a href="../btc_parser/output.md#btc_parser_output_OP_0">OP_0</a>: u8 = 0;
+</code></pre>
+
+
+
+<a name="btc_parser_output_OP_1"></a>
+
+
+
+<pre><code><b>const</b> <a href="../btc_parser/output.md#btc_parser_output_OP_1">OP_1</a>: u8 = 81;
 </code></pre>
 
 
@@ -437,6 +451,33 @@ Push the next 75 bytes onto the stack.
 
 </details>
 
+<a name="btc_parser_output_is_taproot"></a>
+
+## Function `is_taproot`
+
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_is_taproot">is_taproot</a>(<a href="../btc_parser/output.md#btc_parser_output">output</a>: &<a href="../btc_parser/output.md#btc_parser_output_Output">btc_parser::output::Output</a>): bool
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_is_taproot">is_taproot</a>(<a href="../btc_parser/output.md#btc_parser_output">output</a>: &<a href="../btc_parser/output.md#btc_parser_output_Output">Output</a>): bool {
+    <b>let</b> script = <a href="../btc_parser/output.md#btc_parser_output">output</a>.<a href="../btc_parser/output.md#btc_parser_output_script_pubkey">script_pubkey</a>;
+    script.length() == 34 &&
+	script[0] == <a href="../btc_parser/output.md#btc_parser_output_OP_1">OP_1</a> &&
+	script[1] == <a href="../btc_parser/output.md#btc_parser_output_OP_DATA_32">OP_DATA_32</a>
+}
+</code></pre>
+
+
+
+</details>
+
 <a name="btc_parser_output_extract_public_key_hash"></a>
 
 ## Function `extract_public_key_hash`
@@ -527,6 +568,35 @@ returns an empty vector in case it was not able to extract it
 
 </details>
 
+<a name="btc_parser_output_extract_taproot"></a>
+
+## Function `extract_taproot`
+
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_extract_taproot">extract_taproot</a>(<a href="../btc_parser/output.md#btc_parser_output">output</a>: &<a href="../btc_parser/output.md#btc_parser_output_Output">btc_parser::output::Output</a>): <a href="../dependencies/std/option.md#std_option_Option">std::option::Option</a>&lt;vector&lt;u8&gt;&gt;
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_extract_taproot">extract_taproot</a>(<a href="../btc_parser/output.md#btc_parser_output">output</a>: &<a href="../btc_parser/output.md#btc_parser_output_Output">Output</a>): Option&lt;vector&lt;u8&gt;&gt; {
+    <b>let</b> script = <a href="../btc_parser/output.md#btc_parser_output">output</a>.<a href="../btc_parser/output.md#btc_parser_output_script_pubkey">script_pubkey</a>;
+    <b>if</b> (<a href="../btc_parser/output.md#btc_parser_output">output</a>.<a href="../btc_parser/output.md#btc_parser_output_is_taproot">is_taproot</a>()) {
+        option::some(vector_slice(&script, 2, 34))
+    } <b>else</b> {
+        option::none()
+    }
+}
+</code></pre>
+
+
+
+</details>
+
 <a name="btc_parser_output_op_return"></a>
 
 ## Function `op_return`
@@ -571,6 +641,65 @@ This is why we only return the message without check size message.
     // script = <a href="../btc_parser/output.md#btc_parser_output_OP_RETURN">OP_RETURN</a> <a href="../btc_parser/output.md#btc_parser_output_OP_PUSHDATA4">OP_PUSHDATA4</a> &lt;4-bytes&gt; DATA
     //          |      6 bytes                  |  the rest |
     option::some(vector_slice(&script, 6, script.length()))
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="btc_parser_output_decode"></a>
+
+## Function `decode`
+
+
+
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_decode">decode</a>(r: &<b>mut</b> <a href="../btc_parser/reader.md#btc_parser_reader_Reader">btc_parser::reader::Reader</a>): <a href="../btc_parser/output.md#btc_parser_output_Output">btc_parser::output::Output</a>
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_decode">decode</a>(r: &<b>mut</b> Reader): <a href="../btc_parser/output.md#btc_parser_output_Output">Output</a> {
+    <b>let</b> <a href="../btc_parser/output.md#btc_parser_output_amount_bytes">amount_bytes</a> = r.read(8);
+    <b>let</b> script_pubkey_size = r.read_compact_size();
+    <b>let</b> <a href="../btc_parser/output.md#btc_parser_output_script_pubkey">script_pubkey</a> = r.read(script_pubkey_size);
+    <a href="../btc_parser/output.md#btc_parser_output_Output">Output</a> {
+        <a href="../btc_parser/output.md#btc_parser_output_amount">amount</a>: le_bytes_to_u64(<a href="../btc_parser/output.md#btc_parser_output_amount_bytes">amount_bytes</a>),
+        <a href="../btc_parser/output.md#btc_parser_output_amount_bytes">amount_bytes</a>,
+        <a href="../btc_parser/output.md#btc_parser_output_script_pubkey">script_pubkey</a>,
+    }
+}
+</code></pre>
+
+
+
+</details>
+
+<a name="btc_parser_output_encode"></a>
+
+## Function `encode`
+
+
+
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_encode">encode</a>(<a href="../btc_parser/output.md#btc_parser_output">output</a>: &<a href="../btc_parser/output.md#btc_parser_output_Output">btc_parser::output::Output</a>): vector&lt;u8&gt;
+</code></pre>
+
+
+
+<details>
+<summary>Implementation</summary>
+
+
+<pre><code><b>public</b>(package) <b>fun</b> <a href="../btc_parser/output.md#btc_parser_output_encode">encode</a>(<a href="../btc_parser/output.md#btc_parser_output">output</a>: &<a href="../btc_parser/output.md#btc_parser_output_Output">Output</a>): vector&lt;u8&gt; {
+    <b>let</b> <b>mut</b> raw_output = vector[];
+    raw_output.append(<a href="../btc_parser/output.md#btc_parser_output">output</a>.<a href="../btc_parser/output.md#btc_parser_output_amount_bytes">amount_bytes</a>);
+    raw_output.append(u64_to_varint_bytes(<a href="../btc_parser/output.md#btc_parser_output">output</a>.<a href="../btc_parser/output.md#btc_parser_output_script_pubkey">script_pubkey</a>.length()));
+    raw_output.append(<a href="../btc_parser/output.md#btc_parser_output">output</a>.<a href="../btc_parser/output.md#btc_parser_output_script_pubkey">script_pubkey</a>);
+    raw_output
 }
 </code></pre>
 
