@@ -72,11 +72,10 @@ public fun calc_work(header: &BlockHeader): u256 {
     // or ~bnTarget / (bnTarget+1) + 1.
     // More information: https://github.com/bitcoin/bitcoin/blob/28.x/src/chain.cpp#L139.
     //
-    // A move language doesn't support ~ operator. However, we have 2**256 - 1 = 2**255 - 1 + 2*255;
-    // so we have formula bellow:
+
     let target = header.target();
-    let n255 = 1 << 255;
-    (n255 - 1 - target + n255) / (target + 1) + 1
+
+    (target.bitwise_not() / (target + 1)) + 1
 }
 
 /// checks if the block headers meet PoW target requirements. Panics otherewise.
