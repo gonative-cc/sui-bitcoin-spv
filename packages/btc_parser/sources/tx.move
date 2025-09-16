@@ -127,15 +127,11 @@ public fun deserialize(r: &mut Reader): Transaction {
         raw_tx.append(script_sig);
         let sequence = r.read(4);
         raw_tx.append(sequence);
-
+        let inp = input::decode(r);
         inputs.push_back(
-            input::new(
-                tx_id,
-                vout,
-                script_sig,
-                sequence,
-            ),
+            inp,
         );
+        raw_tx.append(inp.encode());
     });
 
     // read outputs
