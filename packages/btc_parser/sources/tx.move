@@ -8,6 +8,9 @@ use btc_parser::input::{Self, Input};
 use btc_parser::output::{Self, Output};
 use btc_parser::reader::Reader;
 
+#[error]
+const ETxReaderNotEnd: vector<u8> = b"Reader not end after parse tx";
+
 // list of witnesses for inputs
 public struct InputWitness has copy, drop, store {
     items: vector<vector<u8>>,
@@ -161,6 +164,8 @@ public fun deserialize(r: &mut Reader): Transaction {
     raw_tx.append(locktime);
 
     let tx_id = hash256(raw_tx);
+
+    assert!(r.end_stream(), ETxReaderNotEnd);
     new(
         version,
         marker,
