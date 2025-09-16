@@ -219,6 +219,20 @@ fun parse_tx_happy_cases() {
 }
 
 #[test]
+fun taproot_tx_parse_happy_cases() {
+    // https://learnmeabitcoin.com/explorer/tx/a7115c7267dbb4aab62b37818d431b784fe731f4d2f9fa0939a9980d581690ec
+    let data =
+        x"020000000001014f75f3f02692ad2c67d02b272e5336017a4116b9efa47b9cc46514312c8ef5170000000000fdffffff02204e0000000000002251200f0c8db753acbd17343a39c2f3f4e35e4be6da749f9e35137ab220e7b238a6674c3001000000000016001453d9c40342ee880e766522c3e2b854d37f2b3cbf0247304402200ea17ab567125d0d724035f910ff43dab3544e3a9f327bde081b8737345376cf022062d073d84a4382ae55b409744f8c2a1bbf85924a452f982fcb0dcacebbdb06d901210315ece6df13fe80219f36187a5f884893897bd5c39bff6ccf4377d7a07c731ed9ff260d00";
+    let mut r = reader::new(data);
+    let txn = tx::deserialize(&mut r);
+    assert_eq!(txn.tx_id(), x"ec9016580d98a93909faf9d2f431e74f781b438d81372bb6aab4db67725c11a7");
+    assert_eq!(txn.inputs().length(), 1);
+    assert_eq!(txn.outputs().length(), 2);
+    assert_eq!(txn.is_witness(), true);
+    assert_eq!(txn.output_at(0).is_taproot(), true);
+}
+
+#[test]
 fun coinbase_logic() {
     // https://learnmeabitcoin.com/explorer/tx/66318604a7123c8ab607108400815cde7a22475d305da03be3d3bf8a3a5a4606
     let raw_coinbase_tx =
