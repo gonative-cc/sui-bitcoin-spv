@@ -8,7 +8,7 @@ authors = ["Native"]
 # For remote import, use the `{ git = "...", subdir = "...", rev = "..." }`.
 # Revision can be a branch, a tag, and a commit hash.
 # For local dependencies use `local = path`. Path is relative to the package root
-# Local = { local = "../path/to" }
+btc_parser = { local = "../btc_parser" }
 
 # To resolve a version conflict and force a specific version for dependency
 # override use `override = true`
