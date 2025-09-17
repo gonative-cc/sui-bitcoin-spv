@@ -3,7 +3,6 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
-use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::light_client::{
     insert_header,
@@ -18,6 +17,7 @@ use bitcoin_spv::light_client::{
     EAlreadyUpdated
 };
 use bitcoin_spv::params;
+use btc_parser::header::{Self, BlockHeader};
 use std::unit_test::{assert_eq, assert_ref_eq};
 use sui::test_scenario;
 
@@ -125,7 +125,7 @@ fun new_lc_for_test(ctx: &mut TxContext): LightClient {
         // }
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
     ];
-    let headers = raw_headers.map!(|h| new_block_header(h));
+    let headers = raw_headers.map!(|h| header::new(h));
     new_light_client(params::mainnet(), start_block, headers, 0, 8, ctx)
 }
 
@@ -140,7 +140,7 @@ fun init_light_client_wrong_start_height_should_fail() {
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213",
     ];
-    let headers = raw_headers.map!(|h| new_block_header(h));
+    let headers = raw_headers.map!(|h| header::new(h));
 
     initialize_light_client(0, height, headers, 0, 8, ctx);
     scenario.end();
@@ -157,7 +157,7 @@ fun init_light_client_happy_case() {
         x"00a0b434e99097082da749068bd8cc81f7ddd017f3153e1f25b000000000000000000000fbef99870f826601fed79703773deb9122f03b5167c0b7554c00112f9fa99e171320cf66763d03175c560dcc",
         x"00205223ce8791e22d0a1b64cfb0b485af2ddba566cb54292e0c030000000000000000003f5d648740a3a0519c56fce7f230d4c35aa83c9df0478b77be3fc89f0acfb8cc9524cf66763d03171746f213",
     ];
-    let headers = raw_headers.map!(|h| new_block_header(h));
+    let headers = raw_headers.map!(|h| header::new(h));
     initialize_light_client(0, height, headers, 0, 8, ctx);
     scenario.end();
 }
@@ -176,7 +176,7 @@ fun test_set_get_block_happy_case() {
     //     "difficulty_target": "5b250317",
     //     "nonce": "245ddc6a"
     // }
-    let header = new_block_header(
+    let header = header::new(
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
     );
     assert_eq!(lc.head_height(), 858816);
@@ -214,7 +214,7 @@ fun insert_header_happy_cases() {
     //     "nonce": "80f1e351"
     // }
     let headers = vector[
-        new_block_header(
+        header::new(
             x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351",
         ),
     ];
@@ -232,7 +232,7 @@ fun insert_header_happy_cases() {
     //     "difficulty_target": "5b250317",
     //     "nonce": "807427ca"
     // }
-    let last_block_header = new_block_header(
+    let last_block_header = header::new(
         x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
     );
     let last_block = new_light_block(
@@ -251,7 +251,7 @@ fun insert_header_happy_cases() {
     //     "nonce": "16c80c0d"
     // }
     let headers = vector[
-        new_block_header(
+        header::new(
             x"006089239c7c45da6d872c93dc9e8389d52b04bdd0a824eb308002000000000000000000fb4c3ac894ebc99c7a7b76ded35ec1c719907320ab781689ba1dedca40c5a9d7c50de1668c09031716c80c0d",
         ),
     ];
@@ -281,7 +281,7 @@ fun insert_headers_that_dont_from_a_chain_should_fail() {
     //     "difficulty_target": "5b250317",
     //     "nonce": "80f1e351"
     // }
-    let h = new_block_header(
+    let h = header::new(
         x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351",
     );
     // we insert 2 identical headers.
@@ -298,7 +298,7 @@ fun insert_header_block_hash_not_match_should_fail() {
     // we changed the previous block hash to make the new header's previous hash not match with last hash
     // from: c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000
     // to:   c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000001
-    let new_header = new_block_header(
+    let new_header = header::new(
         x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000001530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031780f1e351",
     );
     let h = *lc.head();
@@ -313,7 +313,7 @@ fun insert_header_failed_difficulty_not_match_should_fail() {
     let mut lc = new_lc_for_test(scenario.ctx());
     // we changed the difficulty to make the new header's previous hash not match with last hash
     // from 5b250317 to 5b250318
-    let new_header = new_block_header(
+    let new_header = header::new(
         x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f601c35cf665b25031880f1e351",
     );
     let h = *lc.head();
@@ -327,7 +327,7 @@ fun insert_header_failed_timestamp_too_old_should_fail() {
     let mut scenario = test_scenario::begin(sender);
     let mut lc = new_lc_for_test(scenario.ctx());
     // we changed timestamp from 1c35cf66 to 0c35cf46
-    let new_header = new_block_header(
+    let new_header = header::new(
         x"00801e31c24ae25304cbac7c3d3b076e241abb20ff2da1d3ddfc00000000000000000000530e6745eca48e937428b0f15669efdce807a071703ed5a4df0e85a3f6cc0f600c35cf465b25031780f1e351",
     );
     let h = *lc.head();

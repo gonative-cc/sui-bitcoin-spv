@@ -3,7 +3,6 @@
 #[test_only]
 module bitcoin_spv::difficulty_test;
 
-use bitcoin_spv::block_header::new_block_header;
 use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::light_client::{
@@ -12,6 +11,7 @@ use bitcoin_spv::light_client::{
     calc_next_required_difficulty
 };
 use bitcoin_spv::params;
+use btc_parser::header;
 use std::unit_test::assert_eq;
 use sui::test_scenario;
 
@@ -67,7 +67,7 @@ fun difficulty_computation_mainnet_happy_cases() {
         params::mainnet(),
         0,
         vector[
-            new_block_header(
+            header::new(
                 x"0100000000000000000000000000000000000000000000000000000000000000000000003ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a29ab5f49ffff001d1dac2b7c",
             ),
         ],
@@ -86,7 +86,7 @@ fun difficulty_computation_mainnet_happy_cases() {
     // check retarget difficulty
     // bits = 5b250317 # little endian
     // timestamp = b806e166 # little endian
-    let header = new_block_header(
+    let header = header::new(
         x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
     );
     let last_block = new_light_block(
@@ -100,7 +100,7 @@ fun difficulty_computation_mainnet_happy_cases() {
     lc.append_block(last_block);
 
     // timestamp = db34cf66
-    let header = new_block_header(
+    let header = header::new(
         x"0060b0329fd61df7a284ba2f7debbfaef9c5152271ef8165037300000000000000000000562139850fcfc2eb3204b1e790005aaba44e63a2633252fdbced58d2a9a87e2cdb34cf665b250317245ddc6a",
     );
     let first_block = new_light_block(858816, header, 0);
@@ -129,7 +129,7 @@ fun difficulty_computation_regtest_happy_case() {
         // NOTE: this is random header and when compute a new target in regtest mode this always returns a constant
         // this is power_limit.
         vector[
-            new_block_header(
+            header::new(
                 x"0040a320aa52a8971f61e56bf5a45117e3e224eabfef9237cb9a0100000000000000000060a9a5edd4e39b70ee803e3d22673799ae6ec733ea7549442324f9e3a790e4e4b806e1665b250317807427ca",
             ),
         ],
