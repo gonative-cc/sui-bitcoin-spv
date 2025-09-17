@@ -63,7 +63,7 @@ BUILD_DIR := build
 PACKAGE_NAME := $(notdir $(CURDIR))
 gen-docs:
 	@sui move build --doc
-	@cp -r ./$(BUILD_DIR)/$(PACKAGE_NAME)/docs/$(PACKAGE_NAME) ./docs
+	@cp -r ./$(BUILD_DIR)/$(PACKAGE_NAME)/docs/$(PACKAGE_NAME)/* ./docs
 
 .PHONY: gen-docs
 

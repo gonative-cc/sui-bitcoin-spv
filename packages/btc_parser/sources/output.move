@@ -2,7 +2,8 @@
 
 module btc_parser::output;
 
-use btc_parser::encoding::u64_to_le_bytes;
+use btc_parser::encoding::{u64_to_le_bytes, u64_to_varint_bytes, le_bytes_to_u64};
+use btc_parser::reader::Reader;
 use btc_parser::vector_utils::vector_slice;
 
 // === BTC script opcodes ===
@@ -178,4 +179,24 @@ public fun op_return(output: &Output): Option<vector<u8>> {
     // script = OP_RETURN OP_PUSHDATA4 <4-bytes> DATA
     //          |      6 bytes                  |  the rest |
     option::some(vector_slice(&script, 6, script.length()))
+}
+
+public(package) fun decode(r: &mut Reader): Output {
+    let amount_bytes = r.read(8);
+    let script_pubkey_size = r.read_compact_size();
+    let script_pubkey = r.read(script_pubkey_size);
+
+    Output {
+        amount: le_bytes_to_u64(amount_bytes),
+        amount_bytes,
+        script_pubkey,
+    }
+}
+
+public(package) fun encode(output: &Output): vector<u8> {
+    let mut raw_output = vector[];
+    raw_output.append(output.amount_bytes);
+    raw_output.append(u64_to_varint_bytes(output.script_pubkey.length()));
+    raw_output.append(output.script_pubkey);
+    raw_output
 }

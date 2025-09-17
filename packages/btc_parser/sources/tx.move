@@ -3,10 +3,13 @@
 module btc_parser::tx;
 
 use btc_parser::crypto::hash256;
-use btc_parser::encoding::{u64_to_varint_bytes, le_bytes_to_u64};
+use btc_parser::encoding::u64_to_varint_bytes;
 use btc_parser::input::{Self, Input};
 use btc_parser::output::{Self, Output};
 use btc_parser::reader::Reader;
+
+#[error]
+const ETxReaderHasRemainingData: vector<u8> = b"Reader has remaining data";
 
 // list of witnesses for inputs
 public struct InputWitness has copy, drop, store {
@@ -23,6 +26,12 @@ public struct Transaction has copy, drop, store {
     witness: vector<InputWitness>,
     locktime: vector<u8>,
     tx_id: vector<u8>,
+}
+
+public fun new_witness(items: vector<vector<u8>>): InputWitness {
+    InputWitness {
+        items,
+    }
 }
 
 // TODO: `new` is not good name here.
@@ -108,7 +117,6 @@ public fun deserialize(r: &mut Reader): Transaction {
     let mut marker: Option<u8> = option::none();
     let mut flag: Option<u8> = option::none();
     if (segwit[0] == 0x00 && segwit[1] == 0x01) {
-        // TODO: Handle case marker and option is none
         marker = option::some(r.read_byte());
         flag = option::some(r.read_byte());
     };
@@ -117,25 +125,11 @@ public fun deserialize(r: &mut Reader): Transaction {
     raw_tx.append(u64_to_varint_bytes(number_inputs));
     let mut inputs = vector[];
     number_inputs.do!(|_| {
-        let tx_id = r.read(32);
-        raw_tx.append(tx_id);
-        let vout = r.read(4);
-        raw_tx.append(vout);
-        let script_sig_size = r.read_compact_size();
-        raw_tx.append(u64_to_varint_bytes(script_sig_size));
-        let script_sig = r.read(script_sig_size);
-        raw_tx.append(script_sig);
-        let sequence = r.read(4);
-        raw_tx.append(sequence);
-
+        let inp = input::decode(r);
         inputs.push_back(
-            input::new(
-                tx_id,
-                vout,
-                script_sig,
-                sequence,
-            ),
+            inp,
         );
+        raw_tx.append(inp.encode());
     });
 
     // read outputs
@@ -143,20 +137,14 @@ public fun deserialize(r: &mut Reader): Transaction {
     raw_tx.append(u64_to_varint_bytes(number_outputs));
     let mut outputs = vector[];
     number_outputs.do!(|_| {
-        let amount = r.read(8);
-        raw_tx.append(amount);
-        let script_pubkey_size = r.read_compact_size();
-        let script_pubkey = r.read(script_pubkey_size);
-        raw_tx.append(u64_to_varint_bytes(script_pubkey_size));
-        raw_tx.append(script_pubkey);
+        let out = output::decode(r);
         outputs.push_back(
-            output::new(
-                le_bytes_to_u64(amount),
-                script_pubkey,
-            ),
-        )
+            out,
+        );
+        raw_tx.append(out.encode());
     });
 
+    // extract witness
     let mut witness = vector[];
     if (segwit[0] == 0x00 && segwit[1] == 0x01) {
         number_inputs.do!(|_| {
@@ -176,6 +164,8 @@ public fun deserialize(r: &mut Reader): Transaction {
     raw_tx.append(locktime);
 
     let tx_id = hash256(raw_tx);
+
+    assert!(r.end_stream(), ETxReaderHasRemainingData);
     new(
         version,
         marker,
