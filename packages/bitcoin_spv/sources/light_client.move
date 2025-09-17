@@ -2,14 +2,20 @@
 
 module bitcoin_spv::light_client;
 
-use bitcoin_spv::block_header::BlockHeader;
+use bitcoin_spv::block_header::{calc_work, pow_check, target};
 use bitcoin_spv::btc_math::target_to_bits;
 use bitcoin_spv::light_block::{LightBlock, new_light_block};
 use bitcoin_spv::merkle_tree::verify_merkle_proof;
 use bitcoin_spv::params::{Self, Params, is_correct_init_height};
 use bitcoin_spv::utils::nth_element;
+use btc_parser::header::BlockHeader;
 use sui::event;
 use sui::table::{Self, Table};
+
+// alias methods
+use fun calc_work as BlockHeader.calc_work;
+use fun pow_check as BlockHeader.pow_check;
+use fun target as BlockHeader.target;
 
 /// Package version
 const VERSION: u32 = 1;

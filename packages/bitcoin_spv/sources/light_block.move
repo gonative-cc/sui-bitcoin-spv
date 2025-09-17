@@ -2,7 +2,7 @@
 
 module bitcoin_spv::light_block;
 
-use bitcoin_spv::block_header::BlockHeader;
+use bitcoin_spv::header::BlockHeader;
 
 public struct LightBlock has copy, drop, store {
     height: u64,

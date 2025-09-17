@@ -3,7 +3,7 @@
 #[test_only]
 module bitcoin_spv::handle_fork_tests;
 
-use bitcoin_spv::block_header::{new_block_header, BlockHeader};
+use bitcoin_spv::header::{Self, BlockHeader};
 use bitcoin_spv::light_client::{
     LightClient,
     new_light_client,
@@ -46,7 +46,7 @@ fun new_lc_for_test(ctx: &mut TxContext): (LightClient, vector<BlockHeader>) {
         x"000000304f58550f49b5c9dce6328bc8d7b8f5941823efcc51741a024c17d9745ba21111cb2db51b4bf0858c2318820adafa1c8640703dca1faceea0205f388f160d452539c5b167ffff7f2004000000",
         x"00000030aa8bd6ce82edf1f9c03abc2243281f622594bc3aec5106a17f612371f76060084e05aaf29bda3424553cb4636006d006030690b91875fe96fdb4c52d4a38ba8a39c5b167ffff7f2003000000",
         x"0000003040ce8b407650044a4294fd43c6d78cbb4f78ac98527f858f3950dad92fc5982ddebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d23239c5b167ffff7f2002000000",
-    ].map!(|h| new_block_header(h));
+    ].map!(|h| header::new(h));
 
     let lc = new_light_client(params::regtest(), 0, headers, 0, 8, ctx);
 
@@ -73,7 +73,7 @@ fun insert_headers_switch_fork_tests() {
         x"000000307370f207ef4945a89b10b1c60a14770136109de093df4544340251190a5c2436494bba4bf2f3dc3a1d8c1bb592eeadc16c77b6bdd42c6ad2003a704641c3caeb9dc5b167ffff7f2000000000",
     ];
 
-    let headers = raw_headers.map!(|h| new_block_header(h));
+    let headers = raw_headers.map!(|h| header::new(h));
 
     // calc_work = 1 for each block header
     // Fork visualization:
@@ -127,7 +127,7 @@ fun insert_headers_fork_not_enought_power_should_fail() {
         x"000000309c32ae8f3b099ea17563bb425476cf962b84269e09d17e19350b819695970f2cdebd5d70e4be4f6f5cc474416137a697f1fca22bf87e9066eb9b43dd7882d2329dc5b167ffff7f2001000000",
     ];
 
-    let headers = raw_headers.map!(|h| new_block_header(h));
+    let headers = raw_headers.map!(|h| header::new(h));
     // calc_work = 1 for each block header
     // Fork visualization:
     // H0->...->H12->H13->H13->H15->H16->H17
@@ -148,7 +148,7 @@ fun insert_headers_block_does_not_exist_should_fail() {
     let raw_headers = vector[
         x"00000030db0338a432b1242c3bd22c245583e31788feaa6cb189673877b92f2a34eaf4606be46c161e69696c1c83ba3a1ea52f071fcdada5a6bce28f5da591b969b42da19dc5b167ffff7f2001000000",
     ];
-    let headers = raw_headers.map!(|h| new_block_header(h));
+    let headers = raw_headers.map!(|h| header::new(h));
     let sender = @0x01;
     let mut scenario = test_scenario::begin(sender);
     let ctx = scenario.ctx();
@@ -211,7 +211,7 @@ fun reorg_happy_case() {
         x"040000000217ca583ab80b6eda0cc99e814b2aa9750497de8e98901f5cfc76235f4e7365db612186fbd125fd83a05d9ccd75a5abf6453cd60e69b5d6e623e782d8e390b66b148653ffff7f20f4ffffef",
         x"04000000cd61864c5790c7903f049f6f2247eb961f492c09a1c17ebec52a7e22a10a1d41f1d563bcbebd74d8bf517b1021ebaef7b9beb24c376fd6f1d695383b5fd4a86216178653ffff7f2002000000",
         x"0400000048e30418dc91e17527e7b169aba58331e5627a4a1b434295149442fcb779040030128d2428f272019fd5047fef2eb5e74f60c360bd6c26603df7e1bc8a54a08058188653ffff7f20f3ffffef",
-    ].map!(|h| new_block_header(h));
+    ].map!(|h| header::new(h));
 
     // bits at height 0 always equal power_limit_bits
     // so we start at height 1 for easy testing.
@@ -244,7 +244,7 @@ fun reorg_happy_case() {
         x"0400000061f68cf3904a77101fe0a41cfc605d40564bdf693712a8684fded6b01b7ecb5ca8f039285b833d6c93e42d714669e90de06c143d11fba13cd66e1f2735eb219b302e8653ffff7f20f2ffffef",
     ];
 
-    let forks = raw_forks.map!(|f| new_block_header(f));
+    let forks = raw_forks.map!(|f| header::new(f));
     // Fork visualization:
     // H0->H1->H2->H3->H4->...->H9: chain_work = 22
     //             | ->F0->...->F15: chain_work = 42
