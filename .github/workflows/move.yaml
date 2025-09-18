@@ -1,13 +1,15 @@
 name: SuiMove
 
-on:
-  pull_request:
-    branches:
-      - master
-      - dev
+permissions:
+  contents: read
+  pull-requests: write
 
-env:
-  PRETTIER_MOVE_VERSION: 0.3.0
+on:
+  merge_group:
+    types: [checks_requested]
+  pull_request:
+    paths:
+      - '**.move'
 
 jobs:
   test:

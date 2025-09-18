@@ -2,11 +2,14 @@
 build
 .github
 pnpm-lock.yaml
+pnpm-workspace.yaml
 node_modules
 package.json
 bun.lock
 
 worker-configuration.d.ts
+
+private*
 
 # generated docs
 packages/*/docs
