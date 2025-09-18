@@ -1,10 +1,11 @@
 {
 	"name": "btclc",
 	"version": "0.0.0",
-	"description": "Helper for bitcoin spv",
+	"description": "Helpers for bitcoin spv",
 	"type": "module",
 	"private": true,
-	"license": "ISC",
+	"license": "MPL-2.0",
+	"packageManager": "bun@1.20.22",
 	"directories": {
 		"doc": "docs",
 		"test": "tests"
