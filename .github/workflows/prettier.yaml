@@ -1,11 +1,13 @@
 name: Prettier
+
+permissions:
+  contents: read
+  pull-requests: write
+
 on:
   merge_group:
     types: [checks_requested]
   pull_request:
-
-permissions:
-  contents: read
 
 jobs:
   prettier:
