@@ -1,9 +1,10 @@
-.PHONY: setup-hooks, add-license, lint-git, build-all, test-all
-
+.PHONY: setup-hooks lint-git
 
 setup-hooks:
 	@cd .git/hooks; ln -s -f ../../contrib/git-hooks/* ./
-	@pnpm install -g prettier @mysten/prettier-plugin-move
+	@bun install -g prettier @mysten/prettier-plugin-move
+
+.git/hooks/pre-commit: setup
 
 
 # used as pre-commit
@@ -20,6 +21,8 @@ SUBDIRS := $(wildcard packages/*/)
 MOVE_SUBDIRS := $(foreach dir,$(SUBDIRS),$(if $(wildcard $(dir)Move.toml),$(dir)))
 MAKE_SUBDIRS := $(foreach dir,$(SUBDIRS),$(if $(wildcard $(dir)Makefile),$(dir)))
 
+format-move:
+	@bun run format:move-all
 
 build-all:
 	@for dir in $(MOVE_SUBDIRS); do \
@@ -37,6 +40,7 @@ add-license:
 	@for dir in $(MOVE_SUBDIRS); do \
 		cd $$dir; make add-license; cd -; \
 	done
-
 # with reuse tool:
 # docker run --rm --volume $(pwd):/data fsfe/reuse annotate --license MPL-2.0  */tests/*.move */sources/*.move  -s cpp
+
+.PHONY: add-license, build-all, test-all

@@ -1,27 +1,14 @@
 
-
-setup-hooks:
-	@cd .git/hooks; ln -s -f ../../scripts/git-hooks/* ./
-	@pnpm install -g prettier @mysten/prettier-plugin-move
-
-.git/hooks/pre-commit: setup
-
-build: .git/hooks/pre-commit
-	@sui move build
-
-publish:
-	@sui client publish --gas-budget 100000000
-
 # used as pre-commit
 lint-git:
-	@git diff --name-only --cached | grep  -E '\.md$$'| grep -v '^docs/' | xargs -r markdownlint-cli2
+	@git diff --name-only --cached | grep  -E '\.md$$' | xargs -r markdownlint-cli2
 	@sui move build --lint
 # note: prettier-move is run in the hook directly
 
 # lint changed files
 lint:
 	@git diff --name-only | grep  -E '\.md$$' | xargs -r markdownlint-cli2
-	@ sui move build --lint
+	@sui move build --lint
 
 lint-all:
 	@markdownlint-cli2 **.md
@@ -30,9 +17,10 @@ lint-all:
 lint-fix-all:
 	@markdownlint-cli2 --fix **.md
 	@echo "Sui move lint will be fixed by manual"
+	@bun run format:move-all
 
-.PHONY: build setup
-.PHONY: lint-git lint lint-all lint-fix-all
+
+.PHONY: setup lint-git lint lint-all lint-fix-all
 
 
 # add license header to every source file
@@ -42,16 +30,19 @@ add-license:
 
 
 ###############################################################################
-##                                   Tests                                   ##
+##                              Build & Test                                 ##
 ###############################################################################
+
+build: .git/hooks/pre-commit
+	@sui move build
 
 test:
 	@sui move test
 
 test-coverage:
-	@sui move test --coverage
-	@sui move coverage summary
-
+	echo TODO
+# sui move test --coverage
+# sui move coverage
 
 .PHONY: test test-coverage
 
