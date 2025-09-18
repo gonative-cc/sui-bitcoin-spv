@@ -11,7 +11,7 @@ use bitcoin_parser::reader::Reader;
 #[error]
 const ETxReaderHasRemainingData: vector<u8> = b"Reader has remaining data";
 
-// list of witnesses for inputs
+// list of bitcoin script witnesses for inputs
 public struct InputWitness has copy, drop, store {
     items: vector<vector<u8>>,
 }
@@ -34,7 +34,6 @@ public fun new_witness(items: vector<vector<u8>>): InputWitness {
     }
 }
 
-// TODO: `new` is not good name here.
 /// Create a btc data
 public fun new(
     version: vector<u8>,
