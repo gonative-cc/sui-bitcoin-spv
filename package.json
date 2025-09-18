@@ -12,7 +12,7 @@
 	"scripts": {
 		"lint": "echo \"Error: no linter specified\"",
 		"typecheck": "tsc --noEmit",
-		"format:all": "prettier -w **/*.js **/*.ts **/*.md",
+		"format:all": "prettier --no-config -w **/*.js **/*.ts **/*.md",
 		"format:move": "prettier-move --config .prettier-move.json -w",
 		"format:move-all": "prettier-move --config .prettier-move.json **/*.move -w",
 		"test": "bun test"
