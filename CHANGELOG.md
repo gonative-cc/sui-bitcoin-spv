@@ -19,12 +19,14 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ## Unreleased
 
+We changed this repo to a workspace with packages required to handle Bitcoin SPV and transaction verification flow.
 
 ### Features
 
-- [#127](https://github.com/gonative-cc/sui-bitcoin-spv/pull/127) feat: add btc_parser package
+- [#127](https://github.com/gonative-cc/sui-bitcoin-spv/pull/127) feat: add bitcoin_parser package
 - [#115](https://github.com/gonative-cc/sui-bitcoin-spv/pull/115) feat: use BlockHeader type in smart contract method's parameters / PTB friendly
 - [#114](https://github.com/gonative-cc/sui-bitcoin-spv/pull/114) feat: use sui::table to store headers
+- Moved `bitcoin_parser` to this repo
 
 ### Breaking Changes
 

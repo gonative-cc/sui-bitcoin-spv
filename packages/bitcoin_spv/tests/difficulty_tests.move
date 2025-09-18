@@ -3,6 +3,7 @@
 #[test_only]
 module bitcoin_spv::difficulty_test;
 
+use bitcoin_parser::header;
 use bitcoin_spv::btc_math::{bits_to_target, target_to_bits};
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::light_client::{
@@ -11,7 +12,6 @@ use bitcoin_spv::light_client::{
     calc_next_required_difficulty
 };
 use bitcoin_spv::params;
-use btc_parser::header;
 use std::unit_test::assert_eq;
 use sui::test_scenario;
 
