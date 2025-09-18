@@ -32,7 +32,7 @@ build-all:
 
 test-all:
 	@for dir in $(MOVE_SUBDIRS); do \
-		echo "==> testing $$dir"; sui move test; cd -; \
+		echo "==> testing $$dir"; cd $$dir; sui move test -i 5000000; cd -; \
 	done
 
 # add license header to every source file
