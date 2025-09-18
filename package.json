@@ -1,22 +1,22 @@
 {
 	"name": "btclc",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"description": "Helper for bitcoin spv",
-	"main": "index.js",
 	"type": "module",
+	"private": true,
+	"license": "ISC",
 	"directories": {
 		"doc": "docs",
 		"test": "tests"
 	},
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1"
+		"lint": "echo \"Error: no linter specified\"",
+		"typecheck": "tsc --noEmit",
+		"format:all": "prettier -w **/*.js **/*.ts **/*.md",
+		"format:move": "prettier-move --config .prettier-move.json -w",
+		"format:move-all": "prettier-move --config .prettier-move.json **/*.move -w",
+		"test": "bun test"
 	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/gonative-cc/sui-bitcoin-spv.git"
-	},
-	"author": "",
-	"license": "ISC",
 	"bugs": {
 		"url": "https://github.com/gonative-cc/sui-bitcoin-spv/issues"
 	},
@@ -24,5 +24,8 @@
 	"dependencies": {
 		"@mysten/sui": "^1.37.1",
 		"dotenv": "^17.2.1"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
 	}
 }
