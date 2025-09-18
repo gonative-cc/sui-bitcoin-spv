@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+
 module btc_parser::vector_utils;
 
 #[error]
