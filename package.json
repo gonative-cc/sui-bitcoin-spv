@@ -15,7 +15,7 @@
 		"typecheck": "tsc --noEmit",
 		"format:all": "prettier --no-config -w **/*.js **/*.ts **/*.md",
 		"format:move": "prettier-move --config .prettier-move.json -w",
-		"format:move-all": "prettier-move --config .prettier-move.json **/*.move -w",
+		"format:move-all": "prettier-move --config .prettier-move.json -w **/*.move",
 		"test": "bun test"
 	},
 	"bugs": {
