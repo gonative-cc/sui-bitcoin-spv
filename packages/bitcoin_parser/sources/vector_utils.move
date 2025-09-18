@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-module btc_parser::vector_utils;
+module bitcoin_parser::vector_utils;
 
 #[error]
 const EOutOfBounds: vector<u8> = b"Slice out of bounds";

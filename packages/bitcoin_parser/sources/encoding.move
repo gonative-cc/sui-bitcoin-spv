@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-module btc_parser::encoding;
+module bitcoin_parser::encoding;
 
 use std::u64::do;
 

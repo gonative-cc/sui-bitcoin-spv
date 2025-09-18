@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MPL-2.0
 
-module btc_parser::reader;
+module bitcoin_parser::reader;
 
-use btc_parser::encoding::le_bytes_to_u64;
+use bitcoin_parser::encoding::le_bytes_to_u64;
 
 // TODO: Follow error in btc implemetation
 #[error]

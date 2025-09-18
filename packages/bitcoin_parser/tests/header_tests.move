@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #[test_only]
-module btc_parser::header_tests;
+module bitcoin_parser::header_tests;
 
-use btc_parser::encoding::u32_to_le_bytes;
-use btc_parser::header::{new, EInvalidBlockHeaderSize};
+use bitcoin_parser::encoding::u32_to_le_bytes;
+use bitcoin_parser::header::{new, EInvalidBlockHeaderSize};
 use std::unit_test::assert_eq;
 
 #[test]

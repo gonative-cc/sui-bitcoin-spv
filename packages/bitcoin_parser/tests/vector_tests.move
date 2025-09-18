@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
 
 #[test_only]
-module btc_parser::vector_tests;
+module bitcoin_parser::vector_tests;
 
-use btc_parser::vector_utils::vector_slice;
+use bitcoin_parser::vector_utils::vector_slice;
 use std::unit_test::assert_eq;
 
 // TODO: add more tests for slice

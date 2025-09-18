@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL-2.0
 
-module btc_parser::crypto;
+module bitcoin_parser::crypto;
 
 use std::hash::sha2_256;
 

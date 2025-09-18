@@ -1,15 +1,15 @@
 
-<a name="btc_parser_encoding"></a>
+<a name="bitcoin_parser_encoding"></a>
 
-# Module `btc_parser::encoding`
+# Module `bitcoin_parser::encoding`
 
 
 
 -  [Constants](#@Constants_0)
--  [Function `le_bytes_to_u64`](#btc_parser_encoding_le_bytes_to_u64)
--  [Function `u64_to_varint_bytes`](#btc_parser_encoding_u64_to_varint_bytes)
--  [Function `u32_to_le_bytes`](#btc_parser_encoding_u32_to_le_bytes)
--  [Function `u64_to_le_bytes`](#btc_parser_encoding_u64_to_le_bytes)
+-  [Function `le_bytes_to_u64`](#bitcoin_parser_encoding_le_bytes_to_u64)
+-  [Function `u64_to_varint_bytes`](#bitcoin_parser_encoding_u64_to_varint_bytes)
+-  [Function `u32_to_le_bytes`](#bitcoin_parser_encoding_u32_to_le_bytes)
+-  [Function `u64_to_le_bytes`](#bitcoin_parser_encoding_u64_to_le_bytes)
 
 
 <pre><code></code></pre>
@@ -21,24 +21,24 @@
 ## Constants
 
 
-<a name="btc_parser_encoding_EOverflowVector"></a>
+<a name="bitcoin_parser_encoding_EOverflowVector"></a>
 
 
 
 <pre><code>#[error]
-<b>const</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_EOverflowVector">EOverflowVector</a>: vector&lt;u8&gt; = b"Can't covert vector to u64 b/c overflow";
+<b>const</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_EOverflowVector">EOverflowVector</a>: vector&lt;u8&gt; = b"Can't covert vector to u64 b/c overflow";
 </code></pre>
 
 
 
-<a name="btc_parser_encoding_le_bytes_to_u64"></a>
+<a name="bitcoin_parser_encoding_le_bytes_to_u64"></a>
 
 ## Function `le_bytes_to_u64`
 
 Converts vector bytes in the little-endian form to a u64 integer
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_le_bytes_to_u64">le_bytes_to_u64</a>(v: vector&lt;u8&gt;): u64
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_le_bytes_to_u64">le_bytes_to_u64</a>(v: vector&lt;u8&gt;): u64
 </code></pre>
 
 
@@ -47,8 +47,8 @@ Converts vector bytes in the little-endian form to a u64 integer
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_le_bytes_to_u64">le_bytes_to_u64</a>(v: vector&lt;u8&gt;): u64 {
-    <b>assert</b>!(v.length() &lt;= 8, <a href="../btc_parser/encoding.md#btc_parser_encoding_EOverflowVector">EOverflowVector</a>);
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_le_bytes_to_u64">le_bytes_to_u64</a>(v: vector&lt;u8&gt;): u64 {
+    <b>assert</b>!(v.length() &lt;= 8, <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_EOverflowVector">EOverflowVector</a>);
     <b>let</b> <b>mut</b> number = 0;
     v.length().do!(|i| {
         number = number + ((v[i] <b>as</b> u64) * ((1 <b>as</b> u64) &lt;&lt; ((i <b>as</b> u8) * 8)) <b>as</b> u64)
@@ -61,7 +61,7 @@ Converts vector bytes in the little-endian form to a u64 integer
 
 </details>
 
-<a name="btc_parser_encoding_u64_to_varint_bytes"></a>
+<a name="bitcoin_parser_encoding_u64_to_varint_bytes"></a>
 
 ## Function `u64_to_varint_bytes`
 
@@ -69,7 +69,7 @@ Encodes a u64 into VarInt format.
 Adapted from go_native/move_spv_light_client
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_u64_to_varint_bytes">u64_to_varint_bytes</a>(n: u64): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_u64_to_varint_bytes">u64_to_varint_bytes</a>(n: u64): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -78,7 +78,7 @@ Adapted from go_native/move_spv_light_client
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_u64_to_varint_bytes">u64_to_varint_bytes</a>(n: u64): vector&lt;u8&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_u64_to_varint_bytes">u64_to_varint_bytes</a>(n: u64): vector&lt;u8&gt; {
     <b>let</b> <b>mut</b> ans = vector::empty&lt;u8&gt;();
     <b>let</b> <b>mut</b> n = n;
     <b>if</b> (n &lt;= 252) {
@@ -110,14 +110,14 @@ Adapted from go_native/move_spv_light_client
 
 </details>
 
-<a name="btc_parser_encoding_u32_to_le_bytes"></a>
+<a name="bitcoin_parser_encoding_u32_to_le_bytes"></a>
 
 ## Function `u32_to_le_bytes`
 
 Converts a u32 integer to a 4-byte little-endian vector<u8>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_u32_to_le_bytes">u32_to_le_bytes</a>(val: u32): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_u32_to_le_bytes">u32_to_le_bytes</a>(val: u32): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -126,7 +126,7 @@ Converts a u32 integer to a 4-byte little-endian vector<u8>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_u32_to_le_bytes">u32_to_le_bytes</a>(val: u32): vector&lt;u8&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_u32_to_le_bytes">u32_to_le_bytes</a>(val: u32): vector&lt;u8&gt; {
     <b>let</b> <b>mut</b> bytes = vector::empty&lt;u8&gt;();
     bytes.push_back(((val &gt;&gt; 0) & 0xFF) <b>as</b> u8);
     bytes.push_back(((val &gt;&gt; 8) & 0xFF) <b>as</b> u8);
@@ -140,14 +140,14 @@ Converts a u32 integer to a 4-byte little-endian vector<u8>.
 
 </details>
 
-<a name="btc_parser_encoding_u64_to_le_bytes"></a>
+<a name="bitcoin_parser_encoding_u64_to_le_bytes"></a>
 
 ## Function `u64_to_le_bytes`
 
 Converts a u64 integer to an 8-byte little-endian vector<u8>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_u64_to_le_bytes">u64_to_le_bytes</a>(val: u64): vector&lt;u8&gt;
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_u64_to_le_bytes">u64_to_le_bytes</a>(val: u64): vector&lt;u8&gt;
 </code></pre>
 
 
@@ -156,7 +156,7 @@ Converts a u64 integer to an 8-byte little-endian vector<u8>.
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../btc_parser/encoding.md#btc_parser_encoding_u64_to_le_bytes">u64_to_le_bytes</a>(val: u64): vector&lt;u8&gt; {
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding_u64_to_le_bytes">u64_to_le_bytes</a>(val: u64): vector&lt;u8&gt; {
     <b>let</b> <b>mut</b> bytes = vector::empty&lt;u8&gt;();
     bytes.push_back(((val &gt;&gt; 0) & 0xFF) <b>as</b> u8);
     bytes.push_back(((val &gt;&gt; 8) & 0xFF) <b>as</b> u8);
