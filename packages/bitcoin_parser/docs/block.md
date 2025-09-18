@@ -13,7 +13,7 @@
 
 <pre><code><b>use</b> <a href="../bitcoin_parser/crypto.md#bitcoin_parser_crypto">bitcoin_parser::crypto</a>;
 <b>use</b> <a href="../bitcoin_parser/encoding.md#bitcoin_parser_encoding">bitcoin_parser::encoding</a>;
-<b>use</b> <a href="../bitcoin_parser/block_header.md#bitcoin_parser_header">bitcoin_parser::header</a>;
+<b>use</b> <a href="../bitcoin_parser/header.md#bitcoin_parser_header">bitcoin_parser::header</a>;
 <b>use</b> <a href="../bitcoin_parser/input.md#bitcoin_parser_input">bitcoin_parser::input</a>;
 <b>use</b> <a href="../bitcoin_parser/output.md#bitcoin_parser_output">bitcoin_parser::output</a>;
 <b>use</b> <a href="../bitcoin_parser/reader.md#bitcoin_parser_reader">bitcoin_parser::reader</a>;
@@ -44,7 +44,7 @@ A block is a collection of all transactions in the BTC block
 
 <dl>
 <dt>
-<code>block_header: <a href="../bitcoin_parser/block_header.md#bitcoin_parser_header_BlockHeader">bitcoin_parser::header::BlockHeader</a></code>
+<code>block_header: <a href="../bitcoin_parser/header.md#bitcoin_parser_header_BlockHeader">bitcoin_parser::header::BlockHeader</a></code>
 </dt>
 <dd>
 </dd>
@@ -75,7 +75,7 @@ A block is a collection of all transactions in the BTC block
 
 <pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/block.md#bitcoin_parser_block_new">new</a>(raw_block: vector&lt;u8&gt;): <a href="../bitcoin_parser/block.md#bitcoin_parser_block_Block">Block</a> {
     <b>let</b> <b>mut</b> r = <a href="../bitcoin_parser/reader.md#bitcoin_parser_reader_new">reader::new</a>(raw_block);
-    <b>let</b> block_header = <a href="../bitcoin_parser/block_header.md#bitcoin_parser_header_new">header::new</a>(r.read(80));
+    <b>let</b> block_header = <a href="../bitcoin_parser/header.md#bitcoin_parser_header_new">header::new</a>(r.read(80));
     <b>let</b> number_tx = r.read_compact_size();
     <b>let</b> <b>mut</b> transactions = vector[];
     number_tx.do!(|_| {
@@ -122,7 +122,7 @@ A block is a collection of all transactions in the BTC block
 
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/block_header.md#bitcoin_parser_header">header</a>(b: &<a href="../bitcoin_parser/block.md#bitcoin_parser_block_Block">bitcoin_parser::block::Block</a>): <a href="../bitcoin_parser/block_header.md#bitcoin_parser_header_BlockHeader">bitcoin_parser::header::BlockHeader</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/header.md#bitcoin_parser_header">header</a>(b: &<a href="../bitcoin_parser/block.md#bitcoin_parser_block_Block">bitcoin_parser::block::Block</a>): <a href="../bitcoin_parser/header.md#bitcoin_parser_header_BlockHeader">bitcoin_parser::header::BlockHeader</a>
 </code></pre>
 
 
@@ -131,7 +131,7 @@ A block is a collection of all transactions in the BTC block
 <summary>Implementation</summary>
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/block_header.md#bitcoin_parser_header">header</a>(b: &<a href="../bitcoin_parser/block.md#bitcoin_parser_block_Block">Block</a>): BlockHeader {
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/header.md#bitcoin_parser_header">header</a>(b: &<a href="../bitcoin_parser/block.md#bitcoin_parser_block_Block">Block</a>): BlockHeader {
     b.block_header
 }
 </code></pre>

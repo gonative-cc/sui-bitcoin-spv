@@ -7,6 +7,7 @@
 
 -  [Struct `InputWitness`](#bitcoin_parser_tx_InputWitness)
 -  [Struct `Transaction`](#bitcoin_parser_tx_Transaction)
+-  [Constants](#@Constants_0)
 -  [Function `new_witness`](#bitcoin_parser_tx_new_witness)
 -  [Function `new`](#bitcoin_parser_tx_new)
 -  [Function `items`](#bitcoin_parser_tx_items)
@@ -124,6 +125,21 @@ BTC transaction
 
 </details>
 
+<a name="@Constants_0"></a>
+
+## Constants
+
+
+<a name="bitcoin_parser_tx_ETxReaderHasRemainingData"></a>
+
+
+
+<pre><code>#[error]
+<b>const</b> <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_ETxReaderHasRemainingData">ETxReaderHasRemainingData</a>: vector&lt;u8&gt; = b"Reader <b>has</b> remaining data";
+</code></pre>
+
+
+
 <a name="bitcoin_parser_tx_new_witness"></a>
 
 ## Function `new_witness`
@@ -141,7 +157,7 @@ BTC transaction
 
 <pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_new_witness">new_witness</a>(<a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_items">items</a>: vector&lt;vector&lt;u8&gt;&gt;): <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_InputWitness">InputWitness</a> {
     <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_InputWitness">InputWitness</a> {
-	<a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_items">items</a>
+        <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_items">items</a>,
     }
 }
 </code></pre>
@@ -506,6 +522,7 @@ deseriablize transaction from bytes
     <b>let</b> <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_locktime">locktime</a> = r.read(4);
     raw_tx.append(<a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_locktime">locktime</a>);
     <b>let</b> <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_tx_id">tx_id</a> = hash256(raw_tx);
+    <b>assert</b>!(r.end_stream(), <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_ETxReaderHasRemainingData">ETxReaderHasRemainingData</a>);
     <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_new">new</a>(
         <a href="../bitcoin_parser/tx.md#bitcoin_parser_tx_version">version</a>,
         marker,
