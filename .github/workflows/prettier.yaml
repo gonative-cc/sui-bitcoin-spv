@@ -1,0 +1,31 @@
+name: Prettier
+on:
+  merge_group:
+    types: [checks_requested]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Prettify code
+        uses: creyD/prettier_action@v4.6
+        with:
+          prettier_options: --no-config -c .
+          only_changed: true
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: placeholder
+        run: echo OK

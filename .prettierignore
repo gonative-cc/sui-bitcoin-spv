@@ -4,8 +4,9 @@ build
 pnpm-lock.yaml
 node_modules
 package.json
+bun.lock
 
 worker-configuration.d.ts
 
 # generated docs
-/docs
+packages/*/docs
