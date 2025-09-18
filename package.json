@@ -1,10 +1,11 @@
 {
 	"name": "btclc",
 	"version": "0.0.0",
-	"description": "Helper for bitcoin spv",
+	"description": "Helpers for bitcoin spv",
 	"type": "module",
 	"private": true,
-	"license": "ISC",
+	"license": "MPL-2.0",
+	"packageManager": "bun@1.20.22",
 	"directories": {
 		"doc": "docs",
 		"test": "tests"
@@ -14,7 +15,7 @@
 		"typecheck": "tsc --noEmit",
 		"format:all": "prettier --no-config -w **/*.js **/*.ts **/*.md",
 		"format:move": "prettier-move --config .prettier-move.json -w",
-		"format:move-all": "prettier-move --config .prettier-move.json **/*.move -w",
+		"format:move-all": "prettier-move --config .prettier-move.json -w **/*.move",
 		"test": "bun test"
 	},
 	"bugs": {

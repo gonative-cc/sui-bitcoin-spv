@@ -10,7 +10,7 @@
 [![License: MPL-2.0](https://img.shields.io/github/license/gonative-cc/move-bitcoin-spv.svg?style=flat-square)](https://github.com/gonative-cc/move-bitcoin-spv/blob/main/LICENSE)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](https://github.com/gonative-cc/contributig/blob/master/CODE_OF_CONDUCT.md)
 
-A foundational utility library, written in Sui Move, for parsing and deserializing raw Bitcoin data structures like block headers and transactions.
+A foundational utility library, written in Sui Move, for parsing and deserializing raw Bitcoin data structures like block headers, inputs and transactions.
 
 ## [Documentation](./docs)
 

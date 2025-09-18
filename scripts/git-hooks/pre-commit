@@ -9,5 +9,5 @@ if [ -z "$STAGED_MOVE_FILES" ]; then
     exit 0
 fi
 
-prettier-move $STAGED_MOVE_FILES --write
+prettier-move --config .prettier-move.json --write $STAGED_MOVE_FILES
 git add $STAGED_MOVE_FILES

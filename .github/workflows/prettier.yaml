@@ -20,11 +20,23 @@ jobs:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
 
+      # @v2
+      - uses: oven-sh/setup-bun@22457c87c1b161cf7dde222c3e82b2b5f8d2bed2
+      - run: bun install prettier
+
       - name: Prettify code
-        uses: creyD/prettier_action@v4.6
-        with:
-          prettier_options: --no-config -c .
-          only_changed: true
+        run: |
+          # Identify the target branch to diff against.
+          TARGET_BRANCH="origin/${{ github.base_ref }}"
+
+          echo "Identifying changed files against branch $TARGET_BRANCH..."
+
+          # Get a list of changed files, separated by NUL characters to handle spaces.
+          # - xargs -0 reads NUL-separated input.
+          # - xargs -r ensures Prettier doesn't run if there are no changed files.
+          # - prettier --check checks formatting without writing changes.
+          git diff --name-only -z --diff-filter=ACMRT $TARGET_BRANCH...HEAD | \
+            xargs -0 -r bun prettier --ignore-unknown --check
 
   test:
     runs-on: ubuntu-latest
