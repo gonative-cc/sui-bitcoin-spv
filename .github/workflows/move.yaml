@@ -1,4 +1,4 @@
-name: Sui Move Tests
+name: Move Tests
 
 on:
   pull_request:
