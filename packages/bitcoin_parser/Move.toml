@@ -1,21 +1,23 @@
 [package]
-name = "bitcoin_spv"
-edition = "2024.beta"
-license = "MPL-2.0"
-authors = ["Native"]
+name = "bitcoin_parser"
+edition = "2024.beta" # edition = "legacy" to use legacy (pre-2024) Move
+# license = ""           # e.g., "MIT", "GPL", "Apache 2.0"
+# authors = ["..."]      # e.g., ["Joe Smith (joesmith@noemail.com)", "John Snow (johnsnow@noemail.com)"]
 
 [dependencies]
+
 # For remote import, use the `{ git = "...", subdir = "...", rev = "..." }`.
 # Revision can be a branch, a tag, and a commit hash.
+# MyRemotePackage = { git = "https://some.remote/host.git", subdir = "remote/path", rev = "main" }
+
 # For local dependencies use `local = path`. Path is relative to the package root
-bitcoin_parser = { local = "../bitcoin_parser" }
 
 # To resolve a version conflict and force a specific version for dependency
 # override use `override = true`
 # Override = { local = "../conflicting/version", override = true }
 
 [addresses]
-bitcoin_spv = "0x0"
+bitcoin_parser = "0x00"
 
 # Named addresses will be accessible in Move as `@name`. They're also exported:
 # for example, `std = "0x1"` is exported by the Standard Library.

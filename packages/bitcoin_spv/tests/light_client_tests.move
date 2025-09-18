@@ -3,6 +3,7 @@
 #[test_only]
 module bitcoin_spv::light_client_tests;
 
+use bitcoin_parser::header;
 use bitcoin_spv::light_block::new_light_block;
 use bitcoin_spv::light_client::{
     insert_header,
@@ -17,7 +18,6 @@ use bitcoin_spv::light_client::{
     EAlreadyUpdated
 };
 use bitcoin_spv::params;
-use btc_parser::header::{Self, BlockHeader};
 use std::unit_test::{assert_eq, assert_ref_eq};
 use sui::test_scenario;
 

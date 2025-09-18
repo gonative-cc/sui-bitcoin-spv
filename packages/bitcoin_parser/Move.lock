@@ -2,14 +2,13 @@
 
 [move]
 version = 3
-manifest_digest = "86B4EDF3F5A4E1D9CAE2D1C28AF7DF03DB1BF93462A643538183D7BC7ECF0333"
-deps_digest = "397E6A9F7A624706DBDFEE056CE88391A15876868FD18A88504DA74EB458D697"
+manifest_digest = "5BA52C064C5DE3D0F0A22E74004249A5C68DC543BC077DA54556208BDA969730"
+deps_digest = "F9B494B64F0615AED0E98FC12A85B85ECD2BC5185C22D30E7F67786BB52E507C"
 dependencies = [
   { id = "Bridge", name = "Bridge" },
   { id = "MoveStdlib", name = "MoveStdlib" },
   { id = "Sui", name = "Sui" },
   { id = "SuiSystem", name = "SuiSystem" },
-  { id = "bitcoin_parser", name = "bitcoin_parser" },
 ]
 
 [[move.package]]
@@ -43,17 +42,6 @@ dependencies = [
   { id = "Sui", name = "Sui" },
 ]
 
-[[move.package]]
-id = "bitcoin_parser"
-source = { local = "../bitcoin_parser" }
-
-dependencies = [
-  { id = "Bridge", name = "Bridge" },
-  { id = "MoveStdlib", name = "MoveStdlib" },
-  { id = "Sui", name = "Sui" },
-  { id = "SuiSystem", name = "SuiSystem" },
-]
-
 [move.toolchain-version]
 compiler-version = "1.56.2"
 edition = "2024.beta"
@@ -63,12 +51,12 @@ flavor = "sui"
 
 [env.devnet]
 chain-id = "4256f1d2"
-original-published-id = "0x5698a7a53a3134dfda08ad2406d586453f5236d15f75e8a0f896f880c118e39e"
-latest-published-id = "0x5698a7a53a3134dfda08ad2406d586453f5236d15f75e8a0f896f880c118e39e"
+original-published-id = "0x959081e26d6b9aca443706b3e3d2d3dd5391904c98fc9ef6ab3d71f2c3e3dd60"
+latest-published-id = "0x959081e26d6b9aca443706b3e3d2d3dd5391904c98fc9ef6ab3d71f2c3e3dd60"
 published-version = "1"
 
 [env.testnet]
 chain-id = "4c78adac"
-original-published-id = "0x7e7daf17f75096977b0d9791f5f5fb3b2cb6ef44149747117ff5f1c0c4a6e00b"
-latest-published-id = "0x7e7daf17f75096977b0d9791f5f5fb3b2cb6ef44149747117ff5f1c0c4a6e00b"
+original-published-id = "0x79c3a448d2dc27b862e304a9a64f39d420c2f605b8b432d44911d330094aef06"
+latest-published-id = "0x79c3a448d2dc27b862e304a9a64f39d420c2f605b8b432d44911d330094aef06"
 published-version = "1"
