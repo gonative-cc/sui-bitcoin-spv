@@ -9,4 +9,4 @@ bun.lock
 worker-configuration.d.ts
 
 # generated docs
-/docs
+packages/*/docs
