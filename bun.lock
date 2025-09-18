@@ -1,0 +1,66 @@
+{
+  "lockfileVersion": 1,
+  "workspaces": {
+    "": {
+      "name": "btclc",
+      "dependencies": {
+        "@mysten/sui": "^1.37.1",
+        "dotenv": "^17.2.1",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+  },
+  "packages": {
+    "@0no-co/graphql.web": ["@0no-co/graphql.web@1.2.0", "", { "peerDependencies": { "graphql": "^14.0.0 || ^15.0.0 || ^16.0.0" }, "optionalPeers": ["graphql"] }, "sha512-/1iHy9TTr63gE1YcR5idjx8UREz1s0kFhydf3bBLCXyqjhkIc6igAzTOx3zPifCwFR87tsh/4Pa9cNts6d2otw=="],
+
+    "@0no-co/graphqlsp": ["@0no-co/graphqlsp@1.15.0", "", { "dependencies": { "@gql.tada/internal": "^1.0.0", "graphql": "^15.5.0 || ^16.0.0 || ^17.0.0" }, "peerDependencies": { "typescript": "^5.0.0" } }, "sha512-SReJAGmOeXrHGod+9Odqrz4s43liK0b2DFUetb/jmYvxFpWmeNfFYo0seCh0jz8vG3p1pnYMav0+Tm7XwWtOJw=="],
+
+    "@gql.tada/cli-utils": ["@gql.tada/cli-utils@1.7.1", "", { "dependencies": { "@0no-co/graphqlsp": "^1.12.13", "@gql.tada/internal": "1.0.8", "graphql": "^15.5.0 || ^16.0.0 || ^17.0.0" }, "peerDependencies": { "@gql.tada/svelte-support": "1.0.1", "@gql.tada/vue-support": "1.0.1", "typescript": "^5.0.0" }, "optionalPeers": ["@gql.tada/svelte-support", "@gql.tada/vue-support"] }, "sha512-wg5ysZNQxtNQm67T3laVWmZzLpGb7QfyYWZdaUD2r1OjDj5Bgftq7eQlplmH+hsdffjuUyhJw/b5XAjeE2mJtg=="],
+
+    "@gql.tada/internal": ["@gql.tada/internal@1.0.8", "", { "dependencies": { "@0no-co/graphql.web": "^1.0.5" }, "peerDependencies": { "graphql": "^15.5.0 || ^16.0.0 || ^17.0.0", "typescript": "^5.0.0" } }, "sha512-XYdxJhtHC5WtZfdDqtKjcQ4d7R1s0d1rnlSs3OcBEUbYiPoJJfZU7tWsVXuv047Z6msvmr4ompJ7eLSK5Km57g=="],
+
+    "@graphql-typed-document-node/core": ["@graphql-typed-document-node/core@3.2.0", "", { "peerDependencies": { "graphql": "^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0" } }, "sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ=="],
+
+    "@mysten/bcs": ["@mysten/bcs@1.8.0", "", { "dependencies": { "@mysten/utils": "0.2.0", "@scure/base": "^1.2.6" } }, "sha512-bDoLN1nN+XPONsvpNyNyqYHndM3PKWS419GLeRnbLoWyNm4bnyD1X4luEpJLLDq400hBuXiCan4RWjofvyTUIQ=="],
+
+    "@mysten/sui": ["@mysten/sui@1.38.0", "", { "dependencies": { "@graphql-typed-document-node/core": "^3.2.0", "@mysten/bcs": "1.8.0", "@mysten/utils": "0.2.0", "@noble/curves": "^1.9.4", "@noble/hashes": "^1.8.0", "@scure/base": "^1.2.6", "@scure/bip32": "^1.7.0", "@scure/bip39": "^1.6.0", "gql.tada": "^1.8.13", "graphql": "^16.11.0", "poseidon-lite": "0.2.1", "valibot": "^0.36.0" } }, "sha512-tH6V4BJsYi5d97MOiLoOhyldrYxkm/cu8dYV52asqh1i88HrSVMbPAJ9sVoeWN2Ju+QsJ/Go4ldSjdCkaBCyJQ=="],
+
+    "@mysten/utils": ["@mysten/utils@0.2.0", "", { "dependencies": { "@scure/base": "^1.2.6" } }, "sha512-CM6kJcJHX365cK6aXfFRLBiuyXc5WSBHQ43t94jqlCAIRw8umgNcTb5EnEA9n31wPAQgLDGgbG/rCUISCTJ66w=="],
+
+    "@noble/curves": ["@noble/curves@1.9.7", "", { "dependencies": { "@noble/hashes": "1.8.0" } }, "sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw=="],
+
+    "@noble/hashes": ["@noble/hashes@1.8.0", "", {}, "sha512-jCs9ldd7NwzpgXDIf6P3+NrHh9/sD6CQdxHyjQI+h/6rDNo88ypBxxz45UDuZHz9r3tNz7N/VInSVoVdtXEI4A=="],
+
+    "@scure/base": ["@scure/base@1.2.6", "", {}, "sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg=="],
+
+    "@scure/bip32": ["@scure/bip32@1.7.0", "", { "dependencies": { "@noble/curves": "~1.9.0", "@noble/hashes": "~1.8.0", "@scure/base": "~1.2.5" } }, "sha512-E4FFX/N3f4B80AKWp5dP6ow+flD1LQZo/w8UnLGYZO674jS6YnYeepycOOksv+vLPSpgN35wgKgy+ybfTb2SMw=="],
+
+    "@scure/bip39": ["@scure/bip39@1.6.0", "", { "dependencies": { "@noble/hashes": "~1.8.0", "@scure/base": "~1.2.5" } }, "sha512-+lF0BbLiJNwVlev4eKelw1WWLaiKXw7sSl8T6FvBlWkdX+94aGJ4o8XjUdlyhTCjd8c+B3KT3JfS8P0bLRNU6A=="],
+
+    "@types/bun": ["@types/bun@1.2.22", "", { "dependencies": { "bun-types": "1.2.22" } }, "sha512-5A/KrKos2ZcN0c6ljRSOa1fYIyCKhZfIVYeuyb4snnvomnpFqC0tTsEkdqNxbAgExV384OETQ//WAjl3XbYqQA=="],
+
+    "@types/node": ["@types/node@24.5.2", "", { "dependencies": { "undici-types": "~7.12.0" } }, "sha512-FYxk1I7wPv3K2XBaoyH2cTnocQEu8AOZ60hPbsyukMPLv5/5qr7V1i8PLHdl6Zf87I+xZXFvPCXYjiTFq+YSDQ=="],
+
+    "@types/react": ["@types/react@19.1.13", "", { "dependencies": { "csstype": "^3.0.2" } }, "sha512-hHkbU/eoO3EG5/MZkuFSKmYqPbSVk5byPFa3e7y/8TybHiLMACgI8seVYlicwk7H5K/rI2px9xrQp/C+AUDTiQ=="],
+
+    "bun-types": ["bun-types@1.2.22", "", { "dependencies": { "@types/node": "*" }, "peerDependencies": { "@types/react": "^19" } }, "sha512-hwaAu8tct/Zn6Zft4U9BsZcXkYomzpHJX28ofvx7k0Zz2HNz54n1n+tDgxoWFGB4PcFvJXJQloPhaV2eP3Q6EA=="],
+
+    "csstype": ["csstype@3.1.3", "", {}, "sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw=="],
+
+    "dotenv": ["dotenv@17.2.2", "", {}, "sha512-Sf2LSQP+bOlhKWWyhFsn0UsfdK/kCWRv1iuA2gXAwt3dyNabr6QSj00I2V10pidqz69soatm9ZwZvpQMTIOd5Q=="],
+
+    "gql.tada": ["gql.tada@1.8.13", "", { "dependencies": { "@0no-co/graphql.web": "^1.0.5", "@0no-co/graphqlsp": "^1.12.13", "@gql.tada/cli-utils": "1.7.1", "@gql.tada/internal": "1.0.8" }, "peerDependencies": { "typescript": "^5.0.0" }, "bin": { "gql-tada": "bin/cli.js", "gql.tada": "bin/cli.js" } }, "sha512-fYoorairdPgxtE7Sf1X9/6bSN9Kt2+PN8KLg3hcF8972qFnawwUgs1OLVU8efZMHwL7EBHhhKBhrsGPlOs2lZQ=="],
+
+    "graphql": ["graphql@16.11.0", "", {}, "sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw=="],
+
+    "poseidon-lite": ["poseidon-lite@0.2.1", "", {}, "sha512-xIr+G6HeYfOhCuswdqcFpSX47SPhm0EpisWJ6h7fHlWwaVIvH3dLnejpatrtw6Xc6HaLrpq05y7VRfvDmDGIog=="],
+
+    "typescript": ["typescript@5.9.2", "", { "bin": { "tsc": "bin/tsc", "tsserver": "bin/tsserver" } }, "sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A=="],
+
+    "undici-types": ["undici-types@7.12.0", "", {}, "sha512-goOacqME2GYyOZZfb5Lgtu+1IDmAlAEu5xnD3+xTzS10hT0vzpf0SPjkXwAw9Jm+4n/mQGDP3LO8CPbYROeBfQ=="],
+
+    "valibot": ["valibot@0.36.0", "", {}, "sha512-CjF1XN4sUce8sBK9TixrDqFM7RwNkuXdJu174/AwmQUB62QbCQADg5lLe8ldBalFgtj1uKj+pKwDJiNo4Mn+eQ=="],
+  }
+}
