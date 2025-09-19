@@ -70,7 +70,7 @@ public struct LightClient has key, store {
     head_hash: vector<u8>,
     light_block_by_hash: Table<vector<u8>, LightBlock>,
     block_hash_by_height: Table<u64, vector<u8>>,
-    finality: u64,
+    confirmation_depth: u64,
 }
 
 // === Init function for module ====
@@ -82,14 +82,14 @@ fun init(_ctx: &mut TxContext) {}
 /// *start_height: height of the first trusted header
 /// *trusted_headers: List of trusted headers in hex format.
 /// *parent_chain_work: chain_work at parent block of start_height block.
-/// *finality: the finality threshold
+/// *confirmation_depth: the depth from which a block is considered `confirmed`.
 
 public fun new_light_client(
     params: Params,
     start_height: u64,
     trusted_headers: vector<BlockHeader>,
     parent_chain_work: u256,
-    finality: u64,
+    confirmation_depth: u64,
     ctx: &mut TxContext,
 ): LightClient {
     let mut lc = LightClient {
@@ -100,7 +100,7 @@ public fun new_light_client(
         head_hash: vector[],
         light_block_by_hash: table::new(ctx),
         block_hash_by_height: table::new(ctx),
-        finality,
+        confirmation_depth,
     };
 
     let mut parent_chain_work = parent_chain_work;
@@ -136,7 +136,7 @@ public fun initialize_light_client(
     start_height: u64,
     trusted_headers: vector<BlockHeader>,
     parent_chain_work: u256,
-    finality: u64,
+    confirmation_depth: u64,
     ctx: &mut TxContext,
 ) {
     let params = match (network) {
@@ -152,7 +152,7 @@ public fun initialize_light_client(
         start_height,
         trusted_headers,
         parent_chain_work,
-        finality,
+        confirmation_depth,
         ctx,
     );
     event::emit(NewLightClientEvent {
@@ -352,7 +352,7 @@ public fun head(lc: &LightClient): &LightBlock {
 /// Returns latest finalized_block height
 public fun finalized_height(lc: &LightClient): u64 {
     assert!(lc.version == VERSION, EVersionMismatch);
-    lc.head_height - lc.finality
+    lc.head_height - (lc.confirmation_depth - 1)
 }
 
 /// Verify a transaction has tx_id(32 bytes) inclusive in the block has height h.
