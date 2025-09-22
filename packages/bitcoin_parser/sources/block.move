@@ -50,7 +50,7 @@ fun parse_block_test() {
     ];
 
     // format:
-    // start with block hash, follow by transaction id of this block
+    // starts with block hash, followed by transaction id of this block
     let result = vector[
         vector[
             // block hash

@@ -109,8 +109,8 @@ public fun deserialize(r: &mut Reader): Transaction {
     return tx
 }
 
-/// deseriablize transaction from bytes
-public(package) fun parser_tx(r: &mut Reader): Transaction {
+/// deserialise transaction from bytes
+public(package) fun parse_tx(r: &mut Reader): Transaction {
     // transaction data without segwit.
     // use for compute the tx_id
     let mut raw_tx = vector[];
