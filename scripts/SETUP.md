@@ -52,6 +52,6 @@ BTC_HEIGHT=0
 # Initial parent chain work
 PARENT_CHAIN_WORK=0
 
-# Block finality requirement
-FINALITY=3
+# Confirmation depth requirement. Confirmation depth is inclusive. Meaning the block that the transaction is included in is already the first confirmation.
+CONFIRMATION_DEPTH=3
 ```

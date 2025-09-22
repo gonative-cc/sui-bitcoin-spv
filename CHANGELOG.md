@@ -33,6 +33,7 @@ We changed this repo to a workspace with packages required to handle Bitcoin SPV
 - [#106](https://github.com/gonative-cc/sui-bitcoin-spv/pull/106) feat: mitigate Merkle tree leaf-node weakness
 - [#116](https://github.com/gonative-cc/sui-bitcoin-spv/pull/116) feat: simplify initialize for light client
 - [#117](https://github.com/gonative-cc/sui-bitcoin-spv/pull/117) remove verify_payment method from light client
+- [#144](https://github.com/gonative-cc/sui-bitcoin-spv/pull/144) rename finality to confirmation_depth (inclusive)
 
 ### Bug Fixes
 
