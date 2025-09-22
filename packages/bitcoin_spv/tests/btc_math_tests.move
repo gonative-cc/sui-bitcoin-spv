@@ -3,7 +3,7 @@
 #[test_only]
 module bitcoin_spv::btc_math_tests;
 
-use bitcoin_spv::btc_math::{Self, target_to_bits, bits_to_target, compact_size};
+use bitcoin_spv::btc_math::{Self, target_to_bits, bits_to_target};
 use std::unit_test::assert_eq;
 
 #[test]
@@ -109,62 +109,4 @@ fun bits_to_target_happy_cases() {
     let target = bits_to_target(bits);
     assert_eq!(target, 0x000000000168fd00000000000000000000000000000000000000000000000000);
     assert_eq!(bits, target_to_bits(target));
-}
-
-#[test]
-fun extract_u64_happy_cases() {
-    assert_eq!(btc_math::extract_u64(x"010203", 0, 1), 1);
-    assert_eq!(btc_math::extract_u64(x"ffffffffffffffff00", 0, 8), 0xffffffffffffffff);
-}
-
-#[test, expected_failure(abort_code = btc_math::EInvalidLength)]
-fun extract_u64_invalid_length_should_fail() {
-    btc_math::extract_u64(x"", 0, 1);
-}
-
-#[test, expected_failure(abort_code = btc_math::EInvalidNumberSize)]
-fun extract_u64_invalue_number_size_should_fail() {
-    btc_math::extract_u64(x"ffffffffffffffff0000", 0, 9);
-}
-
-#[test]
-fun compact_size_happy_cases() {
-    let inputs = vector[
-        x"fa",
-        x"fc",
-        x"fdfd00",
-        x"fdd007",
-        x"fdffff",
-        x"fe00000100",
-        x"fe005a6202",
-        x"feffffffff",
-        x"ff0000000001000000",
-        x"ff98fdffffffffffff",
-        x"ffffffffffffffffff",
-    ];
-    let outputs = vector[
-        vector[250, 1],
-        vector[252, 1],
-        vector[253, 3],
-        vector[2000, 3],
-        vector[65535, 3],
-        vector[65536, 5],
-        vector[40000000, 5],
-        vector[4294967295, 5],
-        vector[4294967296, 9],
-        vector[18446744073709551000, 9],
-        vector[18446744073709551615, 9],
-    ];
-
-    let mut i = 0;
-    while (i < inputs.length()) {
-        let (x, y) = compact_size(inputs[i], 0);
-        assert_eq!(x == outputs[i][0] && y == outputs[i][1], true);
-        i = i + 1;
-    }
-}
-
-#[test, expected_failure(abort_code = btc_math::EInvalidCompactSizeDecode)]
-fun compact_size_invalid_size_decode_should_fail() {
-    compact_size(x"00fd", 1);
 }
