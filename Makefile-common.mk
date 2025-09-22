@@ -37,7 +37,7 @@ build: .git/hooks/pre-commit
 	@sui move build
 
 test:
-	@sui move test
+	@sui move test --gas-limit 5000000
 
 test-coverage:
 	echo TODO
