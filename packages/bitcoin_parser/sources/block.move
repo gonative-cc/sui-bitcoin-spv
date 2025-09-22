@@ -21,7 +21,7 @@ public fun new(raw_block: vector<u8>): Block {
     let number_tx = r.read_compact_size();
     let mut transactions = vector[];
     number_tx.do!(|_| {
-        transactions.push_back(tx::parser_tx(&mut r));
+        transactions.push_back(tx::parse_tx(&mut r));
     });
 
     Block {

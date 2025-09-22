@@ -104,7 +104,7 @@ public fun tx_id(tx: &Transaction): vector<u8> {
 }
 
 public fun deserialize(r: &mut Reader): Transaction {
-    let tx = parser_tx(r);
+    let tx = parse_tx(r);
     assert!(r.end_stream(), ETxReaderHasRemainingData);
     return tx
 }
