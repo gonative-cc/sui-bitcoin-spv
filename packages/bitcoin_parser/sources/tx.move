@@ -103,8 +103,14 @@ public fun tx_id(tx: &Transaction): vector<u8> {
     tx.tx_id
 }
 
-/// deseriablize transaction from bytes
 public fun deserialize(r: &mut Reader): Transaction {
+    let tx = parse_tx(r);
+    assert!(r.end_stream(), ETxReaderHasRemainingData);
+    return tx
+}
+
+/// deserialise transaction from bytes
+public(package) fun parse_tx(r: &mut Reader): Transaction {
     // transaction data without segwit.
     // use for compute the tx_id
     let mut raw_tx = vector[];
@@ -163,8 +169,6 @@ public fun deserialize(r: &mut Reader): Transaction {
     raw_tx.append(locktime);
 
     let tx_id = hash256(raw_tx);
-
-    assert!(r.end_stream(), ETxReaderHasRemainingData);
     new(
         version,
         marker,
