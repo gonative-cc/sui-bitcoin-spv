@@ -2,27 +2,12 @@
 
 module bitcoin_spv::btc_math;
 
-use std::hash;
-
 #[test_only]
 use std::unit_test::assert_eq;
 
 /// === Errors ===
 #[error]
 const EInvalidLength: vector<u8> = b"The input vector has an invalid length";
-
-/// Converts 4 bytes in little endian format to u32 number
-public fun to_u32(v: vector<u8>): u32 {
-    assert!(v.length() == 4, EInvalidLength);
-    let mut ans = 0u32;
-    let mut i = 0u8;
-    while (i < 4) {
-        ans = ans + ((v[i as u64] as u32) << i*8);
-        i = i + 1;
-    };
-
-    ans
-}
 
 /// Converts 32 bytes in little endian format to u256 number.
 public fun to_u256(v: vector<u8>): u256 {
@@ -35,13 +20,6 @@ public fun to_u256(v: vector<u8>): u256 {
         i = i + 1;
     };
     ans
-}
-
-/// Double hashes the value
-public fun btc_hash(data: vector<u8>): vector<u8> {
-    let first_hash = hash::sha2_256(data);
-    let second_hash = hash::sha2_256(first_hash);
-    second_hash
 }
 
 /// number of bytes to represent number.
