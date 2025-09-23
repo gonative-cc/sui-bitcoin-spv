@@ -40,9 +40,7 @@ test:
 	@sui move test --gas-limit 5000000
 
 test-coverage:
-	echo TODO
-# sui move test --coverage
-# sui move coverage
+	sui move test --gas-limit 5000000 --coverage
 
 .PHONY: test test-coverage
 
