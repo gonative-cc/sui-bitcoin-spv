@@ -6,21 +6,14 @@
 
 
 -  [Constants](#@Constants_0)
--  [Function `to_u32`](#(bitcoin_spv=0x0)_btc_math_to_u32)
 -  [Function `to_u256`](#(bitcoin_spv=0x0)_btc_math_to_u256)
--  [Function `extract_u64`](#(bitcoin_spv=0x0)_btc_math_extract_u64)
--  [Function `btc_hash`](#(bitcoin_spv=0x0)_btc_math_btc_hash)
--  [Function `compact_size_offset`](#(bitcoin_spv=0x0)_btc_math_compact_size_offset)
--  [Function `compact_size`](#(bitcoin_spv=0x0)_btc_math_compact_size)
 -  [Function `bytes_of`](#(bitcoin_spv=0x0)_btc_math_bytes_of)
 -  [Function `get_last_32_bits`](#(bitcoin_spv=0x0)_btc_math_get_last_32_bits)
 -  [Function `target_to_bits`](#(bitcoin_spv=0x0)_btc_math_target_to_bits)
 -  [Function `bits_to_target`](#(bitcoin_spv=0x0)_btc_math_bits_to_target)
--  [Function `u256_to_compact`](#(bitcoin_spv=0x0)_btc_math_u256_to_compact)
 
 
-<pre><code><b>use</b> <a href="../dependencies/std/hash.md#std_hash">std::hash</a>;
-</code></pre>
+<pre><code></code></pre>
 
 
 
@@ -39,68 +32,6 @@
 </code></pre>
 
 
-
-<a name="(bitcoin_spv=0x0)_btc_math_EInvalidCompactSizeDecode"></a>
-
-
-
-<pre><code>#[error]
-<b>const</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidCompactSizeDecode">EInvalidCompactSizeDecode</a>: vector&lt;u8&gt; = b"Invalid compact size encoding during decoding";
-</code></pre>
-
-
-
-<a name="(bitcoin_spv=0x0)_btc_math_EInvalidCompactSizeEncode"></a>
-
-
-
-<pre><code>#[error]
-<b>const</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidCompactSizeEncode">EInvalidCompactSizeEncode</a>: vector&lt;u8&gt; = b"Invalid compact size encoding during encoding";
-</code></pre>
-
-
-
-<a name="(bitcoin_spv=0x0)_btc_math_EInvalidNumberSize"></a>
-
-
-
-<pre><code>#[error]
-<b>const</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidNumberSize">EInvalidNumberSize</a>: vector&lt;u8&gt; = b"Input vector size does not match with expected size";
-</code></pre>
-
-
-
-<a name="(bitcoin_spv=0x0)_btc_math_to_u32"></a>
-
-## Function `to_u32`
-
-Converts 4 bytes in little endian format to u32 number
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_to_u32">to_u32</a>(v: vector&lt;u8&gt;): u32
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_to_u32">to_u32</a>(v: vector&lt;u8&gt;): u32 {
-    <b>assert</b>!(v.length() == 4, <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidLength">EInvalidLength</a>);
-    <b>let</b> <b>mut</b> ans = 0u32;
-    <b>let</b> <b>mut</b> i = 0u8;
-    <b>while</b> (i &lt; 4) {
-        ans = ans + ((v[i <b>as</b> u64] <b>as</b> u32) &lt;&lt; i*8);
-        i = i + 1;
-    };
-    ans
-}
-</code></pre>
-
-
-
-</details>
 
 <a name="(bitcoin_spv=0x0)_btc_math_to_u256"></a>
 
@@ -127,134 +58,6 @@ Converts 32 bytes in little endian format to u256 number.
         i = i + 1;
     };
     ans
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="(bitcoin_spv=0x0)_btc_math_extract_u64"></a>
-
-## Function `extract_u64`
-
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_extract_u64">extract_u64</a>(v: vector&lt;u8&gt;, start: u64, end: u64): u64
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_extract_u64">extract_u64</a>(v: vector&lt;u8&gt;, start: u64, end: u64): u64 {
-    <b>let</b> size = end - start;
-    <b>assert</b>!(size &lt;= 8, <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidNumberSize">EInvalidNumberSize</a>);
-    <b>assert</b>!(end &lt;= v.length(), <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidLength">EInvalidLength</a>);
-    <b>let</b> <b>mut</b> ans = 0;
-    <b>let</b> <b>mut</b> i = start;
-    <b>let</b> <b>mut</b> j = 0;
-    <b>while</b> (i &lt; end) {
-        ans = ans +  ((v[i] <b>as</b> u64)  &lt;&lt; (j * 8 <b>as</b> u8));
-        i = i + 1;
-        j = j + 1;
-    };
-    ans
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="(bitcoin_spv=0x0)_btc_math_btc_hash"></a>
-
-## Function `btc_hash`
-
-Double hashes the value
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_btc_hash">btc_hash</a>(data: vector&lt;u8&gt;): vector&lt;u8&gt;
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_btc_hash">btc_hash</a>(data: vector&lt;u8&gt;): vector&lt;u8&gt; {
-    <b>let</b> first_hash = hash::sha2_256(data);
-    <b>let</b> second_hash = hash::sha2_256(first_hash);
-    second_hash
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="(bitcoin_spv=0x0)_btc_math_compact_size_offset"></a>
-
-## Function `compact_size_offset`
-
-Calculates offset for decoding a Bitcoin compact size integer.
-
-
-<pre><code><b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_compact_size_offset">compact_size_offset</a>(start_byte: u8): u64
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_compact_size_offset">compact_size_offset</a>(start_byte: u8): u64 {
-    <b>if</b> (start_byte &lt;= 0xfc) {
-        <b>return</b> 0
-    };
-    <b>if</b> (start_byte == 0xfd) {
-        <b>return</b> 2
-    };
-    <b>if</b> (start_byte == 0xfe) {
-        <b>return</b> 4
-    };
-    // 0xff
-    8
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="(bitcoin_spv=0x0)_btc_math_compact_size"></a>
-
-## Function `compact_size`
-
-Decodes a compact number - number of integer bytes, from the vector <code>v</code>.
-Returns the decoded number and the first index in <code>v</code> after the number.
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_compact_size">compact_size</a>(v: vector&lt;u8&gt;, start: u64): (u64, u64)
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_compact_size">compact_size</a>(v: vector&lt;u8&gt;, start: u64): (u64, u64) {
-    <b>let</b> offset = <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_compact_size_offset">compact_size_offset</a>(v[start]);
-    <b>assert</b>!(start + offset &lt; v.length(), <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidCompactSizeDecode">EInvalidCompactSizeDecode</a>);
-    <b>if</b> (offset == 0) {
-        <b>return</b> (v[start] <b>as</b> u64, start + 1)
-    };
-    (<a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_extract_u64">extract_u64</a>(v, start + 1, start + offset + 1), start + offset + 1)
 }
 </code></pre>
 
@@ -400,57 +203,6 @@ Converts bits to target. See documentation to the function above for more detail
         target = target &lt;&lt; bits_shift;
     };
     target
-}
-</code></pre>
-
-
-
-</details>
-
-<a name="(bitcoin_spv=0x0)_btc_math_u256_to_compact"></a>
-
-## Function `u256_to_compact`
-
-Encodes a u256 into VarInt format.
-https://learnmeabitcoin.com/technical/general/compact-size/
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_u256_to_compact">u256_to_compact</a>(number: u256): vector&lt;u8&gt;
-</code></pre>
-
-
-
-<details>
-<summary>Implementation</summary>
-
-
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_u256_to_compact">u256_to_compact</a>(number: u256): vector&lt;u8&gt; {
-    <b>let</b> <b>mut</b> ans = vector[];
-    <b>let</b> <b>mut</b> n = number;
-    <b>if</b> (n &lt;= 252) {
-        ans.push_back(n <b>as</b> u8);
-    } <b>else</b> <b>if</b> (n &lt;= 65535) {
-        ans.push_back(0xfd);
-        do!(2, |_i| {
-            ans.push_back((n & 0xff) <b>as</b> u8);
-            n = n &gt;&gt; 8;
-        });
-    } <b>else</b> <b>if</b> (n &lt;= 4294967295) {
-        ans.push_back(0xfe);
-        do!(4, |_i| {
-            ans.push_back((n & 0xff) <b>as</b> u8);
-            n = n &gt;&gt; 8;
-        });
-    } <b>else</b> <b>if</b> (n &lt;= 18446744073709551615) {
-        ans.push_back(0xff);
-        do!(8, |_i| {
-            ans.push_back((n & 0xff) <b>as</b> u8);
-            n = n &gt;&gt; 8;
-        });
-    } <b>else</b> {
-        <b>abort</b> <a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math_EInvalidCompactSizeEncode">EInvalidCompactSizeEncode</a>
-    };
-    ans
 }
 </code></pre>
 

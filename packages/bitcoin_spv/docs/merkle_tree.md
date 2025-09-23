@@ -10,7 +10,7 @@
 -  [Function `verify_merkle_proof`](#(bitcoin_spv=0x0)_merkle_tree_verify_merkle_proof)
 
 
-<pre><code><b>use</b> (bitcoin_spv=0x0)::<a href="../bitcoin_spv/btc_math.md#(bitcoin_spv=0x0)_btc_math">btc_math</a>;
+<pre><code><b>use</b> (bitcoin_parser=0x0)::crypto;
 <b>use</b> <a href="../dependencies/std/hash.md#std_hash">std::hash</a>;
 <b>use</b> <a href="../dependencies/std/vector.md#std_vector">std::vector</a>;
 </code></pre>
@@ -60,7 +60,7 @@ Internal merkle hash computation for BTC merkle tree
 <pre><code><b>public</b>(package) <b>fun</b> <a href="../bitcoin_spv/merkle_tree.md#(bitcoin_spv=0x0)_merkle_tree_merkle_hash">merkle_hash</a>(x: vector&lt;u8&gt;, y: vector&lt;u8&gt;): vector&lt;u8&gt; {
     <b>let</b> <b>mut</b> z = x;
     z.append(y);
-    btc_hash(z)
+    hash256(z)
 }
 </code></pre>
 
