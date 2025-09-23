@@ -2,7 +2,7 @@
 
 module bitcoin_spv::merkle_tree;
 
-use bitcoin_spv::btc_math::btc_hash;
+use bitcoin_parser::crypto::hash256;
 use std::hash::sha2_256;
 
 #[error]
@@ -14,7 +14,7 @@ const HASH_LENGTH: u64 = 32;
 public(package) fun merkle_hash(x: vector<u8>, y: vector<u8>): vector<u8> {
     let mut z = x;
     z.append(y);
-    btc_hash(z)
+    hash256(z)
 }
 
 /// Verifies if tx_id belongs to the merkle tree
