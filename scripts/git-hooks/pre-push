@@ -1,14 +1,21 @@
 #!/bin/bash
-
 threshold=80
 
-coverage=$(sui move coverage summary | grep "% Move Coverage" | tail -n1 | sed -E 's/.*% Move Coverage:[[:space:]]*([0-9.]+).*/\1/')
+for name in $(ls -1 packages/*/Move.toml); do
+	d=$(dirname $name)
+	echo "==> running in" $d
+	cd $d
+	make test-coverage
+	coverage=$(sui move coverage summary | grep "% Move Coverage" | tail -n1 | sed -E 's/.*% Move Coverage:[[:space:]]*([0-9.]+).*/\1/')
 
-echo $coverage
-if awk "BEGIN {exit ($coverage < $threshold ? 0 : 1)}"; then
-    echo "❌ Coverage is low"
-    exit 1
-else
-    echo "✅ Coverage is fine"
-    exit 0
-fi
+	echo $coverage
+	if awk "BEGIN {exit ($coverage < $threshold ? 0 : 1)}"; then
+		echo "❌ Coverage is low"
+		exit 1
+	else
+		echo "✅ Coverage is fine"
+	fi
+	cd -
+done
+
+exit 0
