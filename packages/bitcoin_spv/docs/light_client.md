@@ -220,7 +220,7 @@
 <dd>
 </dd>
 <dt>
-<code>finality: u64</code>
+<code>confirmation_depth: u64</code>
 </dt>
 <dd>
 </dd>
@@ -366,10 +366,10 @@ LightClient constructor. Create light client and verify data.
 *start_height: height of the first trusted header
 *trusted_headers: List of trusted headers in hex format.
 *parent_chain_work: chain_work at parent block of start_height block.
-*finality: the finality threshold
+*confirmation_depth: the depth from which a block is considered <code>confirmed</code>.
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_new_light_client">new_light_client</a>(<a href="../bitcoin_spv/params.md#(bitcoin_spv=0x0)_params">params</a>: (bitcoin_spv=0x0)::<a href="../bitcoin_spv/params.md#(bitcoin_spv=0x0)_params_Params">params::Params</a>, start_height: u64, trusted_headers: vector&lt;(bitcoin_parser=0x0)::header::BlockHeader&gt;, parent_chain_work: u256, finality: u64, ctx: &<b>mut</b> <a href="../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): (bitcoin_spv=0x0)::<a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_LightClient">light_client::LightClient</a>
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_new_light_client">new_light_client</a>(<a href="../bitcoin_spv/params.md#(bitcoin_spv=0x0)_params">params</a>: (bitcoin_spv=0x0)::<a href="../bitcoin_spv/params.md#(bitcoin_spv=0x0)_params_Params">params::Params</a>, start_height: u64, trusted_headers: vector&lt;(bitcoin_parser=0x0)::header::BlockHeader&gt;, parent_chain_work: u256, confirmation_depth: u64, ctx: &<b>mut</b> <a href="../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>): (bitcoin_spv=0x0)::<a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_LightClient">light_client::LightClient</a>
 </code></pre>
 
 
@@ -383,7 +383,7 @@ LightClient constructor. Create light client and verify data.
     start_height: u64,
     trusted_headers: vector&lt;BlockHeader&gt;,
     parent_chain_work: u256,
-    finality: u64,
+    confirmation_depth: u64,
     ctx: &<b>mut</b> TxContext,
 ): <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_LightClient">LightClient</a> {
     <b>let</b> <b>mut</b> lc = <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_LightClient">LightClient</a> {
@@ -394,7 +394,7 @@ LightClient constructor. Create light client and verify data.
         <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_head_hash">head_hash</a>: vector[],
         light_block_by_hash: table::new(ctx),
         block_hash_by_height: table::new(ctx),
-        finality,
+        confirmation_depth,
     };
     <b>let</b> <b>mut</b> parent_chain_work = parent_chain_work;
     <b>if</b> (!trusted_headers.is_empty()) {
@@ -433,7 +433,7 @@ trusted_header: The list of trusted header in hex encode.
 previous_chain_work: the chain_work at parent block of start_height block
 
 
-<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_initialize_light_client">initialize_light_client</a>(network: u8, start_height: u64, trusted_headers: vector&lt;(bitcoin_parser=0x0)::header::BlockHeader&gt;, parent_chain_work: u256, finality: u64, ctx: &<b>mut</b> <a href="../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
+<pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_initialize_light_client">initialize_light_client</a>(network: u8, start_height: u64, trusted_headers: vector&lt;(bitcoin_parser=0x0)::header::BlockHeader&gt;, parent_chain_work: u256, confirmation_depth: u64, ctx: &<b>mut</b> <a href="../dependencies/sui/tx_context.md#sui_tx_context_TxContext">sui::tx_context::TxContext</a>)
 </code></pre>
 
 
@@ -447,7 +447,7 @@ previous_chain_work: the chain_work at parent block of start_height block
     start_height: u64,
     trusted_headers: vector&lt;BlockHeader&gt;,
     parent_chain_work: u256,
-    finality: u64,
+    confirmation_depth: u64,
     ctx: &<b>mut</b> TxContext,
 ) {
     <b>let</b> <a href="../bitcoin_spv/params.md#(bitcoin_spv=0x0)_params">params</a> = match (network) {
@@ -461,7 +461,7 @@ previous_chain_work: the chain_work at parent block of start_height block
         start_height,
         trusted_headers,
         parent_chain_work,
-        finality,
+        confirmation_depth,
         ctx,
     );
     event::emit(<a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_NewLightClientEvent">NewLightClientEvent</a> {
@@ -884,7 +884,7 @@ Returns latest finalized_block height
 
 <pre><code><b>public</b> <b>fun</b> <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_finalized_height">finalized_height</a>(lc: &<a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_LightClient">LightClient</a>): u64 {
     <b>assert</b>!(lc.version == <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_VERSION">VERSION</a>, <a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_EVersionMismatch">EVersionMismatch</a>);
-    lc.<a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_head_height">head_height</a> - lc.finality
+    lc.<a href="../bitcoin_spv/light_client.md#(bitcoin_spv=0x0)_light_client_head_height">head_height</a> - (lc.confirmation_depth - 1)
 }
 </code></pre>
 

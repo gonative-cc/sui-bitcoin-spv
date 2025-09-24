@@ -3,7 +3,7 @@
 #[test_only]
 module bitcoin_spv::utils_test;
 
-use bitcoin_spv::utils::{nth_element, EOutBoundIndex, slice, EInvalidSliceRange};
+use bitcoin_spv::utils::{nth_element, EOutBoundIndex};
 use std::unit_test::assert_eq;
 
 #[test]
@@ -29,20 +29,4 @@ fun nth_element_happy_cases() {
 #[test, expected_failure(abort_code = EOutBoundIndex)]
 fun nth_element_outbound_index_should_fail() {
     nth_element(&mut vector[], 1);
-}
-
-#[test]
-fun slice_happy_cases() {
-    assert_eq!(slice(vector[1, 2, 3], 1, 2), vector[2]);
-    assert_eq!(slice(vector[1, 2, 3, 9, 10], 2, 4), vector[3, 9]);
-}
-
-#[test, expected_failure(abort_code = EInvalidSliceRange)]
-fun slice_invalid_slice_range_fail() {
-    slice(vector[1, 2], 2, 2);
-}
-
-#[test, expected_failure(abort_code = EOutBoundIndex)]
-fun slice_out_bound_index_fail() {
-    slice(vector[1, 2], 2, 3);
 }
