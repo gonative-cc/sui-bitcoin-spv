@@ -345,21 +345,18 @@ public fun head_hash(lc: &LightClient): vector<u8> {
 
 /// Returns vector of booleans, where each element corresponds to a block hash
 /// from the input vector. `true` if its in the heaviest chain, `false` otherwise.
-public fun verify_blocks(
-    lc: &LightClient,
-    block_hashes: vector<vector<u8>>,
-): vector<bool> {
+public fun verify_blocks(lc: &LightClient, block_hashes: vector<vector<u8>>): vector<bool> {
     assert!(lc.version == VERSION, EVersionMismatch);
 
-  block_hashes.map!(|block_hash| {
+    block_hashes.map!(|block_hash| {
         if (!lc.light_block_by_hash.contains(block_hash)) {
-             false
+            false
         } else {
             let light_block = lc.get_light_block_by_hash(block_hash);
             let main_chain_hash_at_height = lc.get_block_hash_by_height(light_block.height());
             block_hash == main_chain_hash_at_height
         }
-     })
+    })
 }
 
 /// Returns blockchain head light block (latest, not confirmed block).
