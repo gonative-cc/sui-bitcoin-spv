@@ -19,7 +19,8 @@ function mkSigner() {
 }
 
 async function main() {
-	const PACKAGE_ID = process.env.PACKAGE_ID;
+	const SPV_PACKAGE_ID = process.env.SPV_PACKAGE_ID;
+	const PARSER_PACKAGE_ID = process.env.PARSER_PACKAGE_ID;
 	const client = new SuiClient({ url: getFullnodeUrl(process.env.NETWORK) });
 
 	const signer = mkSigner();
@@ -28,25 +29,25 @@ async function main() {
 	let headers = [];
 	for (let i = 0; i < raw_headers.length; ++i) {
 		const header = tx.moveCall({
-			target: `${PACKAGE_ID}::block_header::new_block_header`,
+			target: `${PARSER_PACKAGE_ID}::header::new`,
 			arguments: [tx.pure("vector<u8>", fromHex(raw_headers[i]))],
 		});
 		headers.push(header);
 	}
 
 	const header_vec = tx.makeMoveVec({
-		type: `${PACKAGE_ID}::block_header::BlockHeader`,
+		type: `${PARSER_PACKAGE_ID}::header::BlockHeader`,
 		elements: headers,
 	});
 
 	tx.moveCall({
-		target: `${PACKAGE_ID}::light_client::initialize_light_client`,
+		target: `${SPV_PACKAGE_ID}::light_client::initialize_light_client`,
 		arguments: [
 			tx.pure.u8(process.env.BTC_NETWORK),
 			tx.pure.u64(process.env.BTC_HEIGHT),
 			header_vec,
 			tx.pure.u256(process.env.PARENT_CHAIN_WORK),
-			tx.pure.u64(process.env.FINALITY),
+			tx.pure.u64(process.env.CONFIRMATION_DEPTH),
 		],
 	});
 
