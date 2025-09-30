@@ -18,12 +18,12 @@ npm install
     sui client publish
     ```
 
-2.  **Configure your environment.** Create a `.env` file (see the example below) and populate it. Ensure the `PACKAGE_ID` and `NETWORK` match the publish output.
+2.  **Configure your environment.** Create a `.env` file (see the example below) and populate it. Ensure the `SPV_PACKAGE_ID`, `PARSER_PACKAGE_ID` and `NETWORK` match the publish output.
 
 3.  **Run the script** to create the light client object on-chain.
 
     ```bash
-    node new_light_client.js
+    bun new_light_client.js
     ```
 
 ---
@@ -35,7 +35,10 @@ npm install
 MNEMONIC='word1 word2 word3 ...'
 
 # ID of the deployed light client package
-PACKAGE_ID='0x...'
+SPV_PACKAGE_ID='0x...'
+
+# ID of the deployed bitcoin parser package
+PARSER_PACKAGE_ID='0x...'
 
 # Sui network alias ('mainnet', 'testnet', 'devnet', 'localnet')
 NETWORK='testnet'
