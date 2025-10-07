@@ -19,6 +19,8 @@ Change log entries are to be added to the Unreleased section and in one of the f
 
 ## Unreleased
 
+## v0.4.0 (2025-10-07)
+
 We changed this repo to a workspace with packages required to handle Bitcoin SPV and transaction verification flow.
 
 ### Features
@@ -37,12 +39,12 @@ We changed this repo to a workspace with packages required to handle Bitcoin SPV
 
 ### Bug Fixes
 
-## v0.3.1 (2024-04-10)
+## v0.3.1 (2025-04-10)
 
 ### Bug Fixes
 
 - [#78](https://github.com/gonative-cc/sui-bitcoin-spv/pull/78) fix: parse P2WPHK output
 
-## v0.3.0 (2024-04-04)
+## v0.3.0 (2025-04-04)
 
 This is our first official testnet release.
