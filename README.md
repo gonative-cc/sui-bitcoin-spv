@@ -3,6 +3,10 @@
 
 <!-- ![Logo!](assets/logo.png) -->
 
+## Notice
+
+🔀 Packages from this repository has been moved to [gonative-cc/sui-native](https://github.com/gonative-cc/sui-native/). 🔀
+
 ## Overview
 
 This repository contains a set of primitive components for on-chain Bitcoin operations:
